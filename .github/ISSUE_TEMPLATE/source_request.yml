@@ -1,0 +1,94 @@
+name: Source request / 新采集源建议
+description: Suggest a new source for AI, ICT, semiconductor, or related technology monitoring.
+title: "[Source]: "
+labels: ["source-request", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to propose a new public source, video feed, newsletter, WeChat mirror, builder feed, or direct seed.
+
+        请不要提交需要私人账号、cookie、token、内网权限或违反站点条款的来源。
+  - type: input
+    id: source_name
+    attributes:
+      label: Source name / 源名称
+      placeholder: Example Tech News
+    validations:
+      required: true
+  - type: input
+    id: source_url
+    attributes:
+      label: Public URL / 公开链接
+      placeholder: https://example.com/news
+    validations:
+      required: true
+  - type: dropdown
+    id: source_type
+    attributes:
+      label: Source type / 源类型
+      options:
+        - Official website or blog / 官网或博客
+        - News website / 新闻网站
+        - RSS or Atom feed / RSS 或 Atom
+        - WeChat public account mirror / 公众号镜像
+        - Video platform or channel / 视频平台或频道
+        - Follow Builder or video pool / Follow Builder 或视频池
+        - Direct seed URL / 直接种子链接
+        - Research, policy, or company report / 研究、政策或公司报告
+        - Other public source / 其他公开源
+    validations:
+      required: true
+  - type: dropdown
+    id: domain_scope
+    attributes:
+      label: Domain scope / 领域范围
+      options:
+        - AI and agents / AI 与智能体
+        - ICT infrastructure / ICT 基础设施
+        - Cloud, data center, and networking / 云、数据中心与网络
+        - Semiconductor and chips / 半导体与芯片
+        - Edge AI and devices / 端侧智能与设备
+        - Enterprise AI engineering / 企业 AI 工程化
+        - Mixed technology source / 综合科技源
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: Why this source matters / 为什么值得加入
+      placeholder: Explain the signal quality, update cadence, audience, and relation to the existing ICT + semiconductor scope.
+    validations:
+      required: true
+  - type: textarea
+    id: extraction
+    attributes:
+      label: Extraction and fallback notes / 抽取与 fallback 说明
+      description: Describe known RSS, HTML, sitemap, mirror, transcript, or manual-seed options.
+      placeholder: |
+        Preferred:
+        Fallback 1:
+        Fallback 2:
+        Known limitations:
+  - type: textarea
+    id: samples
+    attributes:
+      label: Recent sample links / 近期样例链接
+      description: Provide 2-5 public sample URLs.
+      placeholder: |
+        https://example.com/news/1
+        https://example.com/news/2
+    validations:
+      required: true
+  - type: textarea
+    id: compliance
+    attributes:
+      label: Access, license, and robots notes / 访问、授权与 robots 说明
+      placeholder: Public RSS is available; no login required; robots.txt allows the path.
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation / 确认
+      options:
+        - label: This proposal does not include private credentials, private archives, paid-only content dumps, or personal data.
+          required: true
