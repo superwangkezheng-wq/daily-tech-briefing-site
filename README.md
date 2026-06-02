@@ -26,7 +26,7 @@ This repository is the open-source website, feedback, cache, channel-push, and g
 
 这个仓库不是完整爬虫全集，而是可开源的“网页发布 + 反馈 + 推送 + 巡检门禁”包。完整采集能力依赖 OpenClaw 及其插件/脚本。
 
-For the detailed product logic, source layering, model chain, and OpenClaw dependencies, read:
+For the detailed product logic, dependency matrix, source layering, fallback order, model chain, and OpenClaw dependencies, read:
 
 - [OpenClaw Collector Pipeline / OpenClaw 采集与产品逻辑](docs/openclaw-collector-pipeline.md)
 
@@ -186,6 +186,10 @@ The reference upstream collector is OpenClaw `daily_news_v10.py`. Its default pr
 7. 输出 Markdown，再由本网站发布。
 
 See [docs/openclaw-collector-pipeline.md](docs/openclaw-collector-pipeline.md) for full details.
+
+That document also lists the exact dependency matrix and fallback order, including Scrapling, urllib, Steel.dev/browser tooling, WeChat readers, yt-dlp/video probe, Follow Builders, summarize-pro, Kimi/fallback models, Cloudflare Tunnel, qmd, and OpenClaw channel push.
+
+该文档也列出了明确的依赖清单和 fallback 顺序，包括 Scrapling、urllib、Steel.dev/browser tooling、微信公众号 reader、yt-dlp/video probe、Follow Builders、summarize-pro、Kimi/fallback 模型、Cloudflare Tunnel、qmd 和 OpenClaw channel 推送。
 
 ## macOS launchd
 
