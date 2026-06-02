@@ -1,4 +1,5 @@
 const path = require("node:path");
+const fs = require("node:fs");
 const packageJson = require("../package.json");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -8,6 +9,55 @@ const DEFAULT_FEEDBACK_DIR = path.join(DEFAULT_DATA_DIR, "feedback");
 const DEFAULT_MAINTENANCE_DIR = path.join(DEFAULT_DATA_DIR, "maintenance");
 const DEFAULT_CACHE_DIR = path.join(ROOT_DIR, ".cache");
 
+function parseEnvValue(raw) {
+  const value = String(raw || "").trim();
+  if (
+    (value.startsWith("\"") && value.endsWith("\"")) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1);
+  }
+  return value;
+}
+
+function loadDotEnv() {
+  const envPath = path.join(ROOT_DIR, ".env");
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) {
+      continue;
+    }
+    const match = trimmed.match(/^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+    if (!match || process.env[match[1]] !== undefined) {
+      continue;
+    }
+    process.env[match[1]] = parseEnvValue(match[2]);
+  }
+}
+
+function resolveProjectPath(value, fallback) {
+  const input = String(value || "").trim();
+  if (!input) {
+    return fallback;
+  }
+  return path.isAbsolute(input) ? input : path.resolve(ROOT_DIR, input);
+}
+
+loadDotEnv();
+
+const archiveDir = resolveProjectPath(process.env.NEWS_ARCHIVE_DIR, DEFAULT_ARCHIVE_DIR);
+const feedbackDir = resolveProjectPath(process.env.FEEDBACK_DIR, DEFAULT_FEEDBACK_DIR);
+const feedbackDigestDir = resolveProjectPath(
+  process.env.FEEDBACK_DIGEST_DIR,
+  path.join(feedbackDir, "_digest"),
+);
+const maintenanceDir = resolveProjectPath(process.env.MAINTENANCE_DIR, DEFAULT_MAINTENANCE_DIR);
+const cacheDir = resolveProjectPath(process.env.CACHE_DIR, DEFAULT_CACHE_DIR);
+
 const SITE_CONFIG = {
   rootDir: ROOT_DIR,
   siteTitle: process.env.SITE_TITLE || "每日科技信息",
@@ -15,16 +65,16 @@ const SITE_CONFIG = {
   fixedUrl: process.env.FIXED_SITE_URL || "http://localhost:4321",
   host: process.env.HOST || "0.0.0.0",
   port: Number(process.env.PORT || 4321),
-  archiveDir: process.env.NEWS_ARCHIVE_DIR || DEFAULT_ARCHIVE_DIR,
-  feedbackDir: process.env.FEEDBACK_DIR || DEFAULT_FEEDBACK_DIR,
-  feedbackDigestDir: process.env.FEEDBACK_DIGEST_DIR || path.join(DEFAULT_FEEDBACK_DIR, "_digest"),
-  maintenanceDir: process.env.MAINTENANCE_DIR || DEFAULT_MAINTENANCE_DIR,
-  cacheDir: process.env.CACHE_DIR || DEFAULT_CACHE_DIR,
-  reportsIndexFile: process.env.REPORTS_INDEX_FILE || path.join(DEFAULT_CACHE_DIR, "snapshots.json"),
-  latestIndexFile: process.env.LATEST_INDEX_FILE || path.join(DEFAULT_CACHE_DIR, "latest.json"),
-  detailDir: process.env.DETAIL_CACHE_DIR || path.join(DEFAULT_CACHE_DIR, "snapshot-details"),
-  opsStatusFile: process.env.OPS_STATUS_FILE || path.join(DEFAULT_CACHE_DIR, "ops-status.json"),
-  refreshStateFile: process.env.REFRESH_STATE_FILE || path.join(DEFAULT_CACHE_DIR, "refresh-state.json"),
+  archiveDir,
+  feedbackDir,
+  feedbackDigestDir,
+  maintenanceDir,
+  cacheDir,
+  reportsIndexFile: resolveProjectPath(process.env.REPORTS_INDEX_FILE, path.join(cacheDir, "snapshots.json")),
+  latestIndexFile: resolveProjectPath(process.env.LATEST_INDEX_FILE, path.join(cacheDir, "latest.json")),
+  detailDir: resolveProjectPath(process.env.DETAIL_CACHE_DIR, path.join(cacheDir, "snapshot-details")),
+  opsStatusFile: resolveProjectPath(process.env.OPS_STATUS_FILE, path.join(cacheDir, "ops-status.json")),
+  refreshStateFile: resolveProjectPath(process.env.REFRESH_STATE_FILE, path.join(cacheDir, "refresh-state.json")),
   openclawBin: process.env.OPENCLAW_BIN || "openclaw",
   feishuAccount: process.env.FEISHU_ACCOUNT || "default",
   feishuTarget: process.env.FEISHU_TARGET || "",
