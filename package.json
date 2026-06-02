@@ -1,0 +1,27 @@
+{
+  "name": "daily-tech-briefing-site",
+  "version": "1.1.3",
+  "private": false,
+  "license": "MIT",
+  "description": "Commercial daily technology briefing website with curated summaries, industry impact, source links, and feedback intake.",
+  "scripts": {
+    "build:cache": "node scripts/build-site-cache.js",
+    "check:refresh": "node scripts/check-refresh.js",
+    "check": "npm run check:syntax && npm run check:plists && npm run audit:privacy",
+    "check:syntax": "find . -path './.cache' -prune -o -path './node_modules' -prune -o -name '*.js' -print0 | xargs -0 -n 1 node --check",
+    "check:plists": "find launchd -name '*.plist' -print0 | xargs -0 plutil -lint",
+    "audit:privacy": "node scripts/audit-public-package.js",
+    "audit:schedule": "node scripts/test-schedule-contract.js",
+    "smoke": "node scripts/smoke-public-package.js",
+    "dev": "node server.js",
+    "start": "node server.js",
+    "digest": "node scripts/digest-feedback.js",
+    "run:site": "zsh scripts/run-site.sh",
+    "run:refresh": "zsh scripts/run-refresh-check.sh",
+    "run:qmd": "zsh scripts/run-qmd-refresh.sh",
+    "run:tunnel": "zsh scripts/run-cloudflare-tunnel.sh",
+    "run:tunnel:quick": "zsh scripts/run-cloudflare-quick.sh",
+    "install:launchd": "zsh scripts/install-launchd.sh",
+    "uninstall:launchd": "zsh scripts/uninstall-launchd.sh"
+  }
+}
