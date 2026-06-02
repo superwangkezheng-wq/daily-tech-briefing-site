@@ -1,0 +1,92 @@
+name: Bug report / Bug 反馈
+description: Report a reproducible problem in the website, OpenClaw integration, push flow, or gates.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Daily Tech Briefing Site.
+
+        请先确认：不要粘贴真实 token、open_id、API key、个人目录、私有 channel、内网 URL 或未脱敏日志。
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Affected layer / 影响层
+      description: Which part appears to be failing?
+      options:
+        - Website, cache, or API / 网页、缓存或 API
+        - OpenClaw collector integration / OpenClaw 采集集成
+        - Source extraction or fallback order / 源抽取或 fallback 顺序
+        - Model or summarize-pro chain / 模型或 summarize-pro 链路
+        - Channel push / 绑定 channel 推送
+        - launchd, cron, or schedule / 定时任务
+        - Privacy, audit, or health gate / 隐私、审计或巡检门禁
+        - Documentation or configuration / 文档或配置
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 预期行为
+      description: What should have happened?
+      placeholder: The site should load the latest generated briefing and pass npm run smoke.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / 实际行为
+      description: What happened instead?
+      placeholder: The API returned an empty latest report even though data/collections contains a Markdown file.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps / 复现步骤
+      description: Provide exact commands or steps using redacted paths and tokens.
+      placeholder: |
+        1. cp .env.example .env
+        2. npm run build:cache
+        3. npm run dev
+        4. Open http://localhost:4321
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: Include versions and configuration shape only. Do not include secrets.
+      placeholder: |
+        OS:
+        Node:
+        npm:
+        OpenClaw version/profile:
+        NEWS_ARCHIVE_DIR shape:
+        Customized .env keys:
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks run / 已运行检查
+      options:
+        - label: "`npm run check`"
+        - label: "`npm run smoke`"
+        - label: "`npm run audit:schedule`"
+        - label: "`npm run build:cache`"
+        - label: "I included relevant redacted logs / 已附脱敏日志"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs / 脱敏日志
+      description: Paste only minimal logs needed to diagnose the issue.
+      render: shell
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation / 隐私确认
+      options:
+        - label: I have removed tokens, API keys, open_id values, personal paths, private channel names, and internal URLs.
+          required: true

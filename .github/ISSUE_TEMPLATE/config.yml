@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation / 文档
+    url: https://github.com/superwangkezheng-wq/daily-tech-briefing-site#readme
+    about: Read the product logic, OpenClaw dependency notes, configuration guide, and operations guide before filing an issue.
+  - name: Collector Pipeline / 采集链路说明
+    url: https://github.com/superwangkezheng-wq/daily-tech-briefing-site/blob/main/docs/openclaw-collector-pipeline.md
+    about: Check source layering, fallback order, model usage, and channel-push behavior here.

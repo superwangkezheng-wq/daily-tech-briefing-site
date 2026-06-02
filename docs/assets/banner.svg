@@ -1,0 +1,68 @@
+<svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Daily Tech Briefing Site banner</title>
+  <desc id="desc">OpenClaw-powered AI, ICT, and semiconductor intelligence pipeline from public sources to web publishing, channel push, and audit gates.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1600" y1="0" y2="520" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#101820"/>
+      <stop offset="0.55" stop-color="#14232B"/>
+      <stop offset="1" stop-color="#071014"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="260" x2="1320" y1="255" y2="255" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00A6A6"/>
+      <stop offset="0.5" stop-color="#F5B642"/>
+      <stop offset="1" stop-color="#5EC576"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M 48 0 L 0 0 0 48" stroke="#FFFFFF" stroke-opacity="0.055" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="520" fill="url(#bg)"/>
+  <rect width="1600" height="520" fill="url(#grid)"/>
+  <path d="M0 420 C240 350 360 468 585 383 C805 301 890 254 1127 310 C1326 358 1446 279 1600 221 V520 H0 V420Z" fill="#0C3A42" fill-opacity="0.4"/>
+  <path d="M0 84 C172 124 276 68 452 106 C664 152 758 223 1005 178 C1267 130 1414 147 1600 205" stroke="#3F88C5" stroke-opacity="0.26" stroke-width="2"/>
+  <path d="M0 124 C229 82 363 183 557 151 C758 118 872 62 1110 113 C1321 158 1444 104 1600 74" stroke="#00A6A6" stroke-opacity="0.26" stroke-width="2"/>
+
+  <g transform="translate(104 72)">
+    <text x="0" y="0" dominant-baseline="hanging" fill="#F7FBFC" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="68" font-weight="750" letter-spacing="0">Daily Tech Briefing Site</text>
+    <text x="2" y="90" dominant-baseline="hanging" fill="#C7D6DC" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="30" font-weight="500" letter-spacing="0">OpenClaw-powered AI / ICT / Semiconductor intelligence publishing</text>
+  </g>
+
+  <g filter="url(#softShadow)">
+    <rect x="104" y="252" width="268" height="112" rx="18" fill="#162B34" stroke="#285462"/>
+    <rect x="429" y="252" width="268" height="112" rx="18" fill="#162B34" stroke="#285462"/>
+    <rect x="754" y="252" width="268" height="112" rx="18" fill="#162B34" stroke="#285462"/>
+    <rect x="1079" y="252" width="268" height="112" rx="18" fill="#162B34" stroke="#285462"/>
+    <rect x="1400" y="252" width="96" height="112" rx="18" fill="#162B34" stroke="#285462"/>
+  </g>
+
+  <g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" letter-spacing="0">
+    <text x="134" y="292" fill="#F7FBFC" font-size="24" font-weight="700">Source Layers</text>
+    <text x="134" y="328" fill="#AFC4CC" font-size="18">web, WeChat, video, builder</text>
+
+    <text x="459" y="292" fill="#F7FBFC" font-size="24" font-weight="700">OpenClaw Collector</text>
+    <text x="459" y="328" fill="#AFC4CC" font-size="18">fallback, summarize, reports</text>
+
+    <text x="784" y="292" fill="#F7FBFC" font-size="24" font-weight="700">Markdown to Web</text>
+    <text x="784" y="328" fill="#AFC4CC" font-size="18">cache, API, reading site</text>
+
+    <text x="1109" y="292" fill="#F7FBFC" font-size="24" font-weight="700">Channel Push</text>
+    <text x="1109" y="328" fill="#AFC4CC" font-size="18">bound targets and feedback</text>
+
+    <text x="1428" y="292" fill="#F7FBFC" font-size="24" font-weight="700">Gates</text>
+    <text x="1428" y="328" fill="#AFC4CC" font-size="18">audit</text>
+  </g>
+
+  <path d="M376 308 H425" stroke="url(#flow)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M701 308 H750" stroke="url(#flow)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1026 308 H1075" stroke="url(#flow)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1351 308 H1396" stroke="url(#flow)" stroke-width="6" stroke-linecap="round"/>
+
+  <circle cx="144" cy="422" r="8" fill="#00A6A6"/>
+  <circle cx="181" cy="422" r="8" fill="#F5B642"/>
+  <circle cx="218" cy="422" r="8" fill="#5EC576"/>
+  <text x="250" y="414" fill="#BFD1D8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20" font-weight="500" letter-spacing="0">Local-first publishing, configurable schedules, redacted open-source package</text>
+</svg>

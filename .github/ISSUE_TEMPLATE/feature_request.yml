@@ -1,0 +1,50 @@
+name: Feature request / 功能建议
+description: Propose a product, pipeline, push, gate, or documentation improvement.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / 问题
+      description: What user or operator problem should this solve?
+      placeholder: Operators need a clearer way to see whether a daily report was collected, published, pushed, and gated successfully.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior / 建议方案
+      description: Describe the user-visible behavior and the operator workflow.
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Main layer / 主要影响层
+      options:
+        - Product reading experience / 阅读产品体验
+        - Source collection logic / 采集逻辑
+        - OpenClaw integration / OpenClaw 集成
+        - Model or summarize-pro chain / 模型或 summarize-pro 链路
+        - Channel push / 绑定 channel 推送
+        - Schedule, launchd, or operations / 定时任务与运维
+        - Privacy or audit gates / 隐私或审计门禁
+        - Documentation / 文档
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered / 已考虑替代方案
+      description: If this can be solved by configuration, explain why a product or code change is still useful.
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impact checklist / 影响检查
+      options:
+        - label: This may affect collection schedule or refresh frequency.
+        - label: This may affect channel push behavior.
+        - label: This may affect privacy, token, or path handling.
+        - label: This may affect OpenClaw dependency assumptions.
+        - label: This may require documentation updates.
