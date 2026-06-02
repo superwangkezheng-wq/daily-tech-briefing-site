@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>每日科技情报站</title>
+    <link rel="stylesheet" href="/site.css?v=1.1.3" />
+  </head>
+  <body>
+    <header class="topnav">
+      <div class="container topnav-inner">
+        <div class="logo-wrap">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span class="logo">每日科技情报站</span>
+          <span id="topbar-meta" class="meta">当前版本 · --</span>
+        </div>
+
+        <nav aria-label="主导航">
+          <a href="#top-story">首条焦点</a>
+          <a href="#issue-switch">版本切换</a>
+          <a href="#quick-picks">重点速览</a>
+          <a href="#dispatch-list">正式条目</a>
+          <a href="#feedback">反馈</a>
+        </nav>
+
+        <a class="btn btn-secondary" href="#issue-switch">切换版本</a>
+      </div>
+    </header>
+
+    <main id="content">
+      <section class="section hero" id="top-story">
+        <div class="container hero-split">
+          <div class="hero-copy reveal">
+            <p id="hero-kicker" class="eyebrow">今日首条 · --</p>
+            <span id="hero-slot" class="tag">--</span>
+            <h1 id="hero-title">正在加载</h1>
+            <p id="hero-summary" class="lead">正在整理最新科技资讯。</p>
+            <div class="hero-meta-line">
+              <span id="hero-meta-date" class="meta">--</span>
+              <span id="hero-meta-role" class="meta">首条内容</span>
+              <span id="hero-meta-count" class="meta">--</span>
+            </div>
+          </div>
+
+          <aside class="card hero-panel reveal delay-2" aria-label="当前版本统计信息">
+            <div class="hero-headline">
+              <div>
+                <span class="tag">当前版本</span>
+                <h3>本版统计</h3>
+              </div>
+              <div id="hero-side-status" class="meta">--</div>
+            </div>
+
+            <div class="signal-list">
+              <article class="signal-item">
+                <span class="meta">版本</span>
+                <div>
+                  <p class="signal-title">当前版本</p>
+                  <p id="hero-side-version" class="signal-copy">--</p>
+                </div>
+              </article>
+
+              <article class="signal-item">
+                <span class="meta">时间</span>
+                <div>
+                  <p class="signal-title">生成时间</p>
+                  <p id="hero-side-generated" class="signal-copy">--</p>
+                </div>
+              </article>
+
+              <article class="signal-item">
+                <span class="meta">条目</span>
+                <div>
+                  <p class="signal-title">本次条目</p>
+                  <p id="hero-side-count" class="signal-copy">--</p>
+                </div>
+              </article>
+
+              <article class="signal-item">
+                <span class="meta">日期</span>
+                <div>
+                  <p class="signal-title">日报日期</p>
+                  <p id="hero-side-date" class="signal-copy">--</p>
+                </div>
+              </article>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="issue-switch">
+        <div class="container stack-lg">
+          <div class="row-between reveal">
+            <div class="section-intro">
+              <span class="section-kicker">版本索引</span>
+              <h2>版本切换与历史快照</h2>
+              <p class="section-copy">当前页面直接读取定时任务生成后的日报快照，切换版本只换内容，不跳出阅读流。</p>
+            </div>
+            <button id="snapshot-toggle" class="btn btn-ghost btn-arrow" type="button" aria-expanded="false">
+              展开全部快照
+            </button>
+          </div>
+
+          <div id="slot-switcher" class="switcher" aria-label="版本切换"></div>
+          <div id="snapshot-strip" class="snapshot-strip" aria-label="近期快照"></div>
+          <div id="snapshot-panel" class="snapshot-panel" hidden></div>
+        </div>
+      </section>
+
+      <section class="section" id="quick-picks">
+        <div class="container stack-lg">
+          <div class="row-between reveal">
+            <div class="section-intro section-intro--wide">
+              <span class="section-kicker">重点速览</span>
+              <h2 id="quick-title">重点条目速览</h2>
+              <p id="quick-copy" class="section-copy">--</p>
+            </div>
+            <a class="btn btn-ghost btn-arrow" href="#dispatch-list">进入正式条目</a>
+          </div>
+
+          <div id="quick-grid" class="grid-3 quick-grid"></div>
+        </div>
+      </section>
+
+      <section class="section" id="dispatch-list">
+        <div class="container stack-lg">
+          <div class="row-between reveal">
+            <div class="section-intro section-intro--wide">
+              <span class="section-kicker">正文条目</span>
+              <h2>正式条目列表</h2>
+            </div>
+            <div class="page-meta">
+              <span id="page-indicator" class="meta">当前页 1 / 1</span>
+              <span id="total-indicator" class="meta">共 0 条</span>
+            </div>
+          </div>
+
+          <div id="entry-stream" class="entry-stream"></div>
+          <div id="pagination" class="pagination-shell"></div>
+        </div>
+      </section>
+
+      <section class="section" id="feedback">
+        <div class="container">
+          <div class="feedback-shell">
+            <div class="feedback-head">
+              <div class="section-intro section-intro--wide">
+                <span class="section-kicker">读者反馈</span>
+                <h2>留下建议，持续优化。</h2>
+                <p class="section-copy">反馈会写入 Obsidian，并按现有策略参与次日 10 点的汇总与飞书推送。</p>
+              </div>
+            </div>
+
+            <form id="feedback-form" class="feedback-form">
+              <label class="field">
+                <span>昵称（可选）</span>
+                <input id="visitor-name" name="visitorName" class="input" type="text" maxlength="40" placeholder="例如：产业观察者" />
+              </label>
+
+              <label class="field">
+                <span>联系方式（可选）</span>
+                <input id="visitor-contact" name="contact" class="input" type="text" maxlength="80" placeholder="飞书 / 邮箱 / 微信备注" />
+              </label>
+
+              <label class="field field-wide">
+                <span>反馈内容</span>
+                <textarea
+                  id="feedback-content"
+                  name="content"
+                  class="textarea"
+                  rows="5"
+                  maxlength="1200"
+                  placeholder="例如：建议把产业影响再拆成预算、产品路线、开发者工作流三个维度。"
+                  required
+                ></textarea>
+              </label>
+
+              <div class="feedback-actions">
+                <button class="btn btn-primary" type="submit">提交反馈</button>
+                <p id="feedback-status" class="feedback-status"></p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <template id="quick-card-template">
+      <article class="card quick-card reveal">
+        <div class="quick-meta">
+          <span class="quick-source">--</span>
+          <span class="num quick-rank">01</span>
+        </div>
+        <h3 class="quick-title-text">--</h3>
+        <p class="quick-summary">--</p>
+        <p class="impact-note quick-impact">--</p>
+        <div class="row-between quick-card__footer">
+          <button class="btn btn-ghost btn-arrow quick-jump" type="button">定位正文</button>
+          <a class="btn btn-ghost btn-arrow quick-link" href="#" target="_blank" rel="noreferrer">原文入口</a>
+        </div>
+      </article>
+    </template>
+
+    <template id="entry-template">
+      <article class="card entry-card reveal">
+        <div class="entry-index">
+          <span class="num entry-rank">01</span>
+        </div>
+
+        <div class="entry-body">
+          <div class="entry-header">
+            <div class="entry-header__copy">
+              <span class="entry-source">--</span>
+              <h3 class="entry-title">--</h3>
+            </div>
+            <a class="btn btn-ghost btn-arrow entry-link" href="#" target="_blank" rel="noreferrer">查看原文</a>
+          </div>
+
+          <div class="entry-summary">
+            <div class="entry-summary-block">
+              <strong>摘要</strong>
+              <div class="entry-summary-copy">--</div>
+            </div>
+
+            <div class="entry-summary-block">
+              <strong>产业影响</strong>
+              <div class="entry-impact-copy">--</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="/site.js?v=1.1.3"></script>
+  </body>
+</html>
