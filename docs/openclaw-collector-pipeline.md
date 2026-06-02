@@ -78,7 +78,111 @@ The collection layer intentionally comes before the website layer. This reposito
 
 采集层先于网页层。本仓库用示例 Markdown 可以直接跑通网页，但生产级采集依赖 OpenClaw。
 
-## 4. Source Layering / 源头分层采集
+## 4. Dependency Matrix / 依赖清单
+
+This project has two layers of dependencies:
+
+1. This repository: website publishing, feedback, cache, local gates, optional channel push.
+2. OpenClaw upstream: source collection, scraping, summarization, channel binding, and production cron orchestration.
+
+本项目有两层依赖：
+
+1. 本仓库：网页发布、反馈、缓存、本地门禁、可选 channel 推送。
+2. OpenClaw 上游：源头采集、网页抓取、摘要、channel 绑定、生产 cron 编排。
+
+### 4.1 This Repository / 本仓库依赖
+
+| Dependency | Required | Used by | Notes |
+| --- | --- | --- | --- |
+| Node.js | Yes | `server.js`, `scripts/*.js` | Uses Node built-ins only; there are no npm package dependencies in `package.json`. |
+| zsh | Optional but recommended | run scripts and launchd wrappers | Needed for `scripts/run-*.sh` and macOS launchd templates. |
+| macOS launchd | Optional | scheduled web service / refresh checks | Templates are in `launchd/templates`; other platforms can use cron/systemd/PM2. |
+| Cloudflare `cloudflared` | Optional | external HTTPS tunnel | Required only for `npm run run:tunnel` or tunnel launchd template. |
+| OpenClaw CLI | Optional for website, required for push | `src/feishu.js`, feedback digest push, alert push | Local page rendering and feedback work without OpenClaw. |
+| qmd | Optional | `scripts/run-qmd-refresh.sh` | Used only if you enable local knowledge index refresh. |
+
+| 依赖 | 是否必需 | 用途 | 说明 |
+| --- | --- | --- | --- |
+| Node.js | 必需 | `server.js`、`scripts/*.js` | 只使用 Node 内置模块；`package.json` 没有 npm 依赖包。 |
+| zsh | 可选但推荐 | 运行脚本、launchd wrapper | `scripts/run-*.sh` 和 macOS launchd 模板需要。 |
+| macOS launchd | 可选 | 常驻网页服务 / 刷新检查 | 模板在 `launchd/templates`；其他系统可换 cron/systemd/PM2。 |
+| Cloudflare `cloudflared` | 可选 | 外网 HTTPS tunnel | 只有 `npm run run:tunnel` 或 tunnel launchd 需要。 |
+| OpenClaw CLI | 网页非必需，推送必需 | `src/feishu.js`、反馈汇总推送、告警推送 | 只看网页和提交反馈不需要 OpenClaw。 |
+| qmd | 可选 | `scripts/run-qmd-refresh.sh` | 只有启用本地知识库索引刷新时需要。 |
+
+### 4.2 OpenClaw Collector Dependencies / OpenClaw 采集层依赖
+
+These are not bundled in this repository. They are part of the reference OpenClaw operator environment.
+
+这些不捆绑在本仓库里，属于参考 OpenClaw 采集运行环境。
+
+| Dependency / plugin | Required for full collector | Used for |
+| --- | --- | --- |
+| OpenClaw runtime and cron | Yes | Running scheduled collector, channel binding, health receipts. |
+| `daily_news_v10.py` collector | Yes | AI / ICT / semiconductor source collection and Markdown report generation. |
+| Source manifest `ai_ict_news_sources_v10.json` | Recommended | Configures source pools, buckets, required sources, fallback metadata, slots. |
+| `scrapling` / `scrapling-official` | Yes for reference web fetch | Primary normal-page fetcher. |
+| Python `urllib` | Yes | Fast fallback, RSS/feed fetch, SSL-policy fallback. |
+| `beautifulsoup4` | Yes | HTML parsing, source-specific extraction, generic extraction. |
+| Steel.dev / browser tooling | Optional but important | High-friction pages, JS-rendered pages, browser fallback. |
+| `wechat-article-for-ai` | Optional but important | Script/cron extraction for WeChat article Markdown. |
+| `wechat-mp-reader` | Optional | Dialogue/manual WeChat extraction route. |
+| `miku_ai` / WeChat search tooling | Optional | WeChat official-account discovery by query. |
+| `yt-dlp` | Optional but important | YouTube/Bilibili/channel metadata fallback. |
+| video-source-parser / video probe | Optional | Platform-specific video feed probing before `yt-dlp`. |
+| Follow Builders | Optional but important for Builder pool | X / podcast Builder feeds through `feed-x.json`, `feed-podcasts.json`, `prepare-digest.js`. |
+| X API token | Optional | Only needed if generating Follow Builders feed locally through X API. |
+| `summarize-pro` | Strongly recommended | Final selected item summary and industry impact generation. |
+| Kimi / OpenAI-compatible / local model | Recommended | Backing model for `summarize-pro`. |
+| Feishu / WeChat channel plugins | Optional | Channel push through OpenClaw bindings. |
+
+| 依赖 / 插件 | 完整采集是否需要 | 用途 |
+| --- | --- | --- |
+| OpenClaw runtime 和 cron | 需要 | 定时采集、channel 绑定、健康回执。 |
+| `daily_news_v10.py` 采集器 | 需要 | AI / ICT / 半导体源头采集与 Markdown 日报生成。 |
+| 源 manifest `ai_ict_news_sources_v10.json` | 推荐 | 配置源池、bucket、必收源、fallback 元数据、slot。 |
+| `scrapling` / `scrapling-official` | 参考网页抓取需要 | 普通网页主抓取器。 |
+| Python `urllib` | 需要 | 快速 fallback、RSS/feed 抓取、SSL 策略 fallback。 |
+| `beautifulsoup4` | 需要 | HTML 解析、站点专用抽取、通用抽取。 |
+| Steel.dev / browser tooling | 可选但重要 | 高摩擦页面、JS 渲染页面、浏览器兜底。 |
+| `wechat-article-for-ai` | 可选但重要 | 脚本 / cron 场景的公众号 Markdown 抽取。 |
+| `wechat-mp-reader` | 可选 | 对话 / 手动公众号抽取路线。 |
+| `miku_ai` / 微信检索工具 | 可选 | 按 query 做公众号发现。 |
+| `yt-dlp` | 可选但重要 | YouTube/Bilibili/channel 元数据 fallback。 |
+| video-source-parser / video probe | 可选 | 在 `yt-dlp` 前做平台专用视频源探测。 |
+| Follow Builders | 可选但重要 | 通过 `feed-x.json`、`feed-podcasts.json`、`prepare-digest.js` 提供 Builder feed。 |
+| X API token | 可选 | 只有本地生成 Follow Builders X feed 时需要。 |
+| `summarize-pro` | 强烈推荐 | 对最终入选条目生成摘要和产业影响。 |
+| Kimi / OpenAI-compatible / 本地模型 | 推荐 | 作为 `summarize-pro` 背后的模型。 |
+| 飞书 / 微信 channel 插件 | 可选 | 通过 OpenClaw 绑定 channel 推送。 |
+
+### 4.3 Dependency Boundary / 依赖边界
+
+If you only want to run the website, use:
+
+```bash
+cp .env.example .env
+npm run build:cache
+npm run dev
+```
+
+No OpenClaw, Kimi, Scrapling, Steel, WeChat tooling, Follow Builders, or yt-dlp is required for this basic mode.
+
+如果你只想运行网页：
+
+```bash
+cp .env.example .env
+npm run build:cache
+npm run dev
+```
+
+这个基础模式不需要 OpenClaw、Kimi、Scrapling、Steel、微信公众号工具、Follow Builders 或 yt-dlp。
+
+If you want production collection, you need OpenClaw plus the collector dependencies above.
+
+如果要生产级采集，则需要 OpenClaw 和上表采集依赖。
+
+## 5. Source Layering / 源头分层采集
 
 The reference OpenClaw V10 collector currently uses these source families:
 
@@ -104,23 +208,105 @@ The reference OpenClaw V10 collector currently uses these source families:
 | 视频 / 播客创作者 | 14 | YouTube、Bilibili、播客和创作者更新。 |
 | Builder 源 | 25 | AI Builder、实践者和行业观察者动态。 |
 
-### 4.1 Web and Official Sites / 网页与官方站点
+### 5.1 Web and Official Sites / 网页与官方站点
 
-For normal web pages, the reference collector uses a fallback ladder:
+For normal web pages, the reference collector uses two fallback ladders: one for source listing pages and one for article-body context used by summarization.
 
-1. Scrapling fetch.
-2. `urllib` fallback.
-3. Steel.dev / Playwright fallback for harder pages.
-4. HTML parsing and source-specific extraction.
+普通网页有两条 fallback 链：一条用于源站列表页，一条用于给摘要模型补正文上下文。
 
-普通网页的参考抓取顺序：
+#### Source listing page fallback / 源站列表页 fallback
 
-1. 优先使用 Scrapling。
-2. 失败后回退到 `urllib`。
-3. 更难的页面再用 Steel.dev / Playwright。
-4. 最后进入 HTML 解析和站点专用抽取逻辑。
+Normal non-feed source:
 
-### 4.2 WeChat Official Accounts / 微信公众号
+```text
+Scrapling
+  -> urllib with SSL policy
+  -> Steel.dev / browser fallback
+  -> source-specific parser
+  -> generic BeautifulSoup parser
+```
+
+普通非 feed 源：
+
+```text
+Scrapling
+  -> 带 SSL 策略的 urllib
+  -> Steel.dev / browser fallback
+  -> 站点专用 parser
+  -> 通用 BeautifulSoup parser
+```
+
+Feed / RSS / Atom source:
+
+```text
+urllib
+  -> urllib retry
+  -> Scrapling
+  -> Steel.dev / browser fallback
+  -> feed parser or source parser
+```
+
+Feed / RSS / Atom 源：
+
+```text
+urllib
+  -> urllib retry
+  -> Scrapling
+  -> Steel.dev / browser fallback
+  -> feed parser 或 source parser
+```
+
+Source configured as `fetchMode=steel_first`:
+
+```text
+Steel.dev / browser fallback
+  -> Scrapling
+  -> urllib
+  -> source parser
+```
+
+配置为 `fetchMode=steel_first` 的高摩擦源：
+
+```text
+Steel.dev / browser fallback
+  -> Scrapling
+  -> urllib
+  -> source parser
+```
+
+The collector does not stop at "HTTP success". It continues fallback when parsing returns zero items, titles are unusable/garbled, or no publication-time evidence is found.
+
+采集器不会在“HTTP 成功”后就停止。如果解析 0 条、标题乱码/不可用，或没有发布时间证据，会继续切换下一个抓取器。
+
+#### Article context fallback for summarize-pro / 摘要正文上下文 fallback
+
+For selected candidates, the collector may fetch the article body again to give `summarize-pro` cleaner context:
+
+```text
+urllib
+  -> Scrapling
+  -> Steel.dev / browser fallback
+  -> source-specific body selectors
+  -> meta description
+  -> article/main/content generic extraction
+```
+
+对于最终候选，采集器会再次补正文给 `summarize-pro`：
+
+```text
+urllib
+  -> Scrapling
+  -> Steel.dev / browser fallback
+  -> 站点专用正文 selector
+  -> meta description
+  -> article/main/content 通用正文抽取
+```
+
+For WeChat article URLs in this context, it first uses the WeChat reader route instead of generic HTML.
+
+如果正文 URL 是微信公众号文章，则优先走微信公众号 reader 路线，而不是普通 HTML 抓取。
+
+### 5.2 WeChat Official Accounts / 微信公众号
 
 WeChat is not treated as a generic web page. It has its own route:
 
@@ -140,13 +326,33 @@ WeChat is not treated as a generic web page. It has its own route:
 5. discovery 不稳定时使用直链种子兜底。
 6. 正文抽取使用 `wechat-article-for-ai` 或 `wechat-mp-reader`。
 
-### 4.3 Video and Podcast Pool / 视频与播客池
+### 5.3 Video and Podcast Pool / 视频与播客池
 
 Video and podcast sources are separated from article sites because they need different parsing and freshness signals. The reference setup uses creator pools and video tooling such as `yt-dlp` / video source probes where applicable.
 
 视频和播客源与网页源分开，因为它们的发布时间、正文提取和标题噪声不同。参考实现中视频池包括 YouTube、Bilibili 和播客创作者，并在需要时使用 `yt-dlp` / video source parser 之类工具做补充解析。
 
-### 4.4 Follow Builders / Builder 池
+Reference video fallback order:
+
+```text
+video-source-parser / video probe
+  -> YouTube channel RSS when applicable
+  -> yt-dlp flat playlist
+  -> Bilibili detail enrichment when applicable
+  -> Bilibili HTML fallback: Steel.dev -> Scrapling -> urllib
+```
+
+参考视频 fallback 顺序：
+
+```text
+video-source-parser / video probe
+  -> YouTube 频道 RSS（适用时）
+  -> yt-dlp flat playlist
+  -> Bilibili detail enrichment（适用时）
+  -> Bilibili HTML fallback：Steel.dev -> Scrapling -> urllib
+```
+
+### 5.4 Follow Builders / Builder 池
 
 The Builder pool uses Follow Builders instead of scraping `x.com` pages directly.
 
@@ -168,7 +374,7 @@ Reference order:
 4. 最后回退本地 `feed-x.json`。
 5. 播客池先拉远程 `feed-podcasts.json`，再回退本地缓存。
 
-## 5. Selection Logic / 入选逻辑
+## 6. Selection Logic / 入选逻辑
 
 The V10 reference collector targets a compact daily output:
 
@@ -186,7 +392,7 @@ V10 参考采集器的日报不是无限堆料，而是紧凑输出：
 - 上午版允许受控的近期补位，处理部分源发布时间稍晚的问题。
 - 所有候选先过相关性、新鲜度、去重和源覆盖门禁，再进入摘要。
 
-## 6. Model Chain and summarize-pro / 模型链与 summarize-pro
+## 7. Model Chain and summarize-pro / 模型链与 summarize-pro
 
 The reference OpenClaw setup uses:
 
@@ -244,7 +450,7 @@ For upstream collection quality, choose one of these:
 4. 强化正文抽取和 source snippet，让较弱模型拿到更干净上下文。
 5. 保留本地规则兜底，确保模型失败时仍能产生日报。
 
-## 7. Functional Logic in This Repository / 本仓库功能逻辑
+## 8. Functional Logic in This Repository / 本仓库功能逻辑
 
 This repository consumes generated Markdown reports. It does not bundle private OpenClaw cron jobs or private source lists.
 
@@ -272,7 +478,7 @@ Main modules:
 - `src/feishu.js`：可选调用 OpenClaw 飞书广播。
 - `launchd/templates`：macOS 运行模板。
 
-## 8. Channel Binding and Push / 绑定 channel 推送
+## 9. Channel Binding and Push / 绑定 channel 推送
 
 Push is intentionally not hardcoded. The reference implementation calls:
 
@@ -304,7 +510,7 @@ To support other channels, adapt `src/feishu.js` or add another sender module us
 
 如果要支持其他 channel，可改 `src/feishu.js` 或新增 sender module，继续复用 OpenClaw 的 channel 抽象。
 
-## 9. Schedules / 推送时间与次数
+## 10. Schedules / 推送时间与次数
 
 Reference production snapshots:
 
@@ -326,7 +532,7 @@ The times and number of pushes are configurable. Change OpenClaw cron schedules 
 
 时间和次数都可以定制。采集时间改 OpenClaw cron，网页刷新检查改 `REFRESH_SLOTS` 和 launchd templates。
 
-## 10. Inspection Gates / 巡检门禁
+## 11. Inspection Gates / 巡检门禁
 
 This package includes:
 
@@ -346,7 +552,7 @@ Reference OpenClaw production also runs broader health checks: cron state, chann
 
 参考 OpenClaw 生产环境还会跑更完整的健康检查：cron 状态、channel 推送结果、qmd 刷新、反馈汇总、路由审计、动作合同审计、发布门禁。这些属于 OpenClaw 运维环境，本仓库不直接捆绑。
 
-## 11. Community Contribution / 共同优化
+## 12. Community Contribution / 共同优化
 
 Contributions are welcome:
 
