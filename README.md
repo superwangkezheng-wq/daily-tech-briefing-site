@@ -1,4 +1,4 @@
-![Daily Tech Briefing Site banner](docs/assets/banner.svg)
+![Daily Tech Briefing Site banner](docs/assets/banner.png)
 
 # Daily Tech Briefing Site / 每日科技信息站
 
