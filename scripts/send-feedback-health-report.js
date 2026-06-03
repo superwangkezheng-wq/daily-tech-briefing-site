@@ -430,6 +430,23 @@ async function loadProductionGuardStatus() {
   }
 }
 
+async function loadCurrentOpenClawVersion() {
+  try {
+    const result = await runCommand(OPENCLAW_BIN, ["--version"], {
+      stdio: ["ignore", "pipe", "pipe"],
+      env: process.env,
+      timeoutMs: 15000,
+    });
+    const lines = String(result.stdout || "")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+    return lines.at(-1) || null;
+  } catch {
+    return null;
+  }
+}
+
 function parseTimestamp(value) {
   if (!value || typeof value !== "string") {
     return null;
@@ -454,10 +471,11 @@ function daysSince(timestamp) {
   return (Date.now() - parsed.getTime()) / (1000 * 60 * 60 * 24);
 }
 
-function assetSyncHeadline(status, problemStatus) {
+function assetSyncHeadline(status, problemStatus, currentVersion) {
   if (!status) {
     return [
-      "- 最近统一升级：无正式状态记录（尚未产生首个正式周更回执）",
+      `- 当前已安装版本：${currentVersion || "--"}`,
+      "- 最近自动统一升级回执：无正式状态记录（尚未产生首个正式周更回执）",
       `- 状态文件：${ASSET_SYNC_STATUS_FILE}`,
     ];
   }
@@ -471,14 +489,18 @@ function assetSyncHeadline(status, problemStatus) {
         : `STALE（${ageDays.toFixed(1)} 天前）`;
 
   const lines = [
-    `- 最近统一升级：${status.finishedAt || status.startedAt || "--"}`,
+    `- 当前已安装版本：${currentVersion || status.versionAfter || "--"}`,
+    `- 最近自动统一升级回执：${status.finishedAt || status.startedAt || "--"}`,
     `- 结果：${status.result || "--"}`,
     `- 新鲜度：${freshness}`,
-    `- 升级前 / 后版本：${status.versionBefore || "--"} -> ${status.versionAfter || "--"}`,
+    `- 自动升级前 / 后版本：${status.versionBefore || "--"} -> ${status.versionAfter || "--"}`,
     `- 耗时：${status.duration || "--"}`,
     `- 摘要：${status.summaryPath || "--"}`,
     `- 日志：${status.logPath || "--"}`,
   ];
+  if (currentVersion && status.versionAfter && currentVersion !== status.versionAfter) {
+    lines.push("- 说明：当前版本与最近自动统一升级回执不同，说明此后还发生过手动升级或额外升级。");
+  }
   if (status.notifyOk !== undefined && status.notifyOk !== null) {
     lines.push(`- 通知状态：${status.notifyOk ? "OK" : "FAIL"}${status.notifyDetail ? `（${status.notifyDetail}）` : ""}`);
   }
@@ -883,6 +905,7 @@ async function main() {
   const assetSyncProblem = await loadAssetSyncProblemStatus();
   const businessSmoke = await loadBusinessSmokeStatus();
   const productionGuard = await loadProductionGuardStatus();
+  const currentOpenClawVersion = await loadCurrentOpenClawVersion();
   const skillEvolution = await loadSkillEvolutionHealth();
   const routeViolation = await loadRouteViolationAudit();
   const actionContracts = await loadActionContractAudit();
@@ -978,7 +1001,7 @@ async function main() {
     statusLine("qmd index", qmdIndex),
     "",
     "【统一升级】",
-    ...assetSyncHeadline(assetSync, assetSyncProblem),
+    ...assetSyncHeadline(assetSync, assetSyncProblem, currentOpenClawVersion),
   ].join("\n");
 
   if (args.dryRun) {

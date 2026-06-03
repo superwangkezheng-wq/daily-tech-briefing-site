@@ -2,11 +2,20 @@
 
 # 每日科技信息站
 
+当前版本：`1.1.4`
+
 英文首页：[README.md](README.md)
 
 每日科技信息站是一个本地优先的“定时资讯采集结果网页发布层”。上游由 OpenClaw 负责采集 AI、ICT、半导体相关新闻、视频、公众号和 Builder 动态；本项目负责把生成后的 Markdown 日报发布为网页、接收反馈、生成反馈汇总，并通过绑定 channel 做可选推送和巡检回执。
 
 公开包不包含任何真实 token、个人路径、运行缓存或私有资讯源归档。使用者需要自己配置日报目录、反馈目录、维护 token、推送 channel、Cloudflare Tunnel token 和 OpenClaw 采集环境。
+
+## 2026-06-03 修订
+
+- 推荐的 Tunnel 发布链路调整为用户级 `http2` connector，并优先采用固定 Cloudflare edge IP，减少 `argotunnel` SRV 发现不稳定导致的公网发布抖动。
+- `10:15` 健康回执现在会区分“当前已安装 OpenClaw 版本”和“最近自动统一升级回执”，避免把历史自动升级版本误读成当前运行版本。
+- `run-feedback-health-report.sh` 会优先从当前 OpenClaw cron 合同中回填 `FEISHU_TARGET`，降低因环境变量缺失导致健康状态文件误报失败的概率。
+- 上游采集侧 Juya YouTube 必收源新增 `youtube-feed -> yt-dlp` fallback，适用于上午版 required source 检查。
 
 ## 项目目的
 

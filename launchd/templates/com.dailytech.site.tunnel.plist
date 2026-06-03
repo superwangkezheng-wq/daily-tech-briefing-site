@@ -6,10 +6,11 @@
     <string>com.dailytech.site.tunnel</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/bin/sh</string>
-      <string>-lc</string>
-      <string>cd "__PROJECT_DIR__" &amp;&amp; exec zsh scripts/run-cloudflare-tunnel.sh</string>
+      <string>/bin/zsh</string>
+      <string>__SUPPORT_DIR__/dailytech_tunnel.sh</string>
     </array>
+    <key>WorkingDirectory</key>
+    <string>__SUPPORT_DIR__</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

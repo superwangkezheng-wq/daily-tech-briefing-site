@@ -6,10 +6,11 @@
     <string>com.dailytech.site.web</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/bin/sh</string>
-      <string>-lc</string>
-      <string>cd "__PROJECT_DIR__" &amp;&amp; exec env REQUIRE_MAINTENANCE_TOKEN=1 zsh scripts/run-site.sh</string>
+      <string>/bin/zsh</string>
+      <string>__SUPPORT_DIR__/dailytech_site_web.sh</string>
     </array>
+    <key>WorkingDirectory</key>
+    <string>__SUPPORT_DIR__</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>

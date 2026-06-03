@@ -17,6 +17,27 @@ if [[ -f "$project_dir/.env" ]]; then
   set +a
 fi
 
+if [[ -z "${FEISHU_TARGET:-}" ]]; then
+  cron_jobs_json="${OPENCLAW_CRON_JOBS_JSON:-$HOME/.openclaw/cron/jobs.json}"
+  if [[ -f "$cron_jobs_json" ]]; then
+    feishu_target_from_jobs="$(
+      jq -r '
+        .jobs[]
+        | select(.name == "每日科技信息 网页反馈 & 系统健康回执 (10:15)" or .name == "每日科技信息 网页反馈 & 系统健康回执 (10:00)")
+        | (
+            ((.notifications // [])
+              | map(select(.channel == "feishu" and (.to // "") != ""))
+              | .[0].to)
+            // (.delivery.failureDestination.to // empty)
+          )
+      ' "$cron_jobs_json" 2>/dev/null | head -n 1
+    )"
+    if [[ -n "$feishu_target_from_jobs" ]]; then
+      export FEISHU_TARGET="$feishu_target_from_jobs"
+    fi
+  fi
+fi
+
 dry_run=0
 skip_digest=0
 digest_exit=0
