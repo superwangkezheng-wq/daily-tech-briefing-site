@@ -20,4 +20,21 @@ if [[ -z "${CLOUDFLARED_TUNNEL_TOKEN:-}" ]]; then
   exit 1
 fi
 
-exec "$CLOUDFLARED_BIN" tunnel --no-autoupdate --protocol http2 run --token "$CLOUDFLARED_TUNNEL_TOKEN"
+export TUNNEL_TOKEN="$CLOUDFLARED_TUNNEL_TOKEN"
+export NO_PROXY="${NO_PROXY:-127.0.0.1,localhost,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}"
+unset CLOUDFLARED_TUNNEL_TOKEN HTTPS_PROXY HTTP_PROXY ALL_PROXY
+
+edge_args=()
+if [[ -n "${CLOUDFLARED_EDGE_ARGS:-}" ]]; then
+  # shellcheck disable=SC2206
+  edge_args=(${=CLOUDFLARED_EDGE_ARGS})
+else
+  edge_args=(
+    --edge 198.41.192.27:7844
+    --edge 198.41.192.47:7844
+    --edge 198.41.200.73:7844
+    --edge 198.41.200.113:7844
+  )
+fi
+
+exec "$CLOUDFLARED_BIN" tunnel --no-autoupdate --metrics 127.0.0.1:20241 --protocol http2 "${edge_args[@]}" run

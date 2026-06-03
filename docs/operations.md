@@ -22,6 +22,12 @@ Default report windows:
 
 Morning refresh retries once after 10 minutes. Afternoon and evening refreshes retry up to six times with five-minute spacing.
 
+## 2026-06-03 Runtime Notes
+
+- If your network makes `argotunnel` DNS discovery unreliable, prefer the user-level `http2` tunnel path and pin Cloudflare edge IPs instead of relying on the default discovery flow.
+- The feedback-health receipt should report both the current installed OpenClaw version and the latest automated unified-upgrade record. These are intentionally different concepts.
+- Missing `FEISHU_TARGET` should not be solved by hardcoding a personal open_id into the public package. Prefer the local environment or an active OpenClaw cron contract as the source of truth.
+
 ## Feedback Digest
 
 ```bash

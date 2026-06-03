@@ -16,6 +16,7 @@ node_modules/
 coverage/
 dist/
 tmp/
+__pycache__/
 
 # Logs
 *.log

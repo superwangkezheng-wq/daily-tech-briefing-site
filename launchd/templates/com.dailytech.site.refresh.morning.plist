@@ -6,9 +6,9 @@
     <string>com.dailytech.site.refresh.morning</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/bin/sh</string>
-      <string>-lc</string>
-      <string>cd "__PROJECT_DIR__" &amp;&amp; exec zsh scripts/run-refresh-check.sh morning</string>
+      <string>/bin/zsh</string>
+      <string>__SUPPORT_DIR__/dailytech_refresh_check.sh</string>
+      <string>morning</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
