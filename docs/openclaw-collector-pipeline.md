@@ -514,18 +514,18 @@ To support other channels, adapt `src/feishu.js` or add another sender module us
 
 Reference production snapshots:
 
-- Morning snapshot: around `09:40`.
+- Morning snapshot: around `09:40` by default, configurable with `MORNING_COLLECTION_TIME`.
 - Afternoon snapshot: disabled by default.
 - Evening snapshot: disabled by default.
-- Website refresh check: `10:00` morning refresh, up to 36 attempts with 10-minute spacing.
+- Website refresh check: automatic lag after collection, default `MORNING_REFRESH_LAG_MINUTES=20`, up to `MORNING_REFRESH_MAX_ATTEMPTS=36` attempts with `MORNING_REFRESH_RETRY_DELAY_MINUTES=10` spacing.
 - Feedback and health receipt: around `10:15`.
 
 参考生产排期：
 
-- 上午版：约 `09:40`。
+- 上午版：默认约 `09:40`，可用 `MORNING_COLLECTION_TIME` 配置。
 - 下午版：默认关闭。
 - 晚间版：默认关闭。
-- 网页刷新检查：`10:00` morning refresh，默认 36 次、每 10 分钟一次。
+- 网页刷新检查：采集后自动滞后监测，默认 `MORNING_REFRESH_LAG_MINUTES=20`，最多 `MORNING_REFRESH_MAX_ATTEMPTS=36` 次，每 `MORNING_REFRESH_RETRY_DELAY_MINUTES=10` 分钟一次。
 - 反馈与健康回执：约 `10:15`。
 
 The times and number of pushes are configurable. Change OpenClaw cron schedules for collection, and change `REFRESH_SLOTS` / launchd templates for website refresh checks.

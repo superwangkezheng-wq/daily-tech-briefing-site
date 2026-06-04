@@ -20,8 +20,9 @@ The public package contains no private tokens, no personal paths, no bundled run
 ## 2026-06-04 Operations Contract
 
 - The reference production contract is morning-only: `09:40` collection and `10:15` feedback/health receipt.
-- Afternoon and evening collection/refresh jobs are disabled by default and are not installed unless explicitly opted in.
-- Morning refresh now tracks late reports with 36 attempts at 10-minute intervals.
+- Collection slots, collection time, web refresh lag, retry count, and retry interval are configurable through `.env`.
+- Afternoon and evening collection/refresh jobs are disabled by default and are not installed unless explicitly opted in through `DAILY_COLLECTION_SLOTS` or installer flags.
+- Morning refresh defaults to tracking late reports with 36 attempts at 10-minute intervals, starting 20 minutes after the reference collection time.
 - launchd live services read the support cache under `~/Library/Application Support/daily-tech-site/cache`; project `.cache` is for local/manual runs.
 
 ## Purpose
@@ -100,6 +101,11 @@ FEEDBACK_DIR=./data/feedback
 FEEDBACK_DIGEST_DIR=./data/feedback/_digest
 MAINTENANCE_DIR=./data/maintenance
 CACHE_DIR=./.cache
+DAILY_COLLECTION_SLOTS=morning
+MORNING_COLLECTION_TIME=09:40
+MORNING_REFRESH_LAG_MINUTES=20
+MORNING_REFRESH_MAX_ATTEMPTS=36
+MORNING_REFRESH_RETRY_DELAY_MINUTES=10
 SUMMARIZE_WRAPPER=
 OPENCLAW_BIN=openclaw
 FEISHU_ACCOUNT=default

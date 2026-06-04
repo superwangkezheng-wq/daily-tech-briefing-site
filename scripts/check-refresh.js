@@ -3,8 +3,6 @@ const { buildSiteCache } = require("../src/site-index");
 const { appendOpsLog, updateOpsStatus, todayString } = require("../src/ops-store");
 const { sendFeishuMessage } = require("../src/feishu");
 
-const MORNING_LATE_RECOVERY_ATTEMPTS = 36;
-
 function parseArgs(argv) {
   const args = {};
   for (let index = 2; index < argv.length; index += 1) {
@@ -30,17 +28,11 @@ function sleep(ms) {
 }
 
 function defaultMaxAttempts(slot) {
-  if (slot.key === "morning") {
-    return MORNING_LATE_RECOVERY_ATTEMPTS;
-  }
-  return 6;
+  return slot.maxAttempts || 6;
 }
 
 function defaultRetryDelayMs(slot) {
-  if (slot.key === "morning") {
-    return 600000;
-  }
-  return 300000;
+  return slot.retryDelayMs || 300000;
 }
 
 async function main() {

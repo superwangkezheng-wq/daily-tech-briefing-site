@@ -29,6 +29,12 @@ if [[ -f "$env_file" ]]; then
   set +a
 fi
 
+slot_enabled() {
+  local slot="$1"
+  local enabled_slots=",${DAILY_COLLECTION_SLOTS:-morning},"
+  [[ "$enabled_slots" == *",$slot,"* ]]
+}
+
 mkdir -p "$target_dir"
 mkdir -p "$runtime_dir"
 mkdir -p "$support_dir"
@@ -200,10 +206,10 @@ done
 
 for source_plist in "$template_dir"/*.plist; do
   file_name="$(basename "$source_plist")"
-  if [[ "$file_name" == "com.dailytech.site.refresh.afternoon.plist" && "${INSTALL_AFTERNOON_REFRESH:-0}" != "1" ]]; then
+  if [[ "$file_name" == "com.dailytech.site.refresh.afternoon.plist" && "${INSTALL_AFTERNOON_REFRESH:-0}" != "1" ]] && ! slot_enabled "afternoon"; then
     continue
   fi
-  if [[ "$file_name" == "com.dailytech.site.refresh.evening.plist" && "${INSTALL_EVENING_REFRESH:-0}" != "1" ]]; then
+  if [[ "$file_name" == "com.dailytech.site.refresh.evening.plist" && "${INSTALL_EVENING_REFRESH:-0}" != "1" ]] && ! slot_enabled "evening"; then
     continue
   fi
   if [[ "$file_name" == "com.dailytech.site.tunnel.plist" && ! -f "$project_dir/.env.tunnel" ]]; then
