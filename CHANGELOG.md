@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.5 - 2026-06-04
+
+- Added configurable daily collection slots, collection time, web refresh lag, refresh attempts, and retry intervals.
+- Made the default production contract morning-only while keeping afternoon and evening slots opt-in.
+- Extended morning refresh to follow late reports automatically through a configurable long monitoring window.
+- Updated launchd installation so refresh agents follow `DAILY_COLLECTION_SLOTS` and keep afternoon/evening disabled by default.
+- Updated public documentation and schedule contract tests for the configurable refresh model.
+
 ## 1.1.4 - 2026-06-03
 
 - Hardened the public tunnel launch path around `http2` and fixed-edge startup guidance for unstable `argotunnel` discovery environments.
