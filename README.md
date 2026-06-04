@@ -17,6 +17,13 @@ The public package contains no private tokens, no personal paths, no bundled run
 - The feedback-health wrapper can recover `FEISHU_TARGET` from the active OpenClaw cron contract before treating the push target as missing.
 - The collector-side Juya YouTube fallback now tolerates a stale `youtube-feed` response by continuing to `yt-dlp` when the source is required for the morning slot.
 
+## 2026-06-04 Operations Contract
+
+- The reference production contract is morning-only: `09:40` collection and `10:15` feedback/health receipt.
+- Afternoon and evening collection/refresh jobs are disabled by default and are not installed unless explicitly opted in.
+- Morning refresh now tracks late reports with 36 attempts at 10-minute intervals.
+- launchd live services read the support cache under `~/Library/Application Support/daily-tech-site/cache`; project `.cache` is for local/manual runs.
+
 ## Purpose
 
 The goal is to make daily technology monitoring reusable, inspectable, and easier to improve as a community:

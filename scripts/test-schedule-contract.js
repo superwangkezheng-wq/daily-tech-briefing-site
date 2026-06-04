@@ -28,7 +28,9 @@ assert.equal(REFRESH_SLOTS.afternoon.scheduledCheckAt, "15:20");
 assert.equal(REFRESH_SLOTS.evening.scheduledCheckAt, "20:20");
 
 const checkRefresh = readText(path.join(ROOT_DIR, "scripts/check-refresh.js"));
-assert.match(checkRefresh, /return 2;\s*}\s*return 6;/);
+assert.match(checkRefresh, /return REFRESH_SLOTS\.morning;/);
+assert.match(checkRefresh, /MORNING_LATE_RECOVERY_ATTEMPTS = 36/);
+assert.match(checkRefresh, /return MORNING_LATE_RECOVERY_ATTEMPTS;\s*}\s*return 6;/);
 assert.match(checkRefresh, /return 600000;/);
 
 assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.morning.plist"), [
@@ -40,5 +42,9 @@ assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.afterno
 assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.evening.plist"), [
   { hour: 20, minute: 20 },
 ]);
+
+const installer = readText(path.join(ROOT_DIR, "scripts/install-launchd.sh"));
+assert.match(installer, /INSTALL_AFTERNOON_REFRESH:-0/);
+assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
 
 console.log("public schedule contract ok");

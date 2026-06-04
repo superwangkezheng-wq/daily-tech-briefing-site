@@ -12,15 +12,17 @@ npm run audit:schedule
 
 ## Refresh Contract
 
-Default report windows:
+Reference production report windows:
 
 | Slot | Source Window | Check Time |
 | --- | --- | --- |
 | morning | `00:00-09:40` | `10:00` |
-| afternoon | `09:40-15:00` | `15:20` |
-| evening | `15:00-20:00` | `20:20` |
+| afternoon | optional / disabled by default | opt in only |
+| evening | optional / disabled by default | opt in only |
 
-Morning refresh retries once after 10 minutes. Afternoon and evening refreshes retry up to six times with five-minute spacing.
+Morning refresh retries up to 36 times with 10-minute spacing. Afternoon and evening refresh agents are not installed unless `INSTALL_AFTERNOON_REFRESH=1` or `INSTALL_EVENING_REFRESH=1` is set.
+
+launchd services use the support cache at `~/Library/Application Support/daily-tech-site/cache`. The project `.cache` directory is for local/manual runs.
 
 ## 2026-06-03 Runtime Notes
 

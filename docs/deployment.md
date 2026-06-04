@@ -30,10 +30,13 @@ The installer:
 - creates a project alias at `~/.daily-tech-site`,
 - creates log and support directories,
 - installs the web service,
-- installs morning and afternoon refresh checks,
+- installs the morning refresh check,
+- skips afternoon refresh unless `INSTALL_AFTERNOON_REFRESH=1`,
 - skips evening refresh unless `INSTALL_EVENING_REFRESH=1`,
 - skips tunnel unless `.env.tunnel` exists,
 - skips qmd refresh unless `WIKI_SOURCE_DIR` is set.
+
+The installed web service and refresh wrapper use `~/Library/Application Support/daily-tech-site/cache` by default. The project `.cache` directory is only the local/manual default.
 
 Uninstall:
 
