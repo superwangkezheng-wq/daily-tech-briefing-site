@@ -20,8 +20,9 @@
 ## 2026-06-04 运营合同
 
 - 参考生产合同改为 morning-only：`09:40` 上午采集，`10:15` 反馈与健康回执。
-- 下午版和晚间版采集/刷新默认关闭，除非显式 opt in，否则 installer 不安装。
-- morning refresh 默认 36 次、每 10 分钟一次，用于追踪晚到日报。
+- 每日运行哪些 slot、采集时间、网页刷新滞后分钟数、检查次数和检查间隔都可通过 `.env` 配置。
+- 下午版和晚间版采集/刷新默认关闭，除非通过 `DAILY_COLLECTION_SLOTS` 或 installer flag 显式 opt in，否则 installer 不安装。
+- morning refresh 默认在参考采集时间 20 分钟后开始，36 次、每 10 分钟一次，用于追踪晚到日报。
 - launchd live 服务读取 `~/Library/Application Support/daily-tech-site/cache`；项目 `.cache` 只用于本地/手动运行。
 
 ## 项目目的
@@ -100,6 +101,11 @@ FEEDBACK_DIR=./data/feedback
 FEEDBACK_DIGEST_DIR=./data/feedback/_digest
 MAINTENANCE_DIR=./data/maintenance
 CACHE_DIR=./.cache
+DAILY_COLLECTION_SLOTS=morning
+MORNING_COLLECTION_TIME=09:40
+MORNING_REFRESH_LAG_MINUTES=20
+MORNING_REFRESH_MAX_ATTEMPTS=36
+MORNING_REFRESH_RETRY_DELAY_MINUTES=10
 SUMMARIZE_WRAPPER=
 OPENCLAW_BIN=openclaw
 FEISHU_ACCOUNT=default

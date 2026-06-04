@@ -1,8 +1,9 @@
 const assert = require("node:assert/strict");
+const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { REFRESH_SLOTS } = require("../src/config");
+const { REFRESH_SLOTS, SCHEDULE_CONFIG } = require("../src/config");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const LAUNCHD_TEMPLATES = path.join(ROOT_DIR, "launchd/templates");
@@ -22,16 +23,46 @@ function assertPlistTime(filePath, expectedTimes) {
 }
 
 assert.equal(REFRESH_SLOTS.morning.window, "00:00-09:40");
+assert.equal(REFRESH_SLOTS.morning.collectionTime, "09:40");
 assert.equal(REFRESH_SLOTS.morning.scheduledCheckAt, "10:00");
+assert.equal(REFRESH_SLOTS.morning.maxAttempts, 36);
+assert.equal(REFRESH_SLOTS.morning.retryDelayMs, 600000);
 assert.equal(REFRESH_SLOTS.afternoon.window, "09:40-15:00");
 assert.equal(REFRESH_SLOTS.afternoon.scheduledCheckAt, "15:20");
 assert.equal(REFRESH_SLOTS.evening.scheduledCheckAt, "20:20");
+assert.deepEqual(SCHEDULE_CONFIG.dailyCollectionSlots, ["morning"]);
 
 const checkRefresh = readText(path.join(ROOT_DIR, "scripts/check-refresh.js"));
 assert.match(checkRefresh, /return REFRESH_SLOTS\.morning;/);
-assert.match(checkRefresh, /MORNING_LATE_RECOVERY_ATTEMPTS = 36/);
-assert.match(checkRefresh, /return MORNING_LATE_RECOVERY_ATTEMPTS;\s*}\s*return 6;/);
-assert.match(checkRefresh, /return 600000;/);
+assert.match(checkRefresh, /return slot\.maxAttempts \|\| 6;/);
+assert.match(checkRefresh, /return slot\.retryDelayMs \|\| 300000;/);
+
+const overrideConfig = JSON.parse(
+  execFileSync(
+    process.execPath,
+    [
+      "-e",
+      "const {REFRESH_SLOTS,SCHEDULE_CONFIG}=require('./src/config'); console.log(JSON.stringify({morning:REFRESH_SLOTS.morning,dailyCollectionSlots:SCHEDULE_CONFIG.dailyCollectionSlots}));",
+    ],
+    {
+      cwd: ROOT_DIR,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        DAILY_COLLECTION_SLOTS: "morning,afternoon",
+        MORNING_COLLECTION_TIME: "08:30",
+        MORNING_REFRESH_LAG_MINUTES: "25",
+        MORNING_REFRESH_MAX_ATTEMPTS: "12",
+        MORNING_REFRESH_RETRY_DELAY_MINUTES: "7",
+      },
+    },
+  ),
+);
+assert.equal(overrideConfig.morning.collectionTime, "08:30");
+assert.equal(overrideConfig.morning.scheduledCheckAt, "08:55");
+assert.equal(overrideConfig.morning.maxAttempts, 12);
+assert.equal(overrideConfig.morning.retryDelayMs, 420000);
+assert.deepEqual(overrideConfig.dailyCollectionSlots, ["morning", "afternoon"]);
 
 assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.morning.plist"), [
   { hour: 10, minute: 0 },
@@ -44,6 +75,7 @@ assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.evening
 ]);
 
 const installer = readText(path.join(ROOT_DIR, "scripts/install-launchd.sh"));
+assert.match(installer, /DAILY_COLLECTION_SLOTS:-morning/);
 assert.match(installer, /INSTALL_AFTERNOON_REFRESH:-0/);
 assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
 

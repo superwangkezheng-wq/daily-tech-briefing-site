@@ -31,12 +31,14 @@ The installer:
 - creates log and support directories,
 - installs the web service,
 - installs the morning refresh check,
-- skips afternoon refresh unless `INSTALL_AFTERNOON_REFRESH=1`,
-- skips evening refresh unless `INSTALL_EVENING_REFRESH=1`,
+- skips afternoon refresh unless `DAILY_COLLECTION_SLOTS` includes `afternoon` or `INSTALL_AFTERNOON_REFRESH=1`,
+- skips evening refresh unless `DAILY_COLLECTION_SLOTS` includes `evening` or `INSTALL_EVENING_REFRESH=1`,
 - skips tunnel unless `.env.tunnel` exists,
 - skips qmd refresh unless `WIKI_SOURCE_DIR` is set.
 
 The installed web service and refresh wrapper use `~/Library/Application Support/daily-tech-site/cache` by default. The project `.cache` directory is only the local/manual default.
+
+Set collection times and web refresh follow-up behavior in `.env`; for example `MORNING_COLLECTION_TIME=09:40` plus `MORNING_REFRESH_LAG_MINUTES=20` starts monitoring at `10:00`.
 
 Uninstall:
 

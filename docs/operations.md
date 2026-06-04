@@ -12,15 +12,19 @@ npm run audit:schedule
 
 ## Refresh Contract
 
-Reference production report windows:
+Reference production report windows are configurable through `.env`:
 
 | Slot | Source Window | Check Time |
 | --- | --- | --- |
-| morning | `00:00-09:40` | `10:00` |
-| afternoon | optional / disabled by default | opt in only |
-| evening | optional / disabled by default | opt in only |
+| morning | `00:00-09:40` | `MORNING_COLLECTION_TIME + MORNING_REFRESH_LAG_MINUTES` |
+| afternoon | optional / disabled by default | `AFTERNOON_COLLECTION_TIME + AFTERNOON_REFRESH_LAG_MINUTES` |
+| evening | optional / disabled by default | `EVENING_COLLECTION_TIME + EVENING_REFRESH_LAG_MINUTES` |
 
-Morning refresh retries up to 36 times with 10-minute spacing. Afternoon and evening refresh agents are not installed unless `INSTALL_AFTERNOON_REFRESH=1` or `INSTALL_EVENING_REFRESH=1` is set.
+Default production values are morning-only: `DAILY_COLLECTION_SLOTS=morning`, `MORNING_COLLECTION_TIME=09:40`, `MORNING_REFRESH_LAG_MINUTES=20`, `MORNING_REFRESH_MAX_ATTEMPTS=36`, and `MORNING_REFRESH_RETRY_DELAY_MINUTES=10`.
+
+This means the web publishing layer follows collection closely, but starts monitoring with a small automatic delay at `10:00`. If a report lands late, the refresh monitor keeps checking instead of requiring manual intervention.
+
+Afternoon and evening refresh agents are not installed unless `DAILY_COLLECTION_SLOTS` includes those slots or `INSTALL_AFTERNOON_REFRESH=1` / `INSTALL_EVENING_REFRESH=1` is set.
 
 launchd services use the support cache at `~/Library/Application Support/daily-tech-site/cache`. The project `.cache` directory is for local/manual runs.
 
