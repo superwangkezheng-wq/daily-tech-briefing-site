@@ -3,6 +3,8 @@ const { buildSiteCache } = require("../src/site-index");
 const { appendOpsLog, updateOpsStatus, todayString } = require("../src/ops-store");
 const { sendFeishuMessage } = require("../src/feishu");
 
+const MORNING_LATE_RECOVERY_ATTEMPTS = 36;
+
 function parseArgs(argv) {
   const args = {};
   for (let index = 2; index < argv.length; index += 1) {
@@ -20,10 +22,7 @@ function parseArgs(argv) {
 
 function resolveSlot(input) {
   if (input && REFRESH_SLOTS[input]) return REFRESH_SLOTS[input];
-  const hour = new Date().getHours();
-  if (hour < 12) return REFRESH_SLOTS.morning;
-  if (hour < 18) return REFRESH_SLOTS.afternoon;
-  return REFRESH_SLOTS.evening;
+  return REFRESH_SLOTS.morning;
 }
 
 function sleep(ms) {
@@ -32,7 +31,7 @@ function sleep(ms) {
 
 function defaultMaxAttempts(slot) {
   if (slot.key === "morning") {
-    return 2;
+    return MORNING_LATE_RECOVERY_ATTEMPTS;
   }
   return 6;
 }

@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const { execFileSync } = require("node:child_process");
 const path = require("node:path");
 
 const ROOT_DIR = path.join(__dirname, "..");
@@ -55,7 +56,22 @@ function walk(dir, files = []) {
 }
 
 const findings = [];
-for (const filePath of walk(ROOT_DIR)) {
+function trackedFiles() {
+  try {
+    return execFileSync("git", ["ls-files", "-z"], {
+      cwd: ROOT_DIR,
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .toString("utf8")
+      .split("\0")
+      .filter(Boolean)
+      .map((relativePath) => path.join(ROOT_DIR, relativePath));
+  } catch {
+    return walk(ROOT_DIR);
+  }
+}
+
+for (const filePath of trackedFiles()) {
   const relativePath = path.relative(ROOT_DIR, filePath);
   if (relativePath === ".git" || relativePath === "scripts/audit-public-package.js") {
     continue;

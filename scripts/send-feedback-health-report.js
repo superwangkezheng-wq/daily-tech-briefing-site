@@ -48,7 +48,6 @@ const DEFAULT_URL_TIMEOUT_MS = 10000;
 const CRON_STATUS_MAX_RECENT_ERROR_HOURS = 36;
 const EXPECTED_CRON_JOBS = {
   "每日 AI & ICT 资讯采集 (V10 上午版)": "40 9 * * *",
-  "每日 AI & ICT 资讯采集 (V10 下午版)": "0 15 * * *",
   "每日科技信息 网页反馈 & 系统健康回执 (10:15)": "15 10 * * *",
 };
 
@@ -498,6 +497,9 @@ function assetSyncHeadline(status, problemStatus, currentVersion) {
     `- 摘要：${status.summaryPath || "--"}`,
     `- 日志：${status.logPath || "--"}`,
   ];
+  if (status.skipSync) {
+    lines.push("- 执行类型：状态刷新（未执行资产同步）");
+  }
   if (currentVersion && status.versionAfter && currentVersion !== status.versionAfter) {
     lines.push("- 说明：当前版本与最近自动统一升级回执不同，说明此后还发生过手动升级或额外升级。");
   }
@@ -514,8 +516,17 @@ function assetSyncHeadline(status, problemStatus, currentVersion) {
     const problemAt = problemStatus.finishedAt || problemStatus.startedAt || "";
     const currentAt = status.finishedAt || status.startedAt || "";
     const problemAgeDays = daysSince(problemAt);
+    const problemParsed = parseTimestamp(problemAt);
+    const currentParsed = parseTimestamp(currentAt);
+    const currentSupersedesProblem =
+      problemParsed &&
+      currentParsed &&
+      currentParsed > problemParsed &&
+      ["成功", "跳过执行（测试模式）"].includes(status.result || "") &&
+      status.notifyOk !== false;
     if (problemAt && problemAt !== currentAt && problemAgeDays !== null && problemAgeDays <= ASSET_SYNC_PROBLEM_MAX_AGE_DAYS) {
-      lines.push(`- 最近异常：${problemAt} / ${problemStatus.result || "--"} / 通知=${problemStatus.notifyOk === false ? "FAIL" : "未知"}`);
+      const label = currentSupersedesProblem ? "历史异常（已被当前成功回执覆盖）" : "最近异常";
+      lines.push(`- ${label}：${problemAt} / ${problemStatus.result || "--"} / 通知=${problemStatus.notifyOk === false ? "FAIL" : "未知"}`);
       if (problemStatus.logPath) {
         lines.push(`- 异常日志：${problemStatus.logPath}`);
       }

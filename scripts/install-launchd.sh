@@ -18,6 +18,10 @@ support_refresh_wrapper="$support_dir/dailytech_refresh_check.sh"
 support_tunnel_wrapper="$support_dir/dailytech_tunnel.sh"
 uid="$(id -u)"
 env_file="$project_dir/.env"
+disabled_refresh_plists=(
+  "$target_dir/com.dailytech.site.refresh.afternoon.plist"
+  "$target_dir/com.dailytech.site.refresh.evening.plist"
+)
 
 if [[ -f "$env_file" ]]; then
   set -a
@@ -189,8 +193,16 @@ exec /opt/homebrew/bin/cloudflared tunnel \
 SH
 chmod 700 "$support_tunnel_wrapper"
 
+for disabled_plist in "${disabled_refresh_plists[@]}"; do
+  launchctl bootout "gui/$uid" "$disabled_plist" >/dev/null 2>&1 || true
+  rm -f "$disabled_plist"
+done
+
 for source_plist in "$template_dir"/*.plist; do
   file_name="$(basename "$source_plist")"
+  if [[ "$file_name" == "com.dailytech.site.refresh.afternoon.plist" && "${INSTALL_AFTERNOON_REFRESH:-0}" != "1" ]]; then
+    continue
+  fi
   if [[ "$file_name" == "com.dailytech.site.refresh.evening.plist" && "${INSTALL_EVENING_REFRESH:-0}" != "1" ]]; then
     continue
   fi

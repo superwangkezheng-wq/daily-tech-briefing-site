@@ -17,6 +17,13 @@
 - `run-feedback-health-report.sh` 会优先从当前 OpenClaw cron 合同中回填 `FEISHU_TARGET`，降低因环境变量缺失导致健康状态文件误报失败的概率。
 - 上游采集侧 Juya YouTube 必收源新增 `youtube-feed -> yt-dlp` fallback，适用于上午版 required source 检查。
 
+## 2026-06-04 运营合同
+
+- 参考生产合同改为 morning-only：`09:40` 上午采集，`10:15` 反馈与健康回执。
+- 下午版和晚间版采集/刷新默认关闭，除非显式 opt in，否则 installer 不安装。
+- morning refresh 默认 36 次、每 10 分钟一次，用于追踪晚到日报。
+- launchd live 服务读取 `~/Library/Application Support/daily-tech-site/cache`；项目 `.cache` 只用于本地/手动运行。
+
 ## 项目目的
 
 本项目的目标是把“每天看大量科技资讯”变成一个可运行、可巡检、可替换源、可开源协作优化的系统：
