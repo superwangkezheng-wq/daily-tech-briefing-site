@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.7`
+Current version: `1.1.8`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -31,6 +31,8 @@ The public package contains no private tokens, no personal paths, no bundled run
 - launchd installation reads private support `site.env` when present, so local runtime paths do not have to enter the public package.
 - qmd refresh LaunchAgent declares a working directory and runs through the support wrapper.
 - Health receipts distinguish cron structural failures from recent execution warnings.
+- Scheduled LaunchAgent last-exit checks must be reconciled with fresh subsystem status files.
+- DailyAcceptance must refresh HealthDashboard after it writes the final acceptance status.
 - The package now includes a 1+N maintenance guide, commercial readiness review, and incident log.
 
 ## Purpose

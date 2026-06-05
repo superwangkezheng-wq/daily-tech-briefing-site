@@ -13,6 +13,7 @@ Daily Tech Briefing Site is a local-first publishing layer for scheduled technol
 - Maintenance Markdown in `MAINTENANCE_DIR` is the human-readable operations trail.
 - Cache files are derived runtime state and may be rebuilt.
 - launchd templates in `launchd/templates` are source templates; installed plists are rendered runtime artifacts.
+- Fresh OpenClaw subsystem status files are the business-health source of truth for post-run checks. launchd reports load/schedule/process state; HealthDashboard is a timestamped snapshot and must be newer than the upstream status it summarizes.
 
 ## Modules
 
@@ -35,6 +36,8 @@ Daily Tech Briefing Site is a local-first publishing layer for scheduled technol
 - Afternoon and evening refresh agents must remain opt-in, not installed by default.
 - Optional qmd refresh is installed only when `WIKI_SOURCE_DIR` is configured.
 - launchd services must run through support wrappers, not directly against mutable development state.
+- Scheduled one-shot LaunchAgents may retain stale non-zero `lastExit`; acceptance logic must reconcile that value with fresh subsystem status files.
+- DailyAcceptance must refresh HealthDashboard after writing its final status.
 - Public package checks must pass before publishing: `npm run check`, `npm run smoke`, and `npm run audit:schedule`.
 
 ## Commercial Readiness Bar

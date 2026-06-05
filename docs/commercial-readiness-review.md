@@ -4,7 +4,7 @@ Review date: 2026-06-05
 
 ## Verdict
 
-Daily Tech Briefing Site is commercially usable for a small, local-first publishing workflow after the 1.1.6 fixes, provided operators keep the 1+N guide, launchd contract tests, and incident records current.
+Daily Tech Briefing Site is commercially usable for a small, local-first publishing workflow after the 1.1.8 fixes, provided operators keep the 1+N guide, launchd contract tests, status authority contract, and incident records current.
 
 The main risk is no longer the Node website itself. The main risk is drift between the public package, local support wrappers, installed LaunchAgents, upstream collector schedules, and OpenClaw health checks.
 
@@ -33,6 +33,12 @@ The main risk is no longer the Node website itself. The main risk is drift betwe
 - Feedback health reports now separate cron structural failures from recent execution warnings.
 - Recent OpenClaw cron execution errors no longer make the schedule contract display as `FAIL` when expected jobs, enabled state, and schedules are correct.
 - Schedule contract tests now cover this cron severity split.
+
+## Repaired In 1.1.8
+
+- DailyAcceptance now treats fresh subsystem status files as the business truth when scheduled LaunchAgents retain stale non-zero `lastExit` values.
+- HealthDashboard is refreshed after DailyAcceptance writes its final status, so post-acceptance monitors do not read an older dashboard snapshot.
+- The 1+N guide now records the health authority contract across status files, launchd, DailyAcceptance, and HealthDashboard.
 
 ## Remaining Watch Items
 

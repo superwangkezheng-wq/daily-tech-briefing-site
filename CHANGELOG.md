@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.8 - 2026-06-05
+
+- Documented the unified inspection contract across status files, scheduled LaunchAgents, DailyAcceptance, and HealthDashboard.
+- Clarified that fresh subsystem status files override stale scheduled LaunchAgent non-zero `lastExit` values in acceptance logic.
+- Added the requirement that DailyAcceptance refresh HealthDashboard after writing its final status so dashboards do not present a stale pre-acceptance snapshot.
+- Added release contract coverage for the 1+N operational health guidance.
+
 ## 1.1.7 - 2026-06-05
 
 - Changed the feedback health report cron section to distinguish structural schedule failures from recent execution warnings.

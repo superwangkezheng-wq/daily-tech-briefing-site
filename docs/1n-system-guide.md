@@ -66,6 +66,30 @@ npm run audit:schedule
 
 For reference production environments, also run the local OpenClaw BusinessSmoke and ProductionGuard equivalents after installing launchd templates.
 
+## Health Authority Contract
+
+When inspection layers disagree, use this order:
+
+1. Fresh subsystem status files are the business truth.
+2. launchd state proves whether a job is loaded, scheduled, or currently running.
+3. A scheduled one-shot LaunchAgent can retain an old non-zero `lastExit` after a newer direct repair or gate run. That old exit code must not override a fresh `ok` status file.
+4. HealthDashboard is a snapshot. It is only current if its `generatedAt` is later than the upstream status timestamps it summarizes.
+5. DailyAcceptance must refresh HealthDashboard after writing its final status so follow-up monitors do not read a pre-acceptance dashboard.
+
+Hard failures:
+
+- missing required LaunchAgent,
+- disabled or drifted schedule,
+- fresh subsystem status result is `fail`,
+- missing or stale required status file,
+- HealthDashboard generated before a newer DailyAcceptance result when a monitor is judging post-acceptance state.
+
+Warnings:
+
+- fresh subsystem status is `ok` with warnings,
+- recent cron execution noise when the expected jobs, enabled state, and schedules are correct,
+- partial notification-channel failure when at least one required delivery path succeeds and the business checks are healthy.
+
 ## Incident Rule
 
 Every production-facing failure must leave:

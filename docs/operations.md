@@ -41,6 +41,8 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - The launchd installer reads both project `.env` and private support `site.env` when present.
 - Optional qmd refresh must be explicitly enabled with `WIKI_SOURCE_DIR`; otherwise stale qmd LaunchAgents are removed.
 - Cron contract health is three-state: missing, disabled, or schedule drift is `FAIL`; recent execution errors are `WARN`; clean state is `OK`.
+- Scheduled one-shot LaunchAgents retain old `lastExit` values. Acceptance checks must reconcile them with fresh subsystem status files instead of treating `lastExit` alone as business truth.
+- HealthDashboard must be generated after DailyAcceptance when it is used as a post-acceptance health snapshot.
 - Read [1+N System Guide](1n-system-guide.md) before changing schedule, qmd, launchd, tunnel, or health-report behavior.
 - Record incidents under `docs/incidents/` whenever production-facing checks fail.
 

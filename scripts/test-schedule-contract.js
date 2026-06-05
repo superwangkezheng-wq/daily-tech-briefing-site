@@ -90,4 +90,9 @@ assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
 assert.match(installer, /source "\$support_site_env"/);
 assert.match(installer, /disabled_refresh_plists\+=\("\$target_dir\/com\.dailytech\.qmd\.refresh\.plist"\)/);
 
+const oneNGuide = readText(path.join(ROOT_DIR, "docs/1n-system-guide.md"));
+assert.match(oneNGuide, /Fresh subsystem status files are the business truth/);
+assert.match(oneNGuide, /scheduled one-shot LaunchAgent can retain an old non-zero `lastExit`/);
+assert.match(oneNGuide, /DailyAcceptance must refresh HealthDashboard after writing its final status/);
+
 console.log("public schedule contract ok");

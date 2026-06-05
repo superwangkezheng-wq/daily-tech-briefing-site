@@ -64,3 +64,12 @@ The same verification run showed that the feedback health receipt displayed rece
 - structural cron contract problems: `FAIL`,
 - recent execution errors: `WARN`,
 - clean state: `OK`.
+
+## Follow-Up: 1.1.8
+
+The 11:05 post-acceptance monitor exposed a second authority drift: DailyAcceptance failed on a stale scheduled `production-guard` LaunchAgent `lastExit=1` even though the fresh ProductionGuard status file was `ok`. Version 1.1.8 documents the higher-level contract:
+
+- fresh subsystem status files are business truth,
+- launchd proves schedule/load state,
+- scheduled one-shot `lastExit` must be reconciled with fresh status files,
+- HealthDashboard must be regenerated after DailyAcceptance before it is used as a post-acceptance snapshot.
