@@ -2,7 +2,7 @@
 
 # 每日科技信息站
 
-当前版本：`1.1.7`
+当前版本：`1.1.8`
 
 英文首页：[README.md](README.md)
 
@@ -31,6 +31,8 @@
 - launchd installer 会读取 private support `site.env`，本机真实路径不需要进入公开包。
 - qmd refresh LaunchAgent 显式声明 working directory，并通过 support wrapper 运行。
 - 健康回执区分 cron 结构性失败和近期执行告警。
+- scheduled LaunchAgent 的旧退出码必须和新鲜状态文件合并判断，不能覆盖业务真相。
+- DailyAcceptance 写入最终验收状态后必须刷新 HealthDashboard。
 - 公开包新增 1+N 维护总纲、商业化稳固评估和事故记录。
 
 ## 项目目的
