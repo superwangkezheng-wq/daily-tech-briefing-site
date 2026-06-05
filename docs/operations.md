@@ -40,6 +40,7 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - qmd refresh must run from the support wrapper with an explicit working directory.
 - The launchd installer reads both project `.env` and private support `site.env` when present.
 - Optional qmd refresh must be explicitly enabled with `WIKI_SOURCE_DIR`; otherwise stale qmd LaunchAgents are removed.
+- Cron contract health is three-state: missing, disabled, or schedule drift is `FAIL`; recent execution errors are `WARN`; clean state is `OK`.
 - Read [1+N System Guide](1n-system-guide.md) before changing schedule, qmd, launchd, tunnel, or health-report behavior.
 - Record incidents under `docs/incidents/` whenever production-facing checks fail.
 

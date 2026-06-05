@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.7 - 2026-06-05
+
+- Changed the feedback health report cron section to distinguish structural schedule failures from recent execution warnings.
+- Kept cron contract drift as `FAIL` while showing recent OpenClaw execution errors as `WARN` so daily health receipts do not overstate stale or already-triaged cron noise.
+
 ## 1.1.6 - 2026-06-05
 
 - Fixed qmd refresh LaunchAgent startup by loading the support/runtime environment and PATH before resolving the `qmd` binary.

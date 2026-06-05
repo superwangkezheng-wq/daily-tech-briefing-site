@@ -56,3 +56,11 @@ Reference production validation also passed after launchd reinstall and successf
 - Do not change launchd template layout without updating operator checks and tests.
 - Treat optional integrations as two-state contracts: explicitly enabled or explicitly removed.
 - Prefer behavior checks over brittle string checks where template rendering can change quoting.
+
+## Follow-Up: 1.1.7
+
+The same verification run showed that the feedback health receipt displayed recent cron execution errors as `FAIL` even when expected jobs, enabled state, and schedules were correct. Version 1.1.7 changed that section to a three-state contract:
+
+- structural cron contract problems: `FAIL`,
+- recent execution errors: `WARN`,
+- clean state: `OK`.

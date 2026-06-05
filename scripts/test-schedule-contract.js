@@ -37,6 +37,11 @@ assert.match(checkRefresh, /return REFRESH_SLOTS\.morning;/);
 assert.match(checkRefresh, /return slot\.maxAttempts \|\| 6;/);
 assert.match(checkRefresh, /return slot\.retryDelayMs \|\| 300000;/);
 
+const healthReport = readText(path.join(ROOT_DIR, "scripts/send-feedback-health-report.js"));
+assert.match(healthReport, /const structuralOk = missing\.length === 0 && disabled\.length === 0 && scheduleDrift\.length === 0;/);
+assert.match(healthReport, /status: structuralOk \? \(recentErrors\.length > 0 \? "warn" : "ok"\) : "fail"/);
+assert.doesNotMatch(healthReport, /ok: .*recentErrors\.length === 0/);
+
 const overrideConfig = JSON.parse(
   execFileSync(
     process.execPath,
