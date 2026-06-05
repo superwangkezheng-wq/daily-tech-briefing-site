@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.6 - 2026-06-05
+
+- Fixed qmd refresh LaunchAgent startup by loading the support/runtime environment and PATH before resolving the `qmd` binary.
+- Made qmd refresh installation honor the private support `site.env` and remove stale qmd LaunchAgents when the optional wiki source is not configured.
+- Added an explicit qmd refresh LaunchAgent working directory so dry-run and reboot audits share the same runtime contract.
+- Preserved the morning-only refresh contract while keeping optional qmd refresh explicit and reproducible after reboot.
+
 ## 1.1.5 - 2026-06-04
 
 - Added configurable daily collection slots, collection time, web refresh lag, refresh attempts, and retry intervals.

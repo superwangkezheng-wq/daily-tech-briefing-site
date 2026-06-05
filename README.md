@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.5`
+Current version: `1.1.6`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -25,6 +25,13 @@ The public package contains no private tokens, no personal paths, no bundled run
 - Morning refresh defaults to tracking late reports with 36 attempts at 10-minute intervals, starting 20 minutes after the reference collection time.
 - launchd live services read the support cache under `~/Library/Application Support/daily-tech-site/cache`; project `.cache` is for local/manual runs.
 
+## 2026-06-05 Reliability Contract
+
+- qmd refresh is optional, explicitly enabled by `WIKI_SOURCE_DIR`, and removed from launchd when not configured.
+- launchd installation reads private support `site.env` when present, so local runtime paths do not have to enter the public package.
+- qmd refresh LaunchAgent declares a working directory and runs through the support wrapper.
+- The package now includes a 1+N maintenance guide, commercial readiness review, and incident log.
+
 ## Purpose
 
 The goal is to make daily technology monitoring reusable, inspectable, and easier to improve as a community:
@@ -41,6 +48,8 @@ This repository is the open-source website, feedback, cache, channel-push, and g
 
 For the detailed product logic, dependency matrix, source layering, fallback order, model chain, and OpenClaw dependencies, read:
 
+- [1+N System Guide](docs/1n-system-guide.md)
+- [Commercial Readiness Review](docs/commercial-readiness-review.md)
 - [OpenClaw Collector Pipeline](docs/openclaw-collector-pipeline.md)
 - [Architecture](docs/architecture.md)
 - [Configuration](docs/configuration.md)

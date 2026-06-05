@@ -2,7 +2,7 @@
 
 # 每日科技信息站
 
-当前版本：`1.1.5`
+当前版本：`1.1.6`
 
 英文首页：[README.md](README.md)
 
@@ -25,6 +25,13 @@
 - morning refresh 默认在参考采集时间 20 分钟后开始，36 次、每 10 分钟一次，用于追踪晚到日报。
 - launchd live 服务读取 `~/Library/Application Support/daily-tech-site/cache`；项目 `.cache` 只用于本地/手动运行。
 
+## 2026-06-05 可靠性合同
+
+- qmd refresh 是可选任务，只有设置 `WIKI_SOURCE_DIR` 才启用；未配置时 installer 会移除旧 qmd LaunchAgent。
+- launchd installer 会读取 private support `site.env`，本机真实路径不需要进入公开包。
+- qmd refresh LaunchAgent 显式声明 working directory，并通过 support wrapper 运行。
+- 公开包新增 1+N 维护总纲、商业化稳固评估和事故记录。
+
 ## 项目目的
 
 本项目的目标是把“每天看大量科技资讯”变成一个可运行、可巡检、可替换源、可开源协作优化的系统：
@@ -41,6 +48,8 @@
 
 更详细的产品逻辑、依赖矩阵、源头分层、fallback 顺序、模型链路和 OpenClaw 依赖请看：
 
+- [1+N 系统总纲](docs/1n-system-guide.md)
+- [商业化稳固评估](docs/commercial-readiness-review.md)
 - [OpenClaw 采集与产品逻辑](docs/openclaw-collector-pipeline.md)
 - [架构说明](docs/architecture.md)
 - [配置说明](docs/configuration.md)

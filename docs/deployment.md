@@ -34,11 +34,14 @@ The installer:
 - skips afternoon refresh unless `DAILY_COLLECTION_SLOTS` includes `afternoon` or `INSTALL_AFTERNOON_REFRESH=1`,
 - skips evening refresh unless `DAILY_COLLECTION_SLOTS` includes `evening` or `INSTALL_EVENING_REFRESH=1`,
 - skips tunnel unless `.env.tunnel` exists,
-- skips qmd refresh unless `WIKI_SOURCE_DIR` is set.
+- skips qmd refresh unless `WIKI_SOURCE_DIR` is set,
+- removes stale qmd refresh LaunchAgents when qmd is not configured.
 
 The installed web service and refresh wrapper use `~/Library/Application Support/daily-tech-site/cache` by default. The project `.cache` directory is only the local/manual default.
 
 Set collection times and web refresh follow-up behavior in `.env`; for example `MORNING_COLLECTION_TIME=09:40` plus `MORNING_REFRESH_LAG_MINUTES=20` starts monitoring at `10:00`.
+
+The installer also reads the private support env file at `~/Library/Application Support/daily-tech-site/site.env` when present. This lets operators keep private runtime paths and optional qmd settings outside the public package while still rendering launchd agents reproducibly.
 
 Uninstall:
 

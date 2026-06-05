@@ -34,6 +34,15 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - The feedback-health receipt should report both the current installed OpenClaw version and the latest automated unified-upgrade record. These are intentionally different concepts.
 - Missing `FEISHU_TARGET` should not be solved by hardcoding a personal open_id into the public package. Prefer the local environment or an active OpenClaw cron contract as the source of truth.
 
+## 2026-06-05 Runtime Notes
+
+- launchd templates live under `launchd/templates`; installed plists are rendered runtime artifacts.
+- qmd refresh must run from the support wrapper with an explicit working directory.
+- The launchd installer reads both project `.env` and private support `site.env` when present.
+- Optional qmd refresh must be explicitly enabled with `WIKI_SOURCE_DIR`; otherwise stale qmd LaunchAgents are removed.
+- Read [1+N System Guide](1n-system-guide.md) before changing schedule, qmd, launchd, tunnel, or health-report behavior.
+- Record incidents under `docs/incidents/` whenever production-facing checks fail.
+
 ## Feedback Digest
 
 ```bash

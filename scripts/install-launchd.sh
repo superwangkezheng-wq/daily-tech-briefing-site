@@ -28,6 +28,14 @@ if [[ -f "$env_file" ]]; then
   source "$env_file"
   set +a
 fi
+if [[ -f "$support_site_env" ]]; then
+  set -a
+  source "$support_site_env"
+  set +a
+fi
+if [[ -z "${WIKI_SOURCE_DIR:-}" ]]; then
+  disabled_refresh_plists+=("$target_dir/com.dailytech.qmd.refresh.plist")
+fi
 
 slot_enabled() {
   local slot="$1"

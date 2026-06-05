@@ -72,3 +72,11 @@ You may also override:
 - `WIKI_DIR`
 - `QMD_COLLECTION_NAME`
 - `QMD_CONTEXT_TEXT`
+
+If `QMD_CONTEXT_TEXT` contains spaces, quote it in shell env files:
+
+```bash
+QMD_CONTEXT_TEXT='Your collection context text'
+```
+
+When `WIKI_SOURCE_DIR` is not set, `npm run install:launchd` removes any stale qmd refresh LaunchAgent so old failures do not keep reporting as current health.
