@@ -14,6 +14,8 @@
     <true/>
     <key>StartInterval</key>
     <integer>3600</integer>
+    <key>WorkingDirectory</key>
+    <string>__SUPPORT_DIR__</string>
     <key>StandardOutPath</key>
     <string>__LOG_DIR__/qmd-refresh.out.log</string>
     <key>StandardErrorPath</key>

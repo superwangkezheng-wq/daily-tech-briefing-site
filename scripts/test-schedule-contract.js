@@ -74,9 +74,15 @@ assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.evening
   { hour: 20, minute: 20 },
 ]);
 
+const qmdRefreshTemplate = readText(path.join(LAUNCHD_TEMPLATES, "com.dailytech.qmd.refresh.plist"));
+assert.match(qmdRefreshTemplate, /exec "__SUPPORT_DIR__\/dailytech_qmd_refresh\.sh"/);
+assert.match(qmdRefreshTemplate, /<key>WorkingDirectory<\/key>\s*<string>__SUPPORT_DIR__<\/string>/);
+
 const installer = readText(path.join(ROOT_DIR, "scripts/install-launchd.sh"));
 assert.match(installer, /DAILY_COLLECTION_SLOTS:-morning/);
 assert.match(installer, /INSTALL_AFTERNOON_REFRESH:-0/);
 assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
+assert.match(installer, /source "\$support_site_env"/);
+assert.match(installer, /disabled_refresh_plists\+=\("\$target_dir\/com\.dailytech\.qmd\.refresh\.plist"\)/);
 
 console.log("public schedule contract ok");
