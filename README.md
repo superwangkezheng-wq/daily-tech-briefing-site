@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.6`
+Current version: `1.1.7`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -30,6 +30,7 @@ The public package contains no private tokens, no personal paths, no bundled run
 - qmd refresh is optional, explicitly enabled by `WIKI_SOURCE_DIR`, and removed from launchd when not configured.
 - launchd installation reads private support `site.env` when present, so local runtime paths do not have to enter the public package.
 - qmd refresh LaunchAgent declares a working directory and runs through the support wrapper.
+- Health receipts distinguish cron structural failures from recent execution warnings.
 - The package now includes a 1+N maintenance guide, commercial readiness review, and incident log.
 
 ## Purpose

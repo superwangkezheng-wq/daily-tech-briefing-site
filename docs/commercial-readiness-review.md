@@ -28,6 +28,12 @@ The main risk is no longer the Node website itself. The main risk is drift betwe
 - schedule contract tests now cover qmd template and installer behavior.
 - project documentation now has `CONTEXT.md`, a 1+N guide, and incident records.
 
+## Repaired In 1.1.7
+
+- Feedback health reports now separate cron structural failures from recent execution warnings.
+- Recent OpenClaw cron execution errors no longer make the schedule contract display as `FAIL` when expected jobs, enabled state, and schedules are correct.
+- Schedule contract tests now cover this cron severity split.
+
 ## Remaining Watch Items
 
 - Tunnel reachability can still warn when the operator's network or proxy path cannot carry the tunnel connection. This should remain a warning unless the local site is also unreachable.

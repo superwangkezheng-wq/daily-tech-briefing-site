@@ -2,7 +2,7 @@
 
 # 每日科技信息站
 
-当前版本：`1.1.6`
+当前版本：`1.1.7`
 
 英文首页：[README.md](README.md)
 
@@ -30,6 +30,7 @@
 - qmd refresh 是可选任务，只有设置 `WIKI_SOURCE_DIR` 才启用；未配置时 installer 会移除旧 qmd LaunchAgent。
 - launchd installer 会读取 private support `site.env`，本机真实路径不需要进入公开包。
 - qmd refresh LaunchAgent 显式声明 working directory，并通过 support wrapper 运行。
+- 健康回执区分 cron 结构性失败和近期执行告警。
 - 公开包新增 1+N 维护总纲、商业化稳固评估和事故记录。
 
 ## 项目目的

@@ -648,8 +648,10 @@ async function loadCronJobAudit() {
         recentErrors.push(`${job.name}:${status}:${job.state?.lastError || "--"}`);
       }
     }
+    const structuralOk = missing.length === 0 && disabled.length === 0 && scheduleDrift.length === 0;
     return {
-      ok: missing.length === 0 && disabled.length === 0 && scheduleDrift.length === 0 && recentErrors.length === 0,
+      ok: structuralOk,
+      status: structuralOk ? (recentErrors.length > 0 ? "warn" : "ok") : "fail",
       total: jobs.length,
       missing,
       disabled,
@@ -674,8 +676,9 @@ function cronJobAuditHeadline(audit) {
   if (!audit) {
     return ["- 状态：NO-STATE"];
   }
+  const status = audit.status || (audit.ok ? "ok" : "fail");
   const lines = [
-    `- 状态：${audit.ok ? "OK" : "FAIL"}`,
+    `- 状态：${status.toUpperCase()}`,
     `- 作业数：${audit.total ?? "--"}`,
   ];
   if (audit.running?.length) {
@@ -1039,7 +1042,7 @@ async function main() {
     `doctor noise：${doctorNoise?.result || "NO-STATE"}`,
     `production guard：${productionGuard?.result || "NO-STATE"}`,
     `business smoke：${businessSmoke?.result || "NO-STATE"}`,
-    `cron jobs：${cronJobAudit?.ok ? "OK" : "FAIL"}`,
+    `cron jobs：${(cronJobAudit?.status || (cronJobAudit?.ok ? "ok" : "fail")).toUpperCase()}`,
     `qmd refresh launchd：${qmdRefreshAgent.ok ? "OK" : "FAIL"}`,
     `qmd index：${qmdIndex.ok ? "OK" : "FAIL"}`,
     `asset sync：${assetSync?.result || "NO-STATE"}`,
