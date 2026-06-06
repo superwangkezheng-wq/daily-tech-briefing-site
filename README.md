@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.8`
+Current version: `1.1.9`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -34,6 +34,13 @@ The public package contains no private tokens, no personal paths, no bundled run
 - Scheduled LaunchAgent last-exit checks must be reconciled with fresh subsystem status files.
 - DailyAcceptance must refresh HealthDashboard after it writes the final acceptance status.
 - The package now includes a 1+N maintenance guide, commercial readiness review, and incident log.
+
+## 2026-06-06 Model Routing Contract
+
+- Upstream OpenClaw model selection is now documented as a route contract, not a set of scattered script edits.
+- Agent-style chat and cron routes can use Kimi -> CodePlan (`codex/gpt-5.5`) -> local fallback.
+- Direct summarize wrappers should use HTTP-compatible summary models; a Codex harness model is not automatically a summarize fallback.
+- Operators should audit default/work instances, cron payloads, plugin scripts, provider settings, and thinking/reasoning controls before swapping model APIs.
 
 ## Purpose
 
@@ -177,9 +184,9 @@ The website package does not bundle private source archives or private credentia
 
 ## Model Chain
 
-In the reference setup, `summarize-pro` is used as the summarization wrapper for selected final items and feedback digests. It may call Kimi depending on your OpenClaw environment.
+In the reference setup, `summarize-pro` is used as the summarization wrapper for selected final items and feedback digests. Upstream OpenClaw should route it through a dedicated model-route contract.
 
-If you do not use Kimi, keep the wrapper contract the same:
+The reference route keeps chat/cron and summarize distinct: chat/cron may fall back from Kimi to CodePlan and then local, while summarize should fall back only to HTTP-compatible summary models. If you do not use Kimi, keep the wrapper contract the same:
 
 - Accept prompt text on stdin.
 - Return a concise Markdown result on stdout.

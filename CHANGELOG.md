@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.9 - 2026-06-06
+
+- Documented the upstream OpenClaw model-route contract as a separate operational concern from the website package.
+- Clarified that chat/cron agent routes may use Kimi -> CodePlan -> local fallback, while direct summarize wrappers should only use HTTP-compatible summary models.
+- Added guidance to audit default/work instances, cron payloads, plugin scripts, provider settings, and thinking/reasoning controls before swapping model APIs.
+- Updated the collector pipeline docs so future model changes can be handled through a route contract instead of scattered script edits.
+
 ## 1.1.8 - 2026-06-05
 
 - Documented the unified inspection contract across status files, scheduled LaunchAgents, DailyAcceptance, and HealthDashboard.

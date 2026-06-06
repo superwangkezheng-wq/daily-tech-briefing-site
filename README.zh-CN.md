@@ -2,7 +2,7 @@
 
 # 每日科技信息站
 
-当前版本：`1.1.8`
+当前版本：`1.1.9`
 
 英文首页：[README.md](README.md)
 
@@ -34,6 +34,13 @@
 - scheduled LaunchAgent 的旧退出码必须和新鲜状态文件合并判断，不能覆盖业务真相。
 - DailyAcceptance 写入最终验收状态后必须刷新 HealthDashboard。
 - 公开包新增 1+N 维护总纲、商业化稳固评估和事故记录。
+
+## 2026-06-06 模型路由合同
+
+- 上游 OpenClaw 的模型选择被文档化为独立 route contract，不再靠散落脚本逐个手改。
+- agent 风格的 chat 和 cron 可使用 Kimi -> CodePlan (`codex/gpt-5.5`) -> 本地 fallback。
+- direct summarize wrapper 只能使用 HTTP 兼容摘要模型；Codex harness 不能自动当作 summarize fallback。
+- 替换模型 API 前，应审计 default/work 实例、cron payload、插件脚本、provider 配置和 thinking/reasoning 控制。
 
 ## 项目目的
 
@@ -206,9 +213,9 @@ npm run run:tunnel        # 命名 Cloudflare Tunnel，需要 .env.tunnel
 
 ## 模型链路
 
-参考环境中，`summarize-pro` 是最终入选条目和反馈汇总使用的摘要 wrapper。它可能根据你的 OpenClaw 环境调用 Kimi。
+参考环境中，`summarize-pro` 是最终入选条目和反馈汇总使用的摘要 wrapper。上游 OpenClaw 应通过独立模型路由合同管理它。
 
-如果没有 Kimi，也可以替换为自己的 wrapper，但建议保持同样的接口合同：
+参考路由会区分 chat/cron 和 summarize：chat/cron 可以从 Kimi fallback 到 CodePlan 再到本地，summarize 只应 fallback 到 HTTP 兼容摘要模型。如果没有 Kimi，也可以替换为自己的 wrapper，但建议保持同样的接口合同：
 
 - 从 stdin 接收 prompt。
 - 向 stdout 返回简洁 Markdown。
