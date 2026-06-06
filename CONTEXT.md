@@ -14,6 +14,7 @@ Daily Tech Briefing Site is a local-first publishing layer for scheduled technol
 - Cache files are derived runtime state and may be rebuilt.
 - launchd templates in `launchd/templates` are source templates; installed plists are rendered runtime artifacts.
 - Fresh OpenClaw subsystem status files are the business-health source of truth for post-run checks. launchd reports load/schedule/process state; HealthDashboard is a timestamped snapshot and must be newer than the upstream status it summarizes.
+- The upstream OpenClaw model-route contract is the source of truth for model selection. This website package documents the contract boundary, but does not hardcode private provider credentials or model routes.
 
 ## Modules
 
@@ -39,6 +40,7 @@ Daily Tech Briefing Site is a local-first publishing layer for scheduled technol
 - Scheduled one-shot LaunchAgents may retain stale non-zero `lastExit`; acceptance logic must reconcile that value with fresh subsystem status files.
 - DailyAcceptance must refresh HealthDashboard after writing its final status.
 - Public package checks must pass before publishing: `npm run check`, `npm run smoke`, and `npm run audit:schedule`.
+- Model API swaps belong upstream in the OpenClaw model-route contract. Public docs should preserve the distinction between agent-style chat/cron routes and direct summarize wrappers.
 
 ## Commercial Readiness Bar
 

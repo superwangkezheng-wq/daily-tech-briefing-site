@@ -133,7 +133,8 @@ These are not bundled in this repository. They are part of the reference OpenCla
 | Follow Builders | Optional but important for Builder pool | X / podcast Builder feeds through `feed-x.json`, `feed-podcasts.json`, `prepare-digest.js`. |
 | X API token | Optional | Only needed if generating Follow Builders feed locally through X API. |
 | `summarize-pro` | Strongly recommended | Final selected item summary and industry impact generation. |
-| Kimi / OpenAI-compatible / local model | Recommended | Backing model for `summarize-pro`. |
+| OpenClaw model-route contract | Recommended | Keeps chat/cron, summarize, memory, fallback order, and thinking settings separate. |
+| Kimi / OpenAI-compatible / local model | Recommended | Backing models selected by the route contract. |
 | Feishu / WeChat channel plugins | Optional | Channel push through OpenClaw bindings. |
 
 | 依赖 / 插件 | 完整采集是否需要 | 用途 |
@@ -153,7 +154,8 @@ These are not bundled in this repository. They are part of the reference OpenCla
 | Follow Builders | 可选但重要 | 通过 `feed-x.json`、`feed-podcasts.json`、`prepare-digest.js` 提供 Builder feed。 |
 | X API token | 可选 | 只有本地生成 Follow Builders X feed 时需要。 |
 | `summarize-pro` | 强烈推荐 | 对最终入选条目生成摘要和产业影响。 |
-| Kimi / OpenAI-compatible / 本地模型 | 推荐 | 作为 `summarize-pro` 背后的模型。 |
+| OpenClaw 模型路由合同 | 推荐 | 分开管理 chat/cron、summarize、memory、fallback 顺序和 thinking 设置。 |
+| Kimi / OpenAI-compatible / 本地模型 | 推荐 | 由 route contract 选择的模型。 |
 | 飞书 / 微信 channel 插件 | 可选 | 通过 OpenClaw 绑定 channel 推送。 |
 
 ### 4.3 Dependency Boundary / 依赖边界
@@ -400,7 +402,8 @@ The reference OpenClaw setup uses:
 - Primary summary model: `moonshot/kimi-k2.6`.
 - Thinking disabled.
 - Temperature: `0.6`.
-- Configured fallbacks: `openai/gpt-5.5`, local `qwen3.5-9b-q8`.
+- Configured summary fallback: local `qwen3.5-9b-q8`.
+- Separate agent/cron fallback route: Kimi -> CodePlan (`codex/gpt-5.5`) -> local.
 - Policy: summarize only selected/final items, not every raw candidate.
 
 参考 OpenClaw 配置使用：
@@ -409,7 +412,8 @@ The reference OpenClaw setup uses:
 - 主摘要模型：`moonshot/kimi-k2.6`。
 - 关闭 thinking。
 - temperature：`0.6`。
-- fallback：`openai/gpt-5.5`、本地 `qwen3.5-9b-q8`。
+- 摘要 fallback：本地 `qwen3.5-9b-q8`。
+- 独立的 agent/cron fallback：Kimi -> CodePlan (`codex/gpt-5.5`) -> 本地。
 - 策略：只对最终入选条目做摘要，不对所有候选原文滥用模型。
 
 The generation flow is:
@@ -437,18 +441,20 @@ You can still run this website package without Kimi. The website can parse Markd
 For upstream collection quality, choose one of these:
 
 1. Configure `summarize-pro` to an OpenAI-compatible model you have access to.
-2. Use a local summary model such as Qwen, but expect shorter context, more conservative prompts, and more fallback hits.
-3. Reduce selected item count before summarization to control cost and latency.
-4. Add stricter source snippets or article body extraction so weaker models receive cleaner context.
-5. Keep the local deterministic fallback enabled so the pipeline still produces a report when model calls fail.
+2. Keep direct summarize fallbacks HTTP-compatible; do not assume an agent harness model is usable by the summarize wrapper.
+3. Use a local summary model such as Qwen, but expect shorter context, more conservative prompts, and more fallback hits.
+4. Reduce selected item count before summarization to control cost and latency.
+5. Add stricter source snippets or article body extraction so weaker models receive cleaner context.
+6. Keep the local deterministic fallback enabled so the pipeline still produces a report when model calls fail.
 
 上游采集质量可以这样替代：
 
 1. 把 `summarize-pro` 配成你可用的 OpenAI-compatible 模型。
-2. 使用本地 Qwen 等摘要模型，但要预期上下文更短、提示词更保守、fallback 更多。
-3. 摘要前减少最终入选条目，控制成本和延迟。
-4. 强化正文抽取和 source snippet，让较弱模型拿到更干净上下文。
-5. 保留本地规则兜底，确保模型失败时仍能产生日报。
+2. 保持 direct summarize fallback 是 HTTP 兼容模型，不要假设 agent harness 模型能直接被摘要 wrapper 使用。
+3. 使用本地 Qwen 等摘要模型，但要预期上下文更短、提示词更保守、fallback 更多。
+4. 摘要前减少最终入选条目，控制成本和延迟。
+5. 强化正文抽取和 source snippet，让较弱模型拿到更干净上下文。
+6. 保留本地规则兜底，确保模型失败时仍能产生日报。
 
 ## 8. Functional Logic in This Repository / 本仓库功能逻辑
 

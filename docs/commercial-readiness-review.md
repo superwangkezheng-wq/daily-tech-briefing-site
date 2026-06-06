@@ -1,10 +1,10 @@
 # Commercial Readiness Review
 
-Review date: 2026-06-05
+Review date: 2026-06-06
 
 ## Verdict
 
-Daily Tech Briefing Site is commercially usable for a small, local-first publishing workflow after the 1.1.8 fixes, provided operators keep the 1+N guide, launchd contract tests, status authority contract, and incident records current.
+Daily Tech Briefing Site is commercially usable for a small, local-first publishing workflow after the 1.1.9 fixes, provided operators keep the 1+N guide, launchd contract tests, status authority contract, upstream model-route contract, and incident records current.
 
 The main risk is no longer the Node website itself. The main risk is drift between the public package, local support wrappers, installed LaunchAgents, upstream collector schedules, and OpenClaw health checks.
 
@@ -40,10 +40,17 @@ The main risk is no longer the Node website itself. The main risk is drift betwe
 - HealthDashboard is refreshed after DailyAcceptance writes its final status, so post-acceptance monitors do not read an older dashboard snapshot.
 - The 1+N guide now records the health authority contract across status files, launchd, DailyAcceptance, and HealthDashboard.
 
+## Repaired In 1.1.9
+
+- The public package now documents upstream OpenClaw model routing as a dedicated contract instead of scattered script edits.
+- The model-chain docs now distinguish agent-style chat/cron fallback from direct summarize-wrapper fallback.
+- The readiness checklist now requires model API swaps to audit default/work instances, cron payloads, plugin scripts, provider settings, and thinking/reasoning controls.
+
 ## Remaining Watch Items
 
 - Tunnel reachability can still warn when the operator's network or proxy path cannot carry the tunnel connection. This should remain a warning unless the local site is also unreachable.
 - Upstream collector health belongs to OpenClaw. This repository can document the contract, but it cannot guarantee collector source availability by itself.
+- Upstream model route health also belongs to OpenClaw. This repository documents the boundary, but cannot guarantee provider availability or private credentials.
 - If operators re-enable afternoon or evening slots, they must update collector schedule, refresh config, launchd install behavior, tests, and docs together.
 - If qmd is installed through a runtime with native modules, operators should pin the qmd binary and runtime path in local configuration.
 
@@ -57,6 +64,7 @@ The main risk is no longer the Node website itself. The main risk is drift betwe
 - [x] Schedule defaults and overrides are tested.
 - [x] Optional qmd install/uninstall state is explicit.
 - [x] Incident handling has a documented home.
+- [x] Upstream model route boundary is documented.
 - [ ] Reference production tunnel has no external network warnings.
 - [ ] Upstream collector recent-error noise is cleared in the operator environment.
 
