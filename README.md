@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.9`
+Current version: `1.1.10`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -41,6 +41,13 @@ The public package contains no private tokens, no personal paths, no bundled run
 - Agent-style chat and cron routes can use Kimi -> CodePlan (`codex/gpt-5.5`) -> local fallback.
 - Direct summarize wrappers should use HTTP-compatible summary models; a Codex harness model is not automatically a summarize fallback.
 - Operators should audit default/work instances, cron payloads, plugin scripts, provider settings, and thinking/reasoning controls before swapping model APIs.
+
+## 2026-06-07 Ops Policy Contract
+
+- Reference OpenClaw operators should manage collection, publishing, feedback-health, qmd refresh, and inspection expectations through one ops override/policy file.
+- Pausing all default daily collection slots should automatically pause website publishing refresh, feedback-health receipts, and qmd refresh checks.
+- Pausing publishing means no new refresh/publish cycle runs; the existing website service and tunnel may remain online to serve the last good page.
+- Model routing stays a separate hot-switch contract, so changing providers does not require website package edits.
 
 ## Purpose
 

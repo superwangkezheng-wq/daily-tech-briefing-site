@@ -44,6 +44,14 @@ Scheduling changes must update all of these together:
 - health-report expectations,
 - operations docs and incident records when applicable.
 
+Pause/resume changes in reference OpenClaw environments must update or verify the upstream ops policy, not scattered scripts:
+
+- daily collection effective state,
+- website publishing refresh effective state,
+- feedback-health effective state,
+- qmd refresh effective state,
+- release gate, state drift, production guard, post-reboot, and business-smoke expectations.
+
 launchd changes must update all of these together:
 
 - template under `launchd/templates`,
@@ -64,7 +72,7 @@ npm run smoke
 npm run audit:schedule
 ```
 
-For reference production environments, also run the local OpenClaw BusinessSmoke and ProductionGuard equivalents after installing launchd templates.
+For reference production environments, also run the local OpenClaw BusinessSmoke, ProductionGuard, StateDriftAudit, and ReleaseGate equivalents after installing launchd templates or changing ops policy.
 
 ## Health Authority Contract
 

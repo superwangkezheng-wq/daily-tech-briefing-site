@@ -2,7 +2,7 @@
 
 # 每日科技信息站
 
-当前版本：`1.1.9`
+当前版本：`1.1.10`
 
 英文首页：[README.md](README.md)
 
@@ -41,6 +41,13 @@
 - agent 风格的 chat 和 cron 可使用 Kimi -> CodePlan (`codex/gpt-5.5`) -> 本地 fallback。
 - direct summarize wrapper 只能使用 HTTP 兼容摘要模型；Codex harness 不能自动当作 summarize fallback。
 - 替换模型 API 前，应审计 default/work 实例、cron payload、插件脚本、provider 配置和 thinking/reasoning 控制。
+
+## 2026-06-07 Ops Policy 合同
+
+- 参考 OpenClaw 运维环境应通过一个 ops override/policy 文件管理采集、网页发布、反馈健康、qmd 刷新和巡检预期。
+- 暂停 default 每日资讯早/中/晚三槽位时，应自动联动暂停网页刷新发布、反馈健康回执和 qmd 刷新检查。
+- 暂停发布表示不再运行新的 refresh/publish 周期；现有站点服务和 tunnel 可以继续在线，负责服务最后一个健康页面。
+- 模型路由仍是独立热切换合同，换模型 provider 不需要修改本网页包。
 
 ## 项目目的
 

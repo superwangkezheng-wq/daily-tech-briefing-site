@@ -134,6 +134,7 @@ These are not bundled in this repository. They are part of the reference OpenCla
 | X API token | Optional | Only needed if generating Follow Builders feed locally through X API. |
 | `summarize-pro` | Strongly recommended | Final selected item summary and industry impact generation. |
 | OpenClaw model-route contract | Recommended | Keeps chat/cron, summarize, memory, fallback order, and thinking settings separate. |
+| OpenClaw ops override/policy | Recommended | Hot-switches collection, publishing, feedback-health, qmd refresh, and inspection expectations. |
 | Kimi / OpenAI-compatible / local model | Recommended | Backing models selected by the route contract. |
 | Feishu / WeChat channel plugins | Optional | Channel push through OpenClaw bindings. |
 
@@ -155,6 +156,7 @@ These are not bundled in this repository. They are part of the reference OpenCla
 | X API token | 可选 | 只有本地生成 Follow Builders X feed 时需要。 |
 | `summarize-pro` | 强烈推荐 | 对最终入选条目生成摘要和产业影响。 |
 | OpenClaw 模型路由合同 | 推荐 | 分开管理 chat/cron、summarize、memory、fallback 顺序和 thinking 设置。 |
+| OpenClaw ops override/policy | 推荐 | 热切换采集、发布、反馈健康、qmd 刷新和巡检预期。 |
 | Kimi / OpenAI-compatible / 本地模型 | 推荐 | 由 route contract 选择的模型。 |
 | 飞书 / 微信 channel 插件 | 可选 | 通过 OpenClaw 绑定 channel 推送。 |
 
@@ -538,6 +540,10 @@ The times and number of pushes are configurable. Change OpenClaw cron schedules 
 
 时间和次数都可以定制。采集时间改 OpenClaw cron，网页刷新检查改 `REFRESH_SLOTS` 和 launchd templates。
 
+Reference operators should use an upstream OpenClaw ops policy for temporary pause/resume. If all daily collection slots are paused, website publishing refresh, feedback-health receipts, qmd refresh, and inspection expectations should derive their paused state from that policy. The web service and tunnel can remain online to serve the last good page.
+
+参考运维环境应使用 OpenClaw 上游 ops policy 做临时暂停/恢复。若每日采集三槽位全部暂停，网页刷新发布、反馈健康回执、qmd 刷新和巡检预期都应从该 policy 推导出 paused 状态。网页服务和 tunnel 可以继续在线，用于服务最后一个健康页面。
+
 ## 11. Inspection Gates / 巡检门禁
 
 This package includes:
@@ -554,9 +560,9 @@ This package includes:
 - `npm run audit:schedule`：公开排期合同。
 - `npm run audit:privacy`：个人路径、token、hostname、飞书 open_id 扫描。
 
-Reference OpenClaw production also runs broader health checks: cron state, channel push result, qmd refresh, feedback digest, route audit, action contract audit, and release gates. Those are part of the OpenClaw operator environment, not bundled here.
+Reference OpenClaw production also runs broader health checks: cron state, channel push result, qmd refresh, feedback digest, route audit, action contract audit, ops-policy audit, and release gates. Those are part of the OpenClaw operator environment, not bundled here.
 
-参考 OpenClaw 生产环境还会跑更完整的健康检查：cron 状态、channel 推送结果、qmd 刷新、反馈汇总、路由审计、动作合同审计、发布门禁。这些属于 OpenClaw 运维环境，本仓库不直接捆绑。
+参考 OpenClaw 生产环境还会跑更完整的健康检查：cron 状态、channel 推送结果、qmd 刷新、反馈汇总、路由审计、动作合同审计、ops policy 审计、发布门禁。这些属于 OpenClaw 运维环境，本仓库不直接捆绑。
 
 ## 12. Community Contribution / 共同优化
 

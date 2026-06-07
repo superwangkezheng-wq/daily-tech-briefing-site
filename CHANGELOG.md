@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.10 - 2026-06-07
+
+- Documented the upstream OpenClaw ops override/policy as the single hot-switch source for daily collection, website publishing, feedback health, qmd refresh, and inspection expectations.
+- Clarified that pausing all default daily collection slots should automatically pause website publishing and feedback/health receipts while keeping the existing served site and tunnel online.
+- Added release-gate verification notes for the reference operator state where paused cron jobs and disabled LaunchAgents are expected healthy states.
+- Kept model routing as a separate hot-switch contract so provider changes do not require edits across the website package.
+
 ## 1.1.9 - 2026-06-06
 
 - Documented the upstream OpenClaw model-route contract as a separate operational concern from the website package.

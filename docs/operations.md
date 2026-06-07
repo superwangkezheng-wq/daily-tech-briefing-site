@@ -46,6 +46,14 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Read [1+N System Guide](1n-system-guide.md) before changing schedule, qmd, launchd, tunnel, or health-report behavior.
 - Record incidents under `docs/incidents/` whenever production-facing checks fail.
 
+## 2026-06-07 Ops Policy Notes
+
+- Reference OpenClaw operators should keep daily collection, publishing refresh, feedback-health, qmd refresh, and inspection expectations behind one ops override/policy.
+- If `daily-news-collection` is paused, the effective policy should also pause `daily-tech-publishing`; `feedback-health`, `daily-tech-site-refresh`, and `qmd-refresh` may derive paused state from publishing.
+- Healthy paused state means the matching cron jobs and LaunchAgents are disabled, while `com.dailytech.site.web` and the tunnel may keep serving the last good site.
+- Release gates should treat policy-derived paused states as healthy, not as stale schedule or missing refresh failures.
+- Model provider selection remains controlled by the upstream OpenClaw model-route contract, separate from this ops policy.
+
 ## Feedback Digest
 
 ```bash
