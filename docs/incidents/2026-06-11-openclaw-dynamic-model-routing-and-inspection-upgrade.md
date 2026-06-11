@@ -52,12 +52,16 @@ Additional final verification on 2026-06-11 14:14 +0800:
 Additional Feishu inbound durability fix on 2026-06-11 15:50 +0800:
 
 - Reproduced the failure as: Feishu gateway logged the user DM and `dispatching to agent`, but the target agent `sessions.json` was not updated and the conversation transcript did not contain the inbound text.
+- Root cause: shared `recordInboundSession` launched `recordSessionMetaFromInbound(...)` as a background promise and returned before session metadata was durable. `onRecordError` only logged and swallowed errors, so dispatch could continue after a fake record success.
+- Runtime fix: patch `session-*.js` so inbound session metadata is awaited and record failures are re-thrown before agent dispatch.
+- Upgrade fix: add runtime patch registry entry `inbound_session_record_await`; AssetSync now tracks `RUNTIME_PATCH_CHANGED` and restarts OpenClaw gateways when runtime dist files are patched, even if `package.json` did not change.
 - Added `openclaw_feishu_inbound_guard.py` plus LaunchAgent `com.lenovo.openclaw.feishu-inbound-guard`; every direct Feishu inbound event that reaches gateway dispatch must become durable in the agent session or be acknowledged and replayed once.
+- Guard behavior changed from synchronous full-agent wait to async replay plus later durability confirmation, so a long deep-research flow cannot hold the guard process open.
 - Added `FeishuInboundGuard/latest-status.json` with standard `result`, `checkedAt`, `observedRecent`, `replayed`, and `failed` fields.
 - Wired Feishu inbound guard into `openclaw_ops_status_index.py`, `openclaw_production_guard.sh`, and `openclaw_status_schema.py`.
-- Added regression coverage for gateway-log pairing and replay timeout failure payloads.
-- Recovered deep research task `personal-ontology-20260611-01`; Stage 1 artifacts validated as `waiting_user`, awaiting search depth selection.
-- Verification: guard status `result=ok`, LaunchAgent `last exit code=0`, ProductionGuard dry-run `ok errors=0 warnings=0`, status schema `ok errors=0 warnings=0`, and real Feishu callback message sent successfully.
+- Added regression coverage for gateway-log pairing and async replay process start.
+- Recovered deep research task `personal-ontology-20260611-01`; the user reply `deep / full 7 categories / architecture + workflow diagrams` was replayed, became durable, and moved the run to Stage 2 KB alignment.
+- Verification: runtime patch audit `ok`, guard status `result=ok`, LaunchAgent `last exit code=0`, gateway/work health `live`, ProductionGuard dry-run `ok errors=0 warnings=0`, status schema `ok errors=0 warnings=0`, and real Feishu callback message sent successfully.
 
 ## Coverage Contract
 
