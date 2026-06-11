@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.11 - 2026-06-11
+
+- Documented the 2026-06-11 OpenClaw unified upgrade, health-check, model-route, and article-route closure.
+- Added the current inspection surface covering scheduled upgrade, business smoke, production guard, acceptance, route, model, cron, action, module, and runtime audits.
+- Clarified that paused collection should keep publishing refresh paused while the existing site and tunnel stay online.
+- Added upstream optimization guidance for a shared ops status index, migrated-path resolver, runtime patch registry, provider-auth health split, and one-command pause/resume flow.
+
 ## 1.1.10 - 2026-06-07
 
 - Documented the upstream OpenClaw ops override/policy as the single hot-switch source for daily collection, website publishing, feedback health, qmd refresh, and inspection expectations.

@@ -54,6 +54,15 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Release gates should treat policy-derived paused states as healthy, not as stale schedule or missing refresh failures.
 - Model provider selection remains controlled by the upstream OpenClaw model-route contract, separate from this ops policy.
 
+## 2026-06-11 OpenClaw Inspection Notes
+
+- The upstream OpenClaw inspection surface now includes daily business smoke, weekly unified asset sync/upgrade, daily production guard, daily acceptance, post-reboot recovery, skill-evolution health, route audits, model-route audits, cron audits, module/action contract audits, runtime dependency audits, and process/session/state drift checks.
+- The unified upgrade must verify managed skill roots, local file overlays, OpenClaw plugin updates, MCP configuration, runtime patches, default/work workspace audits, and gateway restart.
+- Runtime post-update compatibility patches should be declared as patchable contracts and verified after OpenClaw package updates.
+- Model route health should distinguish provider authentication failures from fallback route health.
+- Manual single-article saves to "my wiki knowledge base" route to `raw/clippings`; scheduled and batch collection routes remain the only default writers to `raw/collections`.
+- See [2026-06-11 OpenClaw Unified Upgrade, Health, and Route Closure](incidents/2026-06-11-openclaw-unified-upgrade-health-and-route-closure.md).
+
 ## Feedback Digest
 
 ```bash
