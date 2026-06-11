@@ -18,7 +18,15 @@ if [[ -f "$project_dir/.env" ]]; then
 fi
 
 if [[ -z "${FEISHU_TARGET:-}" ]]; then
-  cron_jobs_json="${OPENCLAW_CRON_JOBS_JSON:-$HOME/.openclaw/cron/jobs.json}"
+  cron_jobs_json="${OPENCLAW_CRON_JOBS_JSON:-}"
+  if [[ -z "$cron_jobs_json" ]]; then
+    for candidate in "$HOME/.openclaw/cron/jobs.json.migrated" "$HOME/.openclaw/cron/jobs.json" "$HOME/.openclaw/cron/jobs.json.bak"; do
+      if [[ -f "$candidate" ]]; then
+        cron_jobs_json="$candidate"
+        break
+      fi
+    done
+  fi
   if [[ -f "$cron_jobs_json" ]]; then
     feishu_target_from_jobs="$(
       jq -r '

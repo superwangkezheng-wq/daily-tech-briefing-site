@@ -2,14 +2,16 @@
 
 ## Summary
 
-OpenClaw unified upgrade and health checks were closed after several upstream issues were fixed in the local OpenClaw ops layer. The public site package remains paused for new publishing refreshes while the existing web service and tunnel keep serving the last known good site.
+OpenClaw unified upgrade and health checks were closed after several upstream issues were fixed in the local OpenClaw ops layer. The default reference instance now has morning collection active, afternoon/evening paused, and publishing refresh active because it follows the active morning slot. The existing web service and tunnel remain online.
 
 ## What Changed Upstream
 
 - The OpenClaw asset manifest now treats shared/local skill roots as managed assets, including shared skill helpers and article archive skills.
 - OpenClaw runtime post-update patching now reapplies the task-flow `completed` status compatibility patch after package updates.
-- The model route remains a standalone hot-switch contract. Chat and agent routes use Kimi first, CodePlan/Codex second, and local summary model last; summarize routes keep their own HTTP-compatible fallback chain.
+- The model route remains a standalone hot-switch contract. The current dynamic model route is `volcengine-codeplan-local`: `volcengine-plan/ark-code-latest -> codex/gpt-5.5 -> local-summary/qwen3.5-9b-q8` for chat/cron, with summarize using `volcengine-plan/ark-code-latest -> local-summary/qwen3.5-9b-q8`.
+- `summarize-pro` now treats leaked reasoning, self-checking text, and character-count output as candidate failure so dynamic fallback can protect downstream plugins and feedback digests.
 - The default and work OpenClaw instances both use ops policy derived pause state for collection, publishing, feedback health, site refresh, and qmd refresh.
+- The default daily collection policy is now a `1+3` switch: master plus morning, afternoon, and evening. Publishing pauses only when the master is paused or all three slots are paused.
 - Manual single-article saves to "my wiki knowledge base" route to `raw/clippings`; scheduled collection and batch collection remain the only routes to `raw/collections`.
 
 ## Verification
@@ -18,6 +20,8 @@ OpenClaw unified upgrade and health checks were closed after several upstream is
 - Production guard dry-run returned `ok` with zero errors and zero warnings.
 - Business smoke returned `OK`, and its scheduled LaunchAgent last exit code was reset to `0`.
 - Cron contract audit accepted the paused collection/publishing state as healthy.
+- The 2026-06-11 real morning collection saved report `2026-06-11-134750-资讯采集.md`, pushed to Feishu successfully, and was accepted by the WeChat gateway.
+- Natural run acceptance returned `ok` with 36 items and Juya coverage present.
 - Route violation audit and tool-route harness accepted the WeChat/web article route split.
 - Default task audit returned zero errors, zero warnings, and no stderr.
 
