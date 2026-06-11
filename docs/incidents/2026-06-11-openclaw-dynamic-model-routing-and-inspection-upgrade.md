@@ -49,6 +49,16 @@ Additional final verification on 2026-06-11 14:14 +0800:
 - NaturalRunAcceptance: `ok`, morning report `2026-06-11-134750-资讯采集.md`, 36 items, Juya coverage present.
 - Real delivery log: Obsidian saved, Feishu push success, WeChat gateway accepted with `all_success=True any_accepted=True`.
 
+Additional Feishu inbound durability fix on 2026-06-11 15:50 +0800:
+
+- Reproduced the failure as: Feishu gateway logged the user DM and `dispatching to agent`, but the target agent `sessions.json` was not updated and the conversation transcript did not contain the inbound text.
+- Added `openclaw_feishu_inbound_guard.py` plus LaunchAgent `com.lenovo.openclaw.feishu-inbound-guard`; every direct Feishu inbound event that reaches gateway dispatch must become durable in the agent session or be acknowledged and replayed once.
+- Added `FeishuInboundGuard/latest-status.json` with standard `result`, `checkedAt`, `observedRecent`, `replayed`, and `failed` fields.
+- Wired Feishu inbound guard into `openclaw_ops_status_index.py`, `openclaw_production_guard.sh`, and `openclaw_status_schema.py`.
+- Added regression coverage for gateway-log pairing and replay timeout failure payloads.
+- Recovered deep research task `personal-ontology-20260611-01`; Stage 1 artifacts validated as `waiting_user`, awaiting search depth selection.
+- Verification: guard status `result=ok`, LaunchAgent `last exit code=0`, ProductionGuard dry-run `ok errors=0 warnings=0`, status schema `ok errors=0 warnings=0`, and real Feishu callback message sent successfully.
+
 ## Coverage Contract
 
 The weekly unified upgrade must cover default and work instances, plugins, skills, scripts, MCP registry, LaunchAgents, runtime package patches, model route contracts, and operational policy overlays.
