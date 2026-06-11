@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.10`
+Current version: `1.1.13`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -12,6 +12,9 @@ The public package contains no private tokens, no personal paths, no bundled run
 
 ## 2026-06-03 Update
 
+- OpenClaw reference ops now use a `1+3` daily collection switch: one master switch plus morning, afternoon, and evening slot switches. Website publishing follows the slot state instead of using a hardcoded pause.
+- The default reference instance was verified with morning collection active and afternoon/evening paused. The real 2026-06-11 morning run saved to Obsidian and pushed through both Feishu and WeChat.
+- `summarize-pro` should be routed through the upstream dynamic model route. The reference route rejects leaked reasoning/character-count output and falls back cleanly before the website or feedback digest consumes the summary.
 - The recommended tunnel path now prefers a user-level `http2` connector pinned to fixed Cloudflare edge IPs for networks where `argotunnel` SRV discovery is unstable.
 - The `10:15` feedback and health receipt now distinguishes the current installed OpenClaw version from the latest automated unified-upgrade record.
 - The feedback-health wrapper can recover `FEISHU_TARGET` from the active OpenClaw cron contract before treating the push target as missing.

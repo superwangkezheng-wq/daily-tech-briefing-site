@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.13 - 2026-06-11
+
+- Documented the reference OpenClaw `1+3` daily collection switch: master plus morning, afternoon, and evening slot controls.
+- Recorded the 2026-06-11 real morning collection verification: Obsidian save, Feishu push, WeChat gateway acceptance, and qmd/site refresh health.
+- Clarified that website publishing follows the active collection slots through upstream ops policy instead of a hardcoded pause.
+- Documented the `summarize-pro` dynamic route quality gate that rejects leaked reasoning or character-count output before falling back.
+
 ## 1.1.12 - 2026-06-11
 
 - Documented the upstream OpenClaw dynamic model library and profile selector for hot-switching primary and fallback model routes.
