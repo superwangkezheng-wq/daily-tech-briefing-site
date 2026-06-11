@@ -63,6 +63,16 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Manual single-article saves to "my wiki knowledge base" route to `raw/clippings`; scheduled and batch collection routes remain the only default writers to `raw/collections`.
 - See [2026-06-11 OpenClaw Unified Upgrade, Health, and Route Closure](incidents/2026-06-11-openclaw-unified-upgrade-health-and-route-closure.md).
 
+## 2026-06-11 Dynamic Model Routing And Inspection Upgrade
+
+- OpenClaw model switching is now expected to use a dynamic model library plus a profile selector, rather than editing feature configs directly.
+- The model library declares provider class, consumer support, thinking/reasoning defaults, and route profiles. The selector applies the active profile to default/work agent defaults, summarize profile, memory extraction/persona config, and cron payloads.
+- Provider health and route health are separate checks: provider health verifies configured provider availability, while route health verifies drift across default, work, cron, summarize, and memory consumers.
+- The ops status index should be the first inspection surface. It aggregates latest AssetSync, ProductionGuard, model health, runtime patch audit, pause policy, migrated path resolution, and L0-L3 notification level.
+- Pausing or resuming collection/publishing should go through the upstream pause/resume command so dependent features and LaunchAgents follow policy-derived state.
+- Weekly unified upgrades should run preflight before mutation, postflight after mutation, and write a rollback-plan report on failure.
+- See [2026-06-11 OpenClaw Dynamic Model Routing and Inspection Upgrade](incidents/2026-06-11-openclaw-dynamic-model-routing-and-inspection-upgrade.md).
+
 ## Feedback Digest
 
 ```bash

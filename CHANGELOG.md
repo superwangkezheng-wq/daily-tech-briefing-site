@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.12 - 2026-06-11
+
+- Documented the upstream OpenClaw dynamic model library and profile selector for hot-switching primary and fallback model routes.
+- Added the next inspection design: unified ops status index, migrated cron path resolver, runtime patch registry, provider-health versus route-health split, one-command pause/resume, and L0-L3 notification levels.
+- Standardized the weekly unified upgrade expectations around preflight, postflight, and rollback-plan guard phases.
+- Clarified that unified upgrade coverage must include default/work features, plugins, skills, scripts, MCP registry, LaunchAgents, and runtime patches.
+
 ## 1.1.11 - 2026-06-11
 
 - Documented the 2026-06-11 OpenClaw unified upgrade, health-check, model-route, and article-route closure.
