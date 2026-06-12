@@ -6,6 +6,8 @@ OpenClaw model selection and fallback routing should be treated as a first-class
 
 Final operator state on 2026-06-11: the default instance uses `volcengine-codeplan-local`; the default daily collection policy uses a `1+3` switch with the master collection switch active, morning active, afternoon paused, and evening paused. Website publishing, feedback-health, qmd refresh, and site refresh derive their expected state from the policy.
 
+2026-06-12 closure: the routing and inspection design was extended into a post-upgrade availability gate. Weekly upgrade postflight now validates real channel delivery, OpenDesign availability, model-route drift, summary quality, public/local site availability, and runtime dependency contracts before reporting the system healthy.
+
 ## Implemented Upstream Pattern
 
 - Dynamic model library for model metadata, provider classes, supported consumers, and route profiles.
@@ -16,8 +18,10 @@ Final operator state on 2026-06-11: the default instance uses `volcengine-codepl
 - Migrated cron path resolver for `jobs.json`, `jobs.json.migrated`, and fallback paths.
 - Runtime patch registry for post-upgrade patch verification.
 - Ops status index with L0-L3 notification classification.
+- Shared status semantics for scheduled services and status freshness, so old `lastExit` values do not override fresh successful status files in different ways across checks.
 - Pause/resume command for policy-based collection and publishing control.
 - Unified upgrade guard phases: preflight, postflight, rollback-plan.
+- Upgrade availability gate for live Feishu/Weixin outbound probes, OpenDesign, model routing, summary quality, the daily-tech site, and runtime dependencies.
 - Upgrade postflight no longer fails by observing its own in-progress AssetSync status; only the guarded postflight subprocess may ignore an active self-run.
 - Post-reboot recovery now resolves migrated cron files through the shared path resolver instead of hardcoding `jobs.json` and `jobs-state.json`.
 
@@ -48,6 +52,28 @@ Additional final verification on 2026-06-11 14:14 +0800:
 - BusinessSmoke: `Business smoke OK`; `summarize-pro dynamic route` passed after rejecting polluted `volcengine-plan/ark-code-latest` output and falling back cleanly.
 - NaturalRunAcceptance: `ok`, morning report `2026-06-11-134750-资讯采集.md`, 36 items, Juya coverage present.
 - Real delivery log: Obsidian saved, Feishu push success, WeChat gateway accepted with `all_success=True any_accepted=True`.
+
+Commercial handoff verification on 2026-06-12 18:15 +0800:
+
+- `openclaw_upgrade_availability.py --repair --live-channels --json`: `ok=true`, `errors=0`.
+- Feishu live outbound probe: `ok=true`.
+- Weixin live outbound probe: `ok=true`.
+- OpenDesign: `open-design 0.10.0`, health `ok`.
+- Model route contract: `ok=true`, active profile `volcengine-codeplan-local`.
+- Summary route quality: `ok=true`, final output preserved OpenAI/Codex content and did not leak reasoning text.
+- `openclaw_upgrade_guard.py postflight --json`: `ok=true`, availability gate embedded.
+- `openclaw_production_guard.sh --repair --json`: `result=ok`, `errors=0`, `warnings=0`.
+- `openclaw_business_smoke.sh`: `Business smoke OK`.
+- `openclaw_daily_acceptance.py --json --no-notify`: `result=ok`, `errors=0`, `warnings=0`.
+- `openclaw_ops_status_index.py --json`: `ok=true`, `level=L1`; L1 only reflects intentional paused features.
+
+Additional root-cause closure on 2026-06-12:
+
+- Feishu outbound failure was not caused by a Lark CLI version mismatch. The account could be running while one-shot operational broadcasts still failed because the helper process did not load the app secret required for token acquisition.
+- The notification helper now maps the existing instance Lark CLI app-secret file into the OpenClaw CLI environment before sending. No second credential store was introduced.
+- The model-route contract checker returned JSON `ok=true` with empty `drift`, but one availability check treated `drift={}` as failure. That check now treats an empty drift object/list as healthy.
+- Summary quality gates now reject `Hmm` and `but I'm` inner-monologue text in addition to the earlier reasoning and character-count markers.
+- Asset overlays now include the shared status semantics, upgrade availability gate, channel notification helper, daily acceptance, business smoke, service topology, and operational freshness scripts so weekly upgrades do not overwrite hotfixes.
 
 Additional Feishu inbound durability fix on 2026-06-11 15:50 +0800:
 
@@ -88,4 +114,4 @@ Final verification:
 
 ## Coverage Contract
 
-The weekly unified upgrade must cover default and work instances, plugins, skills, scripts, MCP registry, LaunchAgents, runtime package patches, model route contracts, and operational policy overlays.
+The weekly unified upgrade must cover default and work instances, plugins, skills, scripts, MCP registry, LaunchAgents, runtime package patches, model route contracts, operational policy overlays, and post-upgrade real availability for channel delivery, OpenDesign, model routing, summary quality, and the publishing surface.
