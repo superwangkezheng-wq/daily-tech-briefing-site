@@ -143,6 +143,34 @@ Verification:
 - Business smoke passed.
 - Daily acceptance passed with `errors=0`, `warnings=0`.
 
+## Self-Improvement Closure On 2026-06-18
+
+The OpenClaw self-improvement loop did run and did notice the failed Zhihu archive session. The failure was in what it learned.
+
+Findings:
+
+- `com.lenovo.openclaw.skill-evolution` was loaded, scheduled hourly, and exited successfully.
+- The 15:00 run extracted the failed WeChat-channel Zhihu session into a candidate under `.learnings/workflow-skill-evolution/candidates/`.
+- The generated candidate was overfit to the exact Zhihu URL and replayed the failed tool sequence (`web_fetch`, `curl`, generic archiver) instead of the existing `web-article-archive` skill.
+- The evaluation layer treated session completion as task success and did not detect final-answer failure language such as "not written to the knowledge base" or "paste the body manually".
+
+Fixes:
+
+- `workflow_skill_autopilot.py` now rejects traces whose final answer indicates failure or manual fallback.
+- It also rejects Zhihu wiki archive traces that bypass `zhihu_article_to_wiki_clipping.sh` or try direct/generic fetch before the dedicated wrapper.
+- Valid Zhihu/wiki traces now canonicalize to `auto-workflow-web-article-wiki-archive` rather than a URL-specific skill name.
+- `workflow_skill_pipeline.py` now uses target-success semantics, marks failed/manual-fallback traces as failed, and requires a clean safety review for evaluation pass.
+- The bad URL-specific candidate was quarantined so it is preserved as evidence but cannot match, promote, or create recurring health warnings.
+- AssetSync coverage now includes `workflow_skill_autopilot.py`, `openclaw_skill_evolution_autopilot.py`, and `openclaw_skill_evolution_health.py`.
+
+Verification:
+
+- The real failed session now returns `qualifies=False`, `candidate_completed=False`, and `evaluation_passed=False`.
+- A synthetic positive Zhihu/wiki trace that first invokes `zhihu_article_to_wiki_clipping.sh` and emits `wiki_ingest_verified` returns `qualifies=True`, with slug `auto-workflow-web-article-wiki-archive`.
+- Skill evolution health returns `status=ok` with no warnings or failures.
+- Skill evolution dry-run returns `result=ok`.
+- Business smoke returns `Business smoke OK`.
+
 ## Optimization Plan
 
 - Keep the OpenClaw ops status index as the single status integration point so health dashboard, business smoke, production guard, acceptance checks, and upgrade postflight read the same freshness and supersession model.
