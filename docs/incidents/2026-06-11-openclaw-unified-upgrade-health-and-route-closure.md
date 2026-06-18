@@ -171,6 +171,44 @@ Verification:
 - Skill evolution dry-run returns `result=ok`.
 - Business smoke returns `Business smoke OK`.
 
+## Unified Web Wiki Router Commercial Closure On 2026-06-18
+
+A later WeChat-channel Zhihu save request failed again with a stale anti-scraping answer. This was not a failure of the Zhihu extractor itself: the dedicated wrapper successfully extracted the same article through Jina Reader and saved it to the local LLM Wiki. The failure was an inbound route-selection problem.
+
+Root causes:
+
+- The active WeChat direct session reused an older transcript that already contained the failed anti-scraping answer. The new URL message did not trigger a fresh tool call and answered from stale context.
+- `lossless-claw` was not the direct cause for this specific session: the failing direct session had no active LCM conversation and injected `runtimeContextChars=0`.
+- Cross-session memory still contained an obsolete L1 instruction that routed non-WeChat web saves through the low-level `web_article_to_wiki_clipping.sh` path.
+- Top-level workspace rules were temporarily overwritten while adding the unified route. Business smoke correctly caught the regression because required `AGENTS.md` snippets for summarize, task-state, and WeChat reader split disappeared.
+- Directly running `openclaw_business_smoke.sh` printed success but did not update `BusinessSmoke/latest-status.json`; production guard and daily acceptance could therefore keep failing by reading an old status file even after the real smoke had passed.
+
+Fixes:
+
+- Added `workspace/scripts/web_url_to_wiki_clipping.sh` as the single channel-safe entry for saving any single webpage, WeChat official-account article, or Zhihu article to the wiki.
+- The wrapper dispatches WeChat articles to the WeChat reader, Zhihu articles to the Zhihu extractor with partial fallback, and ordinary webpages through direct extraction, Jina Reader, and Scrapling before clipping/ingest.
+- WeChat and Feishu inbound handling now short-circuits clear URL-to-wiki requests before the general model loop, so stale chat memory and model fallback cannot bypass the archive contract.
+- The obsolete L1 memory instruction was deprecated and replaced with the unified URL-router instruction.
+- The contaminated WeChat direct session was archived out of the active session index as an incident artifact.
+- `workflow_skill_autopilot.py` and `workflow_skill_pipeline.py` now reject web/wiki traces that bypass the unified router or treat manual fallback language as success.
+- `openclaw_business_smoke.sh` now writes `BusinessSmoke/latest-status.json` atomically on direct success or failure; the notify wrapper passes the active log path into the smoke script. This removes the wrapper/manual status split that caused stale-failure cascades.
+- `openclaw_business_smoke_notify.sh` is now an AssetSync-managed overlay, so weekly upgrades preserve the log-path/status handoff.
+
+Verification:
+
+- `web_url_to_wiki_clipping.sh "https://zhuanlan.zhihu.com/p/2010662945907037379" wiki` saved the article to `raw/clippings/`, updated `wiki/sources/zhuanlan-zhihu-com-p-2010662945907037379.md`, and embedded 4 QMD chunks.
+- `test_web_article_extract.py`: 7 tests OK, covering direct/Jina/Scrapling fallback selection.
+- WeChat extension unit tests: 3 tests OK, covering Zhihu intent, non-persistence intent, and ordinary web URL intent.
+- Node bundle syntax checks passed for the Feishu runtime patch and WeChat process-message bundle.
+- Runtime patch audit returned `ok=true`, `errors=0`.
+- Route violation audit returned `status=ok`, `errors=0`, `warnings=0`.
+- Business smoke returned `Business smoke OK` and wrote `BusinessSmoke/latest-status.json` with `result=ok`.
+- Production guard returned `result=ok`, `errors=0`, `warnings=0`.
+- Daily acceptance returned `result=ok`, `errors=0`, `warnings=0`; release gate passed.
+- Status schema returned `result=ok`, `errors=0`, `warnings=0`.
+- Ops status index returned `ok=true`; remaining L1 status only reflects intentional paused features, not an outage.
+- Default and work gateways were restarted through launchd and both `/health` probes returned `{"ok":true,"status":"live"}`.
+
 ## Optimization Plan
 
 - Keep the OpenClaw ops status index as the single status integration point so health dashboard, business smoke, production guard, acceptance checks, and upgrade postflight read the same freshness and supersession model.
