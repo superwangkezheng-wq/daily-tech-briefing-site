@@ -112,6 +112,37 @@ Verification:
 - Production guard returned `ok`, `errors=0`, `warnings=0`.
 - Business smoke returned `Business smoke OK`.
 
+## Zhihu Wiki Archive Route Closure On 2026-06-18
+
+Later on 2026-06-18, a WeChat-channel request to save a Zhihu article to the local wiki failed with an anti-scraping explanation even though the dedicated Zhihu archive wrapper was capable of extracting and ingesting the article.
+
+Root cause:
+
+- The dedicated `web-article-archive` skill correctly required Zhihu URLs to use `workspace/scripts/zhihu_article_to_wiki_clipping.sh "<url>" "wiki"`.
+- The top-level `AGENTS.md` still contained an older route that grouped "non-WeChat web pages / Zhihu" into the generic `web_article_to_wiki_clipping.sh` flow.
+- The WeChat channel model followed that older top-level rule, attempted `web_fetch`, `curl`, and the generic archiver, and never invoked the channel-safe Zhihu wrapper.
+- The previous morning validation proved the wrapper and one URL path, but it did not cover the full WeChat inbound route selection behavior.
+
+Fixes:
+
+- Default and work `AGENTS.md` now split the archive route explicitly:
+  - WeChat official-account articles use `wechat_article_to_obsidian.sh`.
+  - Zhihu / zhihu.com / zhuanlan.zhihu.com wiki saves must first use `zhihu_article_to_wiki_clipping.sh`.
+  - Other web articles must first extract Markdown and then use `web_article_to_wiki_clipping.sh`.
+- `AGENTS.shared.md` and the AssetSync source copy now carry the same Zhihu hard route.
+- Business smoke now fails if top-level AGENTS collapses Zhihu saves back into the generic web archiver.
+- Daily acceptance now checks the same top-level route contract.
+- Daily acceptance also uses the same Juya coverage evidence semantics as natural-run acceptance: final report evidence or same-day OpenClawDailyNews log evidence is acceptable.
+
+Verification:
+
+- The failed article was recovered into the local wiki as `wiki/sources/zhuanlan-zhihu-com-p-2050523911419326680.md`.
+- `wiki_ingest_verified` passed for the recovered source page.
+- QMD embedding completed for the new source.
+- `test_web_article_extract.py` passed: 5 tests OK.
+- Business smoke passed.
+- Daily acceptance passed with `errors=0`, `warnings=0`.
+
 ## Optimization Plan
 
 - Keep the OpenClaw ops status index as the single status integration point so health dashboard, business smoke, production guard, acceptance checks, and upgrade postflight read the same freshness and supersession model.
