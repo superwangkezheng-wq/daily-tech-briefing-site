@@ -81,6 +81,8 @@ assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.evening
 
 const qmdRefreshTemplate = readText(path.join(LAUNCHD_TEMPLATES, "com.dailytech.qmd.refresh.plist"));
 assert.match(qmdRefreshTemplate, /exec "__SUPPORT_DIR__\/dailytech_qmd_refresh\.sh"/);
+assert.match(qmdRefreshTemplate, /<key>HOME<\/key>\s*<string>__HOME_DIR__<\/string>/);
+assert.match(qmdRefreshTemplate, /<key>BUN_INSTALL<\/key>\s*<string>__HOME_DIR__\/\.bun<\/string>/);
 assert.match(qmdRefreshTemplate, /<key>WorkingDirectory<\/key>\s*<string>__SUPPORT_DIR__<\/string>/);
 
 const installer = readText(path.join(ROOT_DIR, "scripts/install-launchd.sh"));
@@ -88,6 +90,7 @@ assert.match(installer, /DAILY_COLLECTION_SLOTS:-morning/);
 assert.match(installer, /INSTALL_AFTERNOON_REFRESH:-0/);
 assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
 assert.match(installer, /source "\$support_site_env"/);
+assert.match(installer, /s\/__HOME_DIR__\/\$home_escaped\/g/);
 assert.match(installer, /disabled_refresh_plists\+=\("\$target_dir\/com\.dailytech\.qmd\.refresh\.plist"\)/);
 
 const oneNGuide = readText(path.join(ROOT_DIR, "docs/1n-system-guide.md"));

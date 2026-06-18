@@ -113,6 +113,17 @@ const SITE_CONFIG = {
   maintenanceToken: process.env.MAINTENANCE_TOKEN || "",
   feedbackDigestHour: process.env.FEEDBACK_DIGEST_HOUR || "10:15",
   pageSize: Number(process.env.PAGE_SIZE || 6),
+  // Horizon-inspired: AI scoring threshold. 0 = no filtering (backwards compatible)
+  aiScoreThreshold: Number(process.env.AI_SCORE_THRESHOLD || 0),
+  // Horizon-inspired: per-section category limits after score sort
+  categoryGroupLimit: {
+    techNews: Number(process.env.CATEGORY_GROUP_TECHNEWS || 0),
+    videoItems: Number(process.env.CATEGORY_GROUP_VIDEO || 0),
+    aiCreators: Number(process.env.CATEGORY_GROUP_CREATOR || 0),
+  },
+  // Enrichment worker config
+  enrichEnabled: String(process.env.ENRICH_ENABLED || "false") === "true",
+  enrichDir: resolveProjectPath(process.env.ENRICH_DIR, path.join(ROOT_DIR, "data", "enrich")),
 };
 
 function createRefreshSlot({

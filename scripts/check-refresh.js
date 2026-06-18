@@ -2,6 +2,8 @@ const { SITE_CONFIG, REFRESH_SLOTS } = require("../src/config");
 const { buildSiteCache } = require("../src/site-index");
 const { appendOpsLog, updateOpsStatus, todayString } = require("../src/ops-store");
 const { sendFeishuMessage } = require("../src/feishu");
+const { spawn } = require("node:child_process");
+const path = require("node:path");
 
 function parseArgs(argv) {
   const args = {};
@@ -69,6 +71,19 @@ async function main() {
         `尝试次数：${attempt}`,
         `命中快照：${matched.displayTitle}`,
       ]);
+
+      // Kick off enrichment worker asynchronously (non-blocking)
+      if (SITE_CONFIG.enrichEnabled) {
+        const enrichChild = spawn(process.execPath, [
+          path.join(__dirname, "enrich-worker.js"),
+          "--no-search",
+        ], {
+          stdio: "ignore",
+          detached: true,
+        });
+        enrichChild.unref();
+      }
+
       console.log(JSON.stringify({ ok: true, matched, attempt }, null, 2));
       return;
     }

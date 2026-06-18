@@ -182,6 +182,8 @@ YYYY-MM-DD-HHMMSS-资讯采集.md
 **摘要**: ...
 
 **产业影响**: ...
+
+**AI 评分**: 8.5    <--（可选）如果提供，网站按评分排序展示；不提供则 score=null，不影响现有功能
 ```
 
 支持的章节：
@@ -199,6 +201,10 @@ npm run check             # 语法、plist、隐私检查
 npm run smoke             # 构建缓存并验证示例端到端链路
 npm run audit:schedule    # 验证公开包排期合同
 npm run digest -- --no-push
+npm run enrich            # 为日报补充背景信息（本地模式，不搜索网络）
+npm run enrich:search     # 为日报补充背景信息（使用网络搜索）
+npm run mcp               # 启动 MCP Server（stdio 模式，供 AI 助手调用）
+npm run mcp:http          # 启动 MCP Server（HTTP 模式，127.0.0.1:4322，用于测试）
 npm run run:tunnel:quick  # 临时 Cloudflare URL
 npm run run:tunnel        # 命名 Cloudflare Tunnel，需要 .env.tunnel
 ```

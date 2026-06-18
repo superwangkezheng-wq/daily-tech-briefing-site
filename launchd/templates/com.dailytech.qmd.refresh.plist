@@ -4,6 +4,15 @@
   <dict>
     <key>Label</key>
     <string>com.dailytech.qmd.refresh</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HOME</key>
+      <string>__HOME_DIR__</string>
+      <key>PATH</key>
+      <string>/opt/homebrew/bin:__HOME_DIR__/.bun/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+      <key>BUN_INSTALL</key>
+      <string>__HOME_DIR__/.bun</string>
+    </dict>
     <key>ProgramArguments</key>
     <array>
       <string>/bin/sh</string>

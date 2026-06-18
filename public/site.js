@@ -246,6 +246,8 @@ function getItems(detail) {
       link: item.link || "#",
       summary: item.summary || "暂无摘要。",
       impact: item.impact || "暂无产业影响分析。",
+      score: item.score != null ? Number(item.score) : null,
+      background: item.background || "",
     }));
 }
 
@@ -460,6 +462,28 @@ function renderEntries(items) {
     renderBilingualCopy(node.querySelector(".entry-summary-copy"), item.summary);
     renderBilingualCopy(node.querySelector(".entry-impact-copy"), item.impact);
     setLink(node.querySelector(".entry-link"), item.link);
+
+    // Score badge
+    const scoreBadge = node.querySelector(".entry-score");
+    if (scoreBadge && item.score != null) {
+      scoreBadge.textContent = String(item.score);
+      scoreBadge.style.display = "inline-flex";
+      if (item.score >= 8) scoreBadge.dataset.level = "high";
+      else if (item.score >= 6) scoreBadge.dataset.level = "medium";
+      else scoreBadge.dataset.level = "low";
+    }
+
+    // Background expand section
+    const bgDetails = node.querySelector(".entry-background");
+    if (bgDetails) {
+      if (item.background) {
+        bgDetails.hidden = false;
+        bgDetails.querySelector(".entry-background-content").textContent = item.background;
+      } else {
+        bgDetails.hidden = true;
+      }
+    }
+
     editorialElements.entryStream.appendChild(node);
   });
 

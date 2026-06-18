@@ -75,6 +75,43 @@ Manual and release-gate checks:
 - Session archive audit.
 - Process deduplication audit.
 
+## Additional Closure On 2026-06-18
+
+The 2026-06-18 morning health failure was a real scheduled-run failure, not just an alerting false positive.
+
+Root causes:
+
+- The morning daily collection cron job still used the shared main agent session key. Under OpenClaw 2026.6.5 this can fail with `EmbeddedAttemptSessionTakeoverError` when another writer updates the same transcript while the embedded prompt lock is released.
+- The live Gateway cron state and the local `jobs.json.migrated` snapshot diverged after manual cron edits. This made some audits read the fixed live state while other gates still read the stale file state.
+- Natural-run acceptance checked Juya coverage only in the final Markdown report. The actual run proved Juya required-source coverage in the collection log via YouTube fallback, while the final Top20 did not necessarily include a Juya item.
+- Some hotfixes were present only in the default runtime instance and had not been mirrored into the work instance, AssetSync source tree, and asset manifest.
+
+Fixes:
+
+- Daily collection and feedback cron jobs now use isolated sessions with stable keys:
+  - `cron:daily-news:0930`
+  - `cron:daily-news:1500`
+  - `cron:daily-news:2000`
+  - `cron:daily-tech-feedback:1015`
+- Cron contract audit now checks `sessionTarget` and `sessionKey` as `sessionDrift` for both file and live Gateway state.
+- The persisted `jobs.json.migrated` snapshot was reconciled with live Gateway cron state.
+- Business smoke no longer hides oversized direct-channel sessions by raising the limit. It archives and resets oversized direct-channel sessions above the strict 200K threshold.
+- Natural-run acceptance now accepts Juya coverage evidence from either the final report or the same-day OpenClawDailyNews collection log.
+- AssetSync overlays now include the cron contract audit, natural-run acceptance, source manifest, and task audit waiver/policy files so weekly upgrades do not erase these fixes.
+
+Verification:
+
+- Manual morning collection rerun completed successfully with isolated session routing.
+- Output landed in the local Obsidian raw collections directory as `2026-06-18-095607-资讯采集.md`.
+- Obsidian save succeeded.
+- Feishu push succeeded.
+- WeChat gateway accepted the push.
+- `summarize-pro` completed without local fallback.
+- Cron file/live audits returned `ok`, `errors=0`, `warnings=0`, `sessionDrift=[]`.
+- Natural-run acceptance returned `ok`, `errors=0`, `warnings=0`.
+- Production guard returned `ok`, `errors=0`, `warnings=0`.
+- Business smoke returned `Business smoke OK`.
+
 ## Optimization Plan
 
 - Keep the OpenClaw ops status index as the single status integration point so health dashboard, business smoke, production guard, acceptance checks, and upgrade postflight read the same freshness and supersession model.

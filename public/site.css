@@ -673,6 +673,55 @@ h3 {
   font-weight: 700;
 }
 
+.entry-score {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 24px;
+  margin-top: 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.entry-score[data-level="high"] {
+  background: rgba(52, 199, 89, 0.15);
+  color: #1d8838;
+}
+
+.entry-score[data-level="medium"] {
+  background: rgba(255, 204, 0, 0.15);
+  color: #b8860b;
+}
+
+.entry-score[data-level="low"] {
+  background: rgba(142, 142, 147, 0.15);
+  color: #636366;
+}
+
+.entry-background {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.entry-background summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.entry-background-content {
+  margin: 8px 0 0;
+}
+
 .entry-body {
   display: grid;
   gap: 20px;

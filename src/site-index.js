@@ -50,6 +50,33 @@ function slotKeyFromLabel(label) {
   return "evening";
 }
 
+function applyScoreSortAndFilter(items, scoreThreshold) {
+  if (!items || !items.length) return [];
+  const threshold = scoreThreshold || 0;
+  const sorted = [...items].sort((a, b) => {
+    const aScore = a.score != null ? a.score : 0;
+    const bScore = b.score != null ? b.score : 0;
+    return bScore - aScore;
+  });
+  if (threshold <= 0) return sorted;
+  return sorted.filter((item) => item.score != null && item.score >= threshold);
+}
+
+function applyCategoryLimit(items, limit) {
+  if (!limit || limit <= 0) return items;
+  return items.slice(0, limit);
+}
+
+function buildEnrichmentMap(report) {
+  const map = {};
+  if (report.enrichment && Array.isArray(report.enrichment.enrichedItems)) {
+    report.enrichment.enrichedItems.forEach((e) => {
+      map[e.rank] = e.background || "";
+    });
+  }
+  return map;
+}
+
 function buildSummaryNote(report) {
   const first = report.sections.techNews && report.sections.techNews[0];
   if (!first) {
@@ -61,13 +88,41 @@ function buildSummaryNote(report) {
 function distinctLatestSlotSnapshots(snapshots) {
   const result = [];
   const seen = new Set();
+  const scoreThreshold = SITE_CONFIG.aiScoreThreshold || 0;
+  const groupLimits = SITE_CONFIG.categoryGroupLimit || {};
+
   for (const snapshot of snapshots) {
     const report = parseReportFile(snapshot.path);
     const slotLabel = extractSlotLabel(report.slot, snapshot.time);
     const key = `${snapshot.date}-${slotLabel}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    result.push({ snapshot, report, slotLabel });
+
+    // Apply score sort + filter to each section
+    const enrichmentMap = buildEnrichmentMap(report);
+    const sections = {};
+    Object.keys(report.sections).forEach((key) => {
+      let items = applyScoreSortAndFilter(report.sections[key], scoreThreshold);
+      items = applyCategoryLimit(items, groupLimits[key]);
+      // Inject enrichment background
+      items = items.map((item) => ({
+        ...item,
+        background: enrichmentMap[item.rank] || "",
+      }));
+      sections[key] = items;
+    });
+
+    const processedReport = {
+      ...report,
+      sections,
+      counts: {
+        techNews: sections.techNews.length,
+        videoItems: sections.videoItems.length,
+        aiCreators: sections.aiCreators.length,
+      },
+    };
+
+    result.push({ snapshot, report: processedReport, slotLabel });
   }
   return result;
 }

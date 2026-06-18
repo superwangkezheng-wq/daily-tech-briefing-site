@@ -85,6 +85,7 @@ function parseItems(sectionText) {
     const summary = extractBetween(block, "**摘要**:", "\n\n**产业影响**");
     const impact = extractBetween(block, "**产业影响**：", "\n\n#### ");
     const fallbackImpact = impact || extractBetween(block, "**产业影响**:", "\n\n#### ");
+    const scoreMatch = block.match(/\*\*AI 评分\*\*\s*[：:]\s*(\d+(?:\.\d+)?)/);
     return {
       rank: titleMatch ? Number(titleMatch[1]) : 0,
       title: titleMatch ? titleMatch[2].trim() : "",
@@ -92,6 +93,7 @@ function parseItems(sectionText) {
       link: linkMatch ? linkMatch[1].trim() : "",
       summary: summary.trim(),
       impact: fallbackImpact.trim(),
+      score: scoreMatch ? Math.min(10, Math.max(0, Number(scoreMatch[1]))) : null,
     };
   });
 }
@@ -107,12 +109,26 @@ function parseSection(content, heading) {
   return parseItems(sectionBody);
 }
 
+function loadEnrichment(reportPath) {
+  const enrichPath = reportPath.replace(/\.md$/, '.enrich');
+  if (fs.existsSync(enrichPath)) {
+    try {
+      const raw = fs.readFileSync(enrichPath, 'utf8');
+      return JSON.parse(raw);
+    } catch {
+      // Malformed enrich file should not break report parsing
+    }
+  }
+  return null;
+}
+
 function parseReportFile(filePath) {
   const content = readUtf8(filePath);
   const meta = parseMeta(content, filePath);
   const techNews = parseSection(content, "## 📰 主新闻");
   const aiCreators = parseSection(content, "## 👤 AI 资讯博主");
   const videoItems = parseSection(content, "## 🎬 视频 / 播客");
+  const enrichment = loadEnrichment(filePath);
 
   return {
     ...meta,
@@ -127,6 +143,7 @@ function parseReportFile(filePath) {
       videoItems: videoItems.length,
       aiCreators: aiCreators.length,
     },
+    enrichment,
   };
 }
 

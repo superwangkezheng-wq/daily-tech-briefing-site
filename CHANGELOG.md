@@ -1,6 +1,14 @@
 # Changelog
 
-## 1.1.13 - 2026-06-11
+## 1.2.0 - 2026-06-16
+
+- **AI 评分与排序 (Horizon-inspired)**: `report-parser.js` 新增 `**AI 评分**:` 字段解析（向后兼容，旧数据 score=null）；`site-index.js` 按评分降序排列条目，支持 `AI_SCORE_THRESHOLD` 阈值过滤（默认 0=不过滤，向后兼容）；`site.js` 新增评分 Badge（绿≥8/黄≥6/灰<6）。
+- **均衡分组 (Horizon-inspired)**: `site-index.js` 支持每个 section（techNews/videoItems/aiCreators）按评分排序后截取前 N 条，由 `CATEGORY_GROUP_TECHNEWS/VIDEO/CREATOR` 控制（默认 0=不限）。
+- **背景补充 / Enrichment (Horizon-inspired)**: 新增 `scripts/enrich-worker.js` — 异步工作器，识别全大写缩写词和专有名词，可选 DuckDuckGo 搜索背景，结果写入 `.enrich` JSON。`check-refresh.js` 在发现新日报后自动异步触发 enrich worker。
+- **MCP Server (Horizon-inspired)**: 新增 `src/mcp-server/server.js` — 7 个 MCP 工具（snapshot_list / snapshot_latest / snapshot_get / cache_rebuild / health_status / feedback_search / enrich_trigger），纯 stdio 协议（可 `--http` 切换测试模式），不暴露公网。
+- **前端更新**: `index.html` 条目模板新增评分 Badge 和背景折叠区；`site.css` 新增 `.entry-score` 和 `.entry-background` 样式，支持三级颜色评分。
+- **配置扩展**: `.env.example` 新增 `AI_SCORE_THRESHOLD`（评分阈值）、`CATEGORY_GROUP_*`（分类上限）、`ENRICH_ENABLED`（enrich 开关）、`ENRICH_DIR`（enrich 目录）；`src/config.js` 新增 `aiScoreThreshold`、`categoryGroupLimit`、`enrichEnabled`、`enrichDir` 四个配置项。
+- **npm scripts 新增**: `enrich` / `enrich:search` / `mcp` / `mcp:http`。
 
 - Documented the reference OpenClaw `1+3` daily collection switch: master plus morning, afternoon, and evening slot controls.
 - Recorded the 2026-06-11 real morning collection verification: Obsidian save, Feishu push, WeChat gateway acceptance, and qmd/site refresh health.

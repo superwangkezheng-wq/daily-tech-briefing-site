@@ -83,12 +83,14 @@ escape_sed() {
 render_template() {
   local source_plist="$1"
   local target_plist="$2"
-  local project_escaped log_escaped support_escaped
+  local project_escaped home_escaped log_escaped support_escaped
   project_escaped="$(escape_sed "$project_dir")"
+  home_escaped="$(escape_sed "$HOME")"
   log_escaped="$(escape_sed "$runtime_dir")"
   support_escaped="$(escape_sed "$support_dir")"
   sed \
     -e "s/__PROJECT_DIR__/$project_escaped/g" \
+    -e "s/__HOME_DIR__/$home_escaped/g" \
     -e "s/__LOG_DIR__/$log_escaped/g" \
     -e "s/__SUPPORT_DIR__/$support_escaped/g" \
     "$source_plist" > "$target_plist"
