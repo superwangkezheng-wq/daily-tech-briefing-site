@@ -73,6 +73,16 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Weekly unified upgrades should run preflight before mutation, postflight after mutation, and write a rollback-plan report on failure.
 - See [2026-06-11 OpenClaw Dynamic Model Routing and Inspection Upgrade](incidents/2026-06-11-openclaw-dynamic-model-routing-and-inspection-upgrade.md).
 
+## 2026-06-22 OpenClaw Upgrade Availability Notes
+
+- OpenClaw package upgrades must not be declared healthy until postflight proves real runtime availability, not just successful file sync.
+- Minimum postflight coverage is: runtime patch registry/audit, Feishu runtime ABI contract, Feishu live outbound probe, Weixin live outbound probe, OpenDesign availability, model-route contract, summary quality, runtime dependency audit, local/public daily-tech site health, and gateway restart.
+- Feishu channel checks must cover the object-parameter `sendMessageFeishu(params)` ABI because upstream package upgrades can change function signatures without breaking process startup.
+- Runtime compatibility patches must run after package/plugin updates and must be audited before postflight succeeds.
+- Scheduled one-shot services such as AssetSync and BusinessSmoke may retain stale `lastExit=1`; gates should use shared status semantics and accept a newer successful status file within SLA.
+- Copy-mode external assets may keep serving an existing valid local HEAD during transient GitHub network failures, but missing source/mirror or failed local copy remains a hard failure.
+- See [2026-06-11 OpenClaw Unified Upgrade, Health, and Route Closure](incidents/2026-06-11-openclaw-unified-upgrade-health-and-route-closure.md).
+
 ## Feedback Digest
 
 ```bash

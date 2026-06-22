@@ -209,6 +209,44 @@ Verification:
 - Ops status index returned `ok=true`; remaining L1 status only reflects intentional paused features, not an outage.
 - Default and work gateways were restarted through launchd and both `/health` probes returned `{"ok":true,"status":"live"}`.
 
+## Unified Upgrade Postflight Hardening On 2026-06-22
+
+The 2026-06-22 03:10 scheduled checks reported business smoke, unified upgrade, and production guard failures after an OpenClaw package upgrade. The failures exposed two commercial-readiness gaps: runtime compatibility patches were not guaranteed to be reapplied after every OpenClaw npm update, and post-upgrade checks did not fully prove that Feishu/Weixin channel delivery remained usable after upstream function-signature changes.
+
+Root causes:
+
+- AssetSync ran runtime patches before some package/plugin update paths could replace the patched bundles, so postflight could observe missing compatibility patches for inbound session recording, Feishu wiki archive preflight, subagent completion delivery, and Codex message-tool completion instructions.
+- Upgrade preflight treated an existing runtime-patch audit failure as a hard blocker, which prevented the upgrade process from repairing the exact condition it was designed to fix.
+- Feishu channel health previously checked account/runtime presence, but did not assert the OpenClaw Feishu runtime ABI after upstream changed `sendMessageFeishu` to object-parameter form.
+- One-shot scheduled LaunchAgents can retain an old `lastExit=1` after a newer successful status file has superseded it; some gates still treated the stale exit code as current failure.
+- Copy-mode external assets could fail the entire weekly upgrade when GitHub fetch had a transient TLS/network failure even though the local source copy already had a valid HEAD.
+
+Fixes:
+
+- AssetSync now has a dedicated `run_openclaw_runtime_patch_phase` after package/plugin updates and before postflight. It reapplies all registered compatibility patches and immediately runs `openclaw_runtime_patch_audit.py --json`; a failed audit blocks postflight.
+- Upgrade preflight now reports existing runtime-patch drift as a warning, while postflight remains strict after the repair phase has run.
+- Upgrade availability now verifies the Feishu runtime contract across installed Feishu bundles:
+  - `sendMessageFeishu(params)` object ABI is present.
+  - reply and fallback fields are preserved.
+  - channel calls use object-style `sendMessageFeishu({...})` / `runtime.sendMessageFeishu({...})`.
+  - inbound monitor compatibility remains present.
+- Unified upgrade postflight continues to run live Feishu and Weixin probes, OpenDesign checks, model-route checks, summary quality checks, daily-tech site checks, and runtime dependency audit.
+- ProductionGuard, BusinessSmoke, and OperationalFreshness now use the shared scheduled-service semantics so fresh success status can override stale one-shot `lastExit=1` for AssetSync and BusinessSmoke.
+- Copy-mode git mirrors now keep using an existing local valid HEAD when network pull/fetch fails, while still failing on missing source, missing mirror, or local copy errors.
+- The AssetSync freshness SLA for scheduled service overrides is now 14 days / 336 hours by default and is configurable.
+
+Verification:
+
+- Full AssetSync completed successfully on 2026-06-22 with OpenClaw `2026.6.9 (c645ec4)`, runtime patch audit `ok`, gateway restart `ok`, and upgrade postflight `ok`.
+- AssetSync notification reported `notifyOk=true`, with all selected notification channels succeeding.
+- Upgrade availability postflight returned `ok=true` with live Feishu and Weixin channel probes enabled.
+- Runtime patch audit returned `ok=true`, `errors=0`.
+- ProductionGuard returned `result=ok`, `errors=0`, `warnings=0`.
+- BusinessSmoke returned `Business smoke OK`; AssetSync schedule was accepted as `fresh status overrides scheduled lastExit`.
+- DailyAcceptance returned `result=ok`, `errors=0`, `warnings=0`; release gate passed.
+- OperationalFreshness returned `Operational freshness OK`.
+- Ops status index returned `ok=true`, `level=L1`; L1 only reflects intentional paused features, not an outage.
+
 ## Optimization Plan
 
 - Keep the OpenClaw ops status index as the single status integration point so health dashboard, business smoke, production guard, acceptance checks, and upgrade postflight read the same freshness and supersession model.
