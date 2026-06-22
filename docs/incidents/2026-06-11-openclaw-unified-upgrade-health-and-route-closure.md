@@ -247,6 +247,36 @@ Verification:
 - OperationalFreshness returned `Operational freshness OK`.
 - Ops status index returned `ok=true`, `level=L1`; L1 only reflects intentional paused features, not an outage.
 
+## WeChat Web Wiki Save Regression Closure On 2026-06-22
+
+A WeChat-channel request to save a WeChat official-account article failed even though the dedicated article reader was healthy. This was a route-boundary bug, not an anti-scraping failure.
+
+Root cause:
+
+- The WeChat channel deterministic web/wiki route used an over-broad URL matcher.
+- When the user sent a URL followed immediately by Chinese intent text, the route treated the intent text as part of the URL.
+- The malformed URL reached the managed wiki wrapper and failed before the dedicated WeChat article reader could fetch the real article.
+- The plugin source could not be rebuilt cleanly because it had no `tsconfig.json` and still imported an SDK helper that was absent from the local plugin dev dependency. The production dist was patchable, but the build chain was not a reliable release gate.
+
+Fixes:
+
+- The WeChat channel URL matcher now uses an ASCII URL boundary and trims trailing archive-intent punctuation/text before routing.
+- The unified web URL wrapper, WeChat article wrapper, and Zhihu article wrapper each sanitize inbound URLs at entry so channel parsing, agent routing, and direct script calls all share the same guard.
+- The WeChat plugin now has a working TypeScript build configuration.
+- The plugin no longer depends on the removed `fetchWithRuntimeDispatcher` symbol. It uses a local `fetchWithWeixinRuntime` adapter backed by the current OpenClaw SDK guarded-fetch API.
+- Business smoke now runs `openclaw-weixin` build and typecheck as a gate. Future SDK ABI drift or source/dist divergence will fail inspection instead of relying on hand-patched dist files.
+- Runtime patch audit now verifies the WeChat preflight route by requiring the `trimUrlForArchive` guard in the compiled bundle.
+
+Verification:
+
+- `npm run build` and `npm run typecheck` passed in the WeChat plugin directory.
+- WeChat extension unit tests passed, including glued URL plus Chinese wiki-save intent.
+- Runtime patch audit returned `ok=true`, `errors=0`.
+- Business smoke returned `Business smoke OK` and included the new plugin build/typecheck gate.
+- Production guard returned `result=ok`, `errors=0`, `warnings=0`.
+- Gateway restart completed and `/health` returned `{"ok":true,"status":"live"}`.
+- A real glued WeChat URL replay saved the article to the local wiki source `mp-weixin-qq-com-s-tmerzfxjr8c4v3bg7l-rzq.md` and completed QMD embedding.
+
 ## Optimization Plan
 
 - Keep the OpenClaw ops status index as the single status integration point so health dashboard, business smoke, production guard, acceptance checks, and upgrade postflight read the same freshness and supersession model.

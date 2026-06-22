@@ -83,6 +83,14 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Copy-mode external assets may keep serving an existing valid local HEAD during transient GitHub network failures, but missing source/mirror or failed local copy remains a hard failure.
 - See [2026-06-11 OpenClaw Unified Upgrade, Health, and Route Closure](incidents/2026-06-11-openclaw-unified-upgrade-health-and-route-closure.md).
 
+## 2026-06-22 WeChat Plugin Build Gate Notes
+
+- Channel URL-to-wiki routes must treat the URL and the natural-language archive intent as separate fields. A URL immediately followed by Chinese text must be sanitized before reaching any extractor.
+- The unified web URL wrapper and the dedicated WeChat/Zhihu wrappers should all keep entry-point URL sanitization. This prevents one broken channel parser from poisoning the whole archive path.
+- The WeChat channel plugin must remain buildable from source. Business smoke now runs the plugin `npm run build` and `npm run typecheck` gates so source/dist drift or OpenClaw SDK ABI drift is caught before release.
+- Runtime patch audit should continue checking the compiled WeChat route bundle for the URL trimming guard.
+- See [2026-06-11 OpenClaw Unified Upgrade, Health, and Route Closure](incidents/2026-06-11-openclaw-unified-upgrade-health-and-route-closure.md).
+
 ## Feedback Digest
 
 ```bash
