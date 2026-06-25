@@ -3,19 +3,45 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "$0")" && pwd)"
 project_dir="$(cd "$script_dir/.." && pwd)"
+support_dir="${DAILY_TECH_SUPPORT_DIR:-$HOME/Library/Application Support/daily-tech-site}"
+support_site_env="$support_dir/site.env"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/opt/homebrew/opt/node@22/bin:$PATH"
+
+load_env_file() {
+  local file="$1" line key value content
+  content="$(/bin/cat "$file" 2>/dev/null || true)"
+  [[ -n "$content" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key##export }"
+    [[ "$key" =~ '^[A-Za-z_][A-Za-z0-9_]*$' ]] || continue
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+      value="${value[2,-2]}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+      value="${value[2,-2]}"
+    fi
+    export "$key=$value"
+  done <<< "$content"
+}
 
 openclaw_runtime_env="${OPENCLAW_RUNTIME_ENV:-$HOME/.openclaw/ops/openclaw_runtime_env.sh}"
 if [[ -f "$openclaw_runtime_env" ]]; then
   source "$openclaw_runtime_env"
 fi
 
-if [[ -f "$project_dir/.env" ]]; then
-  set -a
-  source "$project_dir/.env"
-  set +a
-fi
+load_env_file "$project_dir/.env"
+load_env_file "$support_site_env"
+
+export CACHE_DIR="${CACHE_DIR:-$support_dir/cache}"
+export REPORTS_INDEX_FILE="${REPORTS_INDEX_FILE:-$support_dir/cache/snapshots.json}"
+export LATEST_INDEX_FILE="${LATEST_INDEX_FILE:-$support_dir/cache/latest.json}"
+export DETAIL_CACHE_DIR="${DETAIL_CACHE_DIR:-$support_dir/cache/snapshot-details}"
+export OPS_STATUS_FILE="${OPS_STATUS_FILE:-$support_dir/cache/ops-status.json}"
+export REFRESH_STATE_FILE="${REFRESH_STATE_FILE:-$support_dir/cache/refresh-state.json}"
 
 if [[ -z "${FEISHU_TARGET:-}" ]]; then
   cron_jobs_json="${OPENCLAW_CRON_JOBS_JSON:-}"

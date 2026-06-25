@@ -14,16 +14,28 @@ fi
 export PATH="/opt/homebrew/bin:$HOME/.bun/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
 
-if [[ -f "$project_dir/.env" ]]; then
-  set -a
-  source "$project_dir/.env"
-  set +a
-fi
-if [[ -f "$support_dir/site.env" ]]; then
-  set -a
-  source "$support_dir/site.env"
-  set +a
-fi
+load_env_file() {
+  local file="$1" line key value content
+  content="$(/bin/cat "$file" 2>/dev/null || true)"
+  [[ -n "$content" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key##export }"
+    [[ "$key" =~ '^[A-Za-z_][A-Za-z0-9_]*$' ]] || continue
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+      value="${value[2,-2]}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+      value="${value[2,-2]}"
+    fi
+    export "$key=$value"
+  done <<< "$content"
+}
+
+load_env_file "$project_dir/.env"
+load_env_file "$support_dir/site.env"
 
 QMD_BIN="${QMD_BIN:-qmd}"
 KB_ALIAS_DIR="${KB_ALIAS_DIR:-$HOME/.daily-tech-site-wiki}"

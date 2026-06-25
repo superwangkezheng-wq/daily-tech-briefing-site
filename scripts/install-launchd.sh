@@ -75,6 +75,7 @@ mkdir -p "$support_runtime_dir"
   --exclude 'node_modules' \
   --exclude '.cache' \
   "$project_dir/" "$support_runtime_dir/"
+rm -f "$support_runtime_dir/.env"
 
 escape_sed() {
   printf '%s' "$1" | sed 's/[\/&]/\\&/g'
@@ -105,16 +106,28 @@ runtime_dir="$support_dir/runtime"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-if [[ -f "$runtime_dir/.env" ]]; then
-  set -a
-  source "$runtime_dir/.env"
-  set +a
-fi
-if [[ -f "$support_dir/site.env" ]]; then
-  set -a
-  source "$support_dir/site.env"
-  set +a
-fi
+load_env_file() {
+  local file="$1" line key value content
+  content="$(/bin/cat "$file" 2>/dev/null || true)"
+  [[ -n "$content" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key##export }"
+    [[ "$key" =~ '^[A-Za-z_][A-Za-z0-9_]*$' ]] || continue
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+      value="${value[2,-2]}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+      value="${value[2,-2]}"
+    fi
+    export "$key=$value"
+  done <<< "$content"
+}
+
+load_env_file "$runtime_dir/.env"
+load_env_file "$support_dir/site.env"
 
 export CACHE_DIR="${CACHE_DIR:-$support_dir/cache}"
 export REPORTS_INDEX_FILE="${REPORTS_INDEX_FILE:-$support_dir/cache/snapshots.json}"
@@ -140,19 +153,37 @@ set -euo pipefail
 slot="${1:?slot required}"
 support_dir="${DAILY_TECH_SUPPORT_DIR:-$HOME/Library/Application Support/daily-tech-site}"
 runtime_dir="$support_dir/runtime"
+ops_policy="${OPENCLAW_OPS_POLICY:-$HOME/.openclaw/ops/openclaw_ops_policy.py}"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
-if [[ -f "$runtime_dir/.env" ]]; then
-  set -a
-  source "$runtime_dir/.env"
-  set +a
+if [[ -x "$ops_policy" ]] && "$ops_policy" is-paused daily-tech-site-refresh >/dev/null 2>&1; then
+  echo "daily-tech site refresh paused by $ops_policy; skip refresh slot=$slot"
+  exit 0
 fi
-if [[ -f "$support_dir/site.env" ]]; then
-  set -a
-  source "$support_dir/site.env"
-  set +a
-fi
+
+load_env_file() {
+  local file="$1" line key value content
+  content="$(/bin/cat "$file" 2>/dev/null || true)"
+  [[ -n "$content" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key##export }"
+    [[ "$key" =~ '^[A-Za-z_][A-Za-z0-9_]*$' ]] || continue
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+      value="${value[2,-2]}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+      value="${value[2,-2]}"
+    fi
+    export "$key=$value"
+  done <<< "$content"
+}
+
+load_env_file "$runtime_dir/.env"
+load_env_file "$support_dir/site.env"
 
 export CACHE_DIR="${CACHE_DIR:-$support_dir/cache}"
 export REPORTS_INDEX_FILE="${REPORTS_INDEX_FILE:-$support_dir/cache/snapshots.json}"

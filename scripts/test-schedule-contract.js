@@ -89,9 +89,22 @@ const installer = readText(path.join(ROOT_DIR, "scripts/install-launchd.sh"));
 assert.match(installer, /DAILY_COLLECTION_SLOTS:-morning/);
 assert.match(installer, /INSTALL_AFTERNOON_REFRESH:-0/);
 assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
-assert.match(installer, /source "\$support_site_env"/);
+assert.match(installer, /load_env_file "\$support_dir\/site\.env"/);
+assert.match(installer, /daily-tech site refresh paused by \$ops_policy/);
+assert.match(installer, /rm -f "\$support_runtime_dir\/\.env"/);
 assert.match(installer, /s\/__HOME_DIR__\/\$home_escaped\/g/);
 assert.match(installer, /disabled_refresh_plists\+=\("\$target_dir\/com\.dailytech\.qmd\.refresh\.plist"\)/);
+
+const healthWrapper = readText(path.join(ROOT_DIR, "scripts/run-feedback-health-report.sh"));
+assert.match(healthWrapper, /support_site_env="\$support_dir\/site\.env"/);
+assert.match(healthWrapper, /load_env_file "\$support_site_env"/);
+assert.match(healthWrapper, /export CACHE_DIR="\$\{CACHE_DIR:-\$support_dir\/cache\}"/);
+assert.match(healthWrapper, /export OPS_STATUS_FILE="\$\{OPS_STATUS_FILE:-\$support_dir\/cache\/ops-status\.json\}"/);
+
+const qmdWrapper = readText(path.join(ROOT_DIR, "scripts/run-qmd-refresh.sh"));
+assert.match(qmdWrapper, /load_env_file "\$project_dir\/\.env"/);
+assert.match(qmdWrapper, /load_env_file "\$support_dir\/site\.env"/);
+assert.doesNotMatch(qmdWrapper, /source "\$project_dir\/\.env"/);
 
 const oneNGuide = readText(path.join(ROOT_DIR, "docs/1n-system-guide.md"));
 assert.match(oneNGuide, /Fresh subsystem status files are the business truth/);

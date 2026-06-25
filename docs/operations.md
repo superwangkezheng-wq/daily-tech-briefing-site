@@ -91,6 +91,14 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Runtime patch audit should continue checking the compiled WeChat route bundle for the URL trimming guard.
 - See [2026-06-11 OpenClaw Unified Upgrade, Health, and Route Closure](incidents/2026-06-11-openclaw-unified-upgrade-health-and-route-closure.md).
 
+## 2026-06-25 Website Freshness Notes
+
+- Production health must validate the latest snapshot age through `/api/snapshots`; `http://127.0.0.1:4321` returning `200` only proves the server is alive.
+- Feedback-health receipts must read the production support cache/status files under `~/Library/Application Support/daily-tech-site/cache`, not the project `.cache` directory.
+- launchd wrappers load env files defensively and the installer removes runtime `.env` copies, so macOS provenance/quarantine metadata cannot break refresh or qmd jobs.
+- BusinessSmoke, ProductionGuard, and HealthDashboard all include a daily-tech latest snapshot freshness check. The default freshness budget is 40 hours so pre-morning checks accept yesterday's successful morning edition while stale multi-day pages fail.
+- See [2026-06-25 Daily-Tech Website Freshness Drift](incidents/2026-06-25-daily-tech-website-freshness-drift.md).
+
 ## Feedback Digest
 
 ```bash
