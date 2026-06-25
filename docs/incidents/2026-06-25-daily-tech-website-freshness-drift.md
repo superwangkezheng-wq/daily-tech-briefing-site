@@ -42,3 +42,22 @@ The morning collection completed and pushed through the notification channel, bu
 ## Prevention
 
 Do not treat a website `200` as publishing health. Publishing health requires an endpoint check plus a content freshness check against the latest business snapshot.
+
+## 2026-06-25 Ops Closure
+
+Additional OpenClaw operations hardening was applied after the first fix:
+
+- `openclaw_upgrade_availability.py` now checks `/api/snapshots` freshness in post-upgrade availability, so unified upgrades can no longer pass on HTTP `200` alone.
+- Availability probes are split by channel: Feishu live outbound remains a hard postflight gate because it protects the known Feishu ABI regression class; Weixin live outbound records a warning when OpenClaw blocks the route as a private/internal target.
+- `openclaw_upgrade_guard.py` now refreshes post-upgrade availability before rebuilding the ops status index, preventing stale `upgradeAvailability` blockers from making a newer successful postflight fail.
+- Freshness gates honor `daily-tech-publishing` pause policy: active publishing requires a fresh latest snapshot; paused publishing skips freshness while still checking that the site can serve the last good page.
+- `openclaw_health_dashboard.sh` is now managed by the AssetSync manifest, alongside BusinessSmoke, ProductionGuard, UpgradeGuard, and UpgradeAvailability, so weekly unified upgrades do not overwrite these runtime fixes.
+
+Final verification:
+
+- `openclaw_upgrade_guard.py postflight --json`: `ok=true`
+- `openclaw_upgrade_availability.py`: Feishu outbound `ok`, Weixin outbound `warn`, OpenDesign/model/summary/site/runtime `ok`
+- `openclaw_business_smoke.sh`: `Business smoke OK`, latest site snapshot `2026-06-25 上午版`
+- `openclaw_production_guard.sh --repair --json`: `result=ok`, latest snapshot freshness `2026-06-25 上午版`
+- `openclaw_health_dashboard.sh`: `errors=0`
+- AssetSync dry-run: failures `0`, file overlays include `health_dashboard`

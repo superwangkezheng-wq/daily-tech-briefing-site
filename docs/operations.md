@@ -97,6 +97,9 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Feedback-health receipts must read the production support cache/status files under `~/Library/Application Support/daily-tech-site/cache`, not the project `.cache` directory.
 - launchd wrappers load env files defensively and the installer removes runtime `.env` copies, so macOS provenance/quarantine metadata cannot break refresh or qmd jobs.
 - BusinessSmoke, ProductionGuard, and HealthDashboard all include a daily-tech latest snapshot freshness check. The default freshness budget is 40 hours so pre-morning checks accept yesterday's successful morning edition while stale multi-day pages fail.
+- Unified upgrade postflight must refresh availability before reading the ops status index. This prevents a stale `upgradeAvailability` status from failing a newer successful postflight.
+- Post-upgrade channel probes are channel-specific: Feishu live outbound is a hard ABI/availability gate; Weixin live outbound may be a warning when the route is blocked as private/internal, while account health remains checked separately.
+- AssetSync file overlays must include every ops gate that enforces website freshness, including HealthDashboard, so weekly upgrades cannot roll back runtime guard changes.
 - See [2026-06-25 Daily-Tech Website Freshness Drift](incidents/2026-06-25-daily-tech-website-freshness-drift.md).
 
 ## Feedback Digest
