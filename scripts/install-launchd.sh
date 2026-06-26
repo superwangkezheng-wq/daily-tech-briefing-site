@@ -199,14 +199,32 @@ chmod +x "$support_refresh_wrapper"
 
 cat > "$support_tunnel_wrapper" <<'SH'
 #!/bin/zsh
-set -eu
+set -euo pipefail
 
 support_dir="${DAILY_TECH_SUPPORT_DIR:-$HOME/Library/Application Support/daily-tech-site}"
 env_file="$support_dir/cloudflare-tunnel.env"
 
-if [[ -f "$env_file" ]]; then
-  source "$env_file"
-fi
+load_env_file() {
+  local file="$1" line key value content
+  content="$(/bin/cat "$file" 2>/dev/null || true)"
+  [[ -n "$content" ]] || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [[ -z "$line" || "$line" == \#* || "$line" != *=* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    key="${key##export }"
+    [[ "$key" =~ '^[A-Za-z_][A-Za-z0-9_]*$' ]] || continue
+    if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+      value="${value[2,-2]}"
+    elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+      value="${value[2,-2]}"
+    fi
+    export "$key=$value"
+  done <<< "$content"
+}
+
+load_env_file "$env_file"
 
 if [[ -z "${CLOUDFLARED_TUNNEL_TOKEN:-}" ]]; then
   echo "CLOUDFLARED_TUNNEL_TOKEN is missing in $env_file" >&2
@@ -218,9 +236,15 @@ export TUNNEL_TOKEN="$CLOUDFLARED_TUNNEL_TOKEN"
 export NO_PROXY="${NO_PROXY:-127.0.0.1,localhost,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}"
 unset CLOUDFLARED_TUNNEL_TOKEN HTTPS_PROXY HTTP_PROXY ALL_PROXY
 
+protocol_args=()
+if [[ -n "${CLOUDFLARED_PROTOCOL:-}" ]]; then
+  protocol_args=(--protocol "$CLOUDFLARED_PROTOCOL")
+fi
+
 edge_args=()
-if [[ -n "${CLOUDFLARED_EDGE_ARGS:-}" ]]; then
-  # shellcheck disable=SC2206
+if [[ "${CLOUDFLARED_EDGE_ARGS:-}" == "auto" ]]; then
+  edge_args=()
+elif [[ -n "${CLOUDFLARED_EDGE_ARGS:-}" ]]; then
   edge_args=(${=CLOUDFLARED_EDGE_ARGS})
 else
   edge_args=(
@@ -234,7 +258,7 @@ fi
 exec /opt/homebrew/bin/cloudflared tunnel \
   --no-autoupdate \
   --metrics 127.0.0.1:20241 \
-  --protocol http2 \
+  "${protocol_args[@]}" \
   "${edge_args[@]}" \
   run
 SH
