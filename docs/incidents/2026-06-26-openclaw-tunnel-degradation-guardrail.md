@@ -14,9 +14,10 @@ The 03:10 BusinessSmoke and 09:05 ProductionGuard receipts failed because the pu
 
 ## Root Cause
 
-- `dailytech_tunnel.sh` forced `cloudflared` to `--protocol http2` and a fixed set of edge addresses. When that edge path degraded, the public tunnel could not connect.
-- Removing the fixed edges exposed a second local network issue: `cloudflared` SRV discovery used the system resolver `114.114.114.114`, which failed for Cloudflare Tunnel SRV lookups.
-- QUIC also timed out on the current network path, and HTTP/2 to the tested Cloudflare edges returned TLS EOF. This indicates a current public tunnel egress problem rather than a Daily-Tech origin failure.
+- The Daily-Tech origin and snapshot were healthy, but `cloudflared` could not keep the public tunnel registered, so Cloudflare returned `530 / 1033`.
+- The historical proxy fix had been expressed as Clash Verge enhancement rules, but those rules were configured under `append`. Clash generated `MATCH,🐟漏网之鱼` before the OpenClaw Tunnel rules, so the tunnel-specific rules were never reached.
+- After the rule order was corrected, `cloudflared` registered four Cloudflare edge connections and the public site returned `200`.
+- A second class of runtime risk was found during verification: zsh treats the lowercase `path` variable as the array mirror of `PATH`. Any `for path in ...` or `local path=...` in zsh can make later commands disappear in the same script scope.
 - ProductionGuard did not distinguish "origin service unavailable" from "public tunnel degraded while origin remains healthy."
 
 ## Fix
@@ -29,6 +30,8 @@ The 03:10 BusinessSmoke and 09:05 ProductionGuard receipts failed because the pu
 - Updated ProductionGuard so Daily-Tech tunnel endpoint failures are classified as warning-level public tunnel degradation when the local site and snapshot checks remain healthy.
 - Synced the ProductionGuard change to default/work ops copies and the `openclaw_md_refresh` overlay.
 - Refreshed BusinessSmoke status after the guardrail change so stale failure state no longer propagates.
+- Corrected Clash Verge OpenClaw Tunnel rule generation so `PROCESS-NAME,cloudflared`, `argotunnel.com`, `trycloudflare.com`, and fixed Cloudflare edge IP rules are inserted before the first `MATCH` / `FINAL` rule.
+- Added `openclaw_zsh_path_safety_audit.py` to ProductionGuard and renamed zsh shell variables that used the reserved `path` name in default/work/deep-research maintenance scripts.
 
 ## Verification
 
@@ -37,10 +40,12 @@ The 03:10 BusinessSmoke and 09:05 ProductionGuard receipts failed because the pu
 - `zsh scripts/install-launchd.sh`
 - Local site: `http://127.0.0.1:4321 => 200`
 - Latest snapshot: `2026-06-26 上午版`
-- Public tunnel: still degraded with `530 / 1033`, recorded as warning
+- Public tunnel: `https://daily-tech.example.com => 200` after Clash rule ordering was repaired
 - `openclaw_production_guard.sh --dry-run --skip-business-smoke-status --json`: `result=ok`, `errors=0`, `warnings=2`
 - `openclaw_business_smoke.sh`: `Business smoke OK`, status refreshed at `2026-06-26T10:05:09+0800`
 - `openclaw_production_guard.sh --repair --json`: `result=ok`, `errors=0`, `warnings=2`
+- `openclaw_zsh_path_safety_audit.py --json`: `result=ok`, `errors=0`, `scanned=122`
+- `openclaw_production_guard.sh --dry-run --skip-business-smoke-status --json`: `result=ok`, `errors=0`, `warnings=1`, including `zsh path safety audit = ok`
 
 ## Prevention
 
@@ -50,3 +55,4 @@ Daily-Tech publishing health must be evaluated in layers:
 2. Public tunnel availability is a warning while the origin remains healthy and a self-heal kickstart has been attempted.
 3. A stale BusinessSmoke failure must not be allowed to re-contaminate ProductionGuard after the current guard run proves the origin is healthy.
 4. Cloudflare Tunnel protocol and edge selection must stay env-driven so operators can hot-switch between DNS discovery, fixed edges, QUIC, and HTTP/2 without patching OpenClaw code.
+5. zsh production scripts must not use `path` as a variable name. The guardrail is now part of ProductionGuard because this silently mutates `PATH`.
