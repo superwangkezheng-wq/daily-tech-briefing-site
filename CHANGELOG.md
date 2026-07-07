@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1 - 2026-07-07
+
+- Documented the upstream OpenClaw AGI HUNT provider closure: canary, cache, disabled-by-default source config, daily-news candidate seam, and primary-verification semantics.
+- Documented new OpenClaw gate coverage for AGI HUNT in BusinessSmoke, ProductionGuard, Status Schema, and AssetSync contract audit.
+- Recorded the AssetSync manifest coverage that prevents AGI HUNT provider, tests, `daily_news_v10.py`, and source manifest drift across default/work OpenClaw runtimes.
+- Documented the Lark PromptScript skill refresh fix: refresh `~/.agents/skills` without global PromptScript installation and guard the scope through AssetSync contract audit.
+
 ## 1.2.0 - 2026-06-16
 
 - **AI 评分与排序 (Horizon-inspired)**: `report-parser.js` 新增 `**AI 评分**:` 字段解析（向后兼容，旧数据 score=null）；`site-index.js` 按评分降序排列条目，支持 `AI_SCORE_THRESHOLD` 阈值过滤（默认 0=不过滤，向后兼容）；`site.js` 新增评分 Badge（绿≥8/黄≥6/灰<6）。

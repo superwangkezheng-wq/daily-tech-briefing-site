@@ -102,6 +102,15 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - AssetSync file overlays must include every ops gate that enforces website freshness, including HealthDashboard, so weekly upgrades cannot roll back runtime guard changes.
 - See [2026-06-25 Daily-Tech Website Freshness Drift](incidents/2026-06-25-daily-tech-website-freshness-drift.md).
 
+## 2026-07-07 AGI HUNT And Production Gate Closure
+
+- AGI HUNT is an upstream OpenClaw aggregated-signal provider, not a primary source. Its candidates should stay marked as requiring primary-source verification.
+- The reference source manifest keeps AGI HUNT disabled by default. Disabled canary status is healthy when it returns `skipped` with `errors=0` and `warnings=0`.
+- BusinessSmoke and ProductionGuard should include the AGI HUNT canary so source availability and schema compatibility are visible before operators enable the source.
+- AssetSync overlays must include the AGI HUNT provider, provider tests, `daily_news_v10.py`, and the daily-news source manifest so weekly upgrades cannot drop the adapter from default/work runtimes.
+- Lark skill refresh should update the local skill source without global PromptScript installation. Do not reintroduce `npx skills add larksuite/cli -y -g`.
+- See [2026-07-07 OpenClaw AGI HUNT Production Gate Closure](incidents/2026-07-07-openclaw-agihunt-production-gate-closure.md).
+
 ## Feedback Digest
 
 ```bash

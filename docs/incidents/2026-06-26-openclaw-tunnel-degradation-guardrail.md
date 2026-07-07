@@ -10,7 +10,7 @@ The 03:10 BusinessSmoke and 09:05 ProductionGuard receipts failed because the pu
 
 - BusinessSmoke failed even though the local website, snapshot cache, model route, channel contracts, knowledge checks, and runtime dependencies were healthy.
 - ProductionGuard later failed because it hard-referenced the stale BusinessSmoke failure status.
-- The public entry `https://daily-tech.example.com` remained unavailable while `http://127.0.0.1:4321` served the current `2026-06-26 上午版` snapshot.
+- The configured public tunnel entry remained unavailable while the local origin `http://127.0.0.1:4321` served the current `2026-06-26 上午版` snapshot.
 
 ## Root Cause
 
@@ -36,11 +36,11 @@ The 03:10 BusinessSmoke and 09:05 ProductionGuard receipts failed because the pu
 ## Verification
 
 - `zsh -n scripts/install-launchd.sh`
-- `zsh -n /Users/REDACTED/.openclaw/ops/openclaw_production_guard.sh`
+- `zsh -n ~/.openclaw/ops/openclaw_production_guard.sh`
 - `zsh scripts/install-launchd.sh`
 - Local site: `http://127.0.0.1:4321 => 200`
 - Latest snapshot: `2026-06-26 上午版`
-- Public tunnel: `https://daily-tech.example.com => 200` after Clash rule ordering was repaired
+- Public tunnel: configured public tunnel URL returned `200` after Clash rule ordering was repaired
 - `openclaw_production_guard.sh --dry-run --skip-business-smoke-status --json`: `result=ok`, `errors=0`, `warnings=2`
 - `openclaw_business_smoke.sh`: `Business smoke OK`, status refreshed at `2026-06-26T10:05:09+0800`
 - `openclaw_production_guard.sh --repair --json`: `result=ok`, `errors=0`, `warnings=2`
