@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.18 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Live Provider Transport Stub seam.
+- Recorded the secret-free request envelope, stub response envelope, timeout/error mapping, and QA-checked draft path behind the real provider canary guard.
+- Clarified that the transport stub still uses no real network, no provider key, and no model call; it only proves the adapter seam before a future audited live transport.
+
 ## 1.2.17 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Real Provider Canary Guard.

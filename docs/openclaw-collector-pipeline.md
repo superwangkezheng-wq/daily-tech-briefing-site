@@ -135,6 +135,7 @@ Current audited shadow metrics:
 | Live canary execution gate | one fixture draft only, explicit switch |
 | Provider adapter harness | recorded replay, explicit injection |
 | Real provider canary guard | preflight only, adapter not implemented |
+| Live provider transport stub | secret-free envelope, no real network |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -160,6 +161,7 @@ Current audited shadow metrics:
 | Live canary execution gate | 显式开关下仅 1 条 fixture draft |
 | Provider adapter harness | 录制回放，显式注入 |
 | Real provider canary guard | 仅预检，adapter 未实现 |
+| Live provider transport stub | 无密钥 envelope，不触真实网络 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -187,6 +189,10 @@ provider adapter harness 是真实 provider 调用前的下一道 Synthesis Engi
 The real provider canary guard is a preflight policy gate, not a provider caller. With `realProviderCanaryEnabled=true`, it requires `canaryExecutionEnabled=true`, explicit network/model switches, provider route allowlist, model allowlist, cost ceiling, timeout ceiling, and `maxCanaryItems=1`. If the policy fails, it blocks with specific reasons such as `network_disabled`, `provider_route_not_allowed`, `cost_limit_exceeded`, or `canary_limit_exceeded`. If the policy passes, it still blocks with `real_provider_adapter_not_implemented`, keeping `network_used=false`, `model_call_count=0`, and `provider_call_count=0`.
 
 real provider canary guard 是真实调用前的预检策略门，不是 provider caller。只有 `realProviderCanaryEnabled=true` 时，它才检查 `canaryExecutionEnabled=true`、显式网络/模型开关、provider route allowlist、模型 allowlist、成本上限、超时上限以及 `maxCanaryItems=1`。策略失败时会用 `network_disabled`、`provider_route_not_allowed`、`cost_limit_exceeded`、`canary_limit_exceeded` 等原因阻断；策略通过时仍以 `real_provider_adapter_not_implemented` 阻断，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。
+
+The live provider transport stub is the first transport seam behind the real provider guard. With `providerTransportStubEnabled=true` and an injected stub transport, it builds a secret-free request envelope containing route, model profile, timeouts, token and cost ceilings, event id, slot, source count, and evidence count. It excludes API keys, prompts, article text, and source payload. Stub success responses can be parsed into `SynthesisDraft(synthesis_mode=live_provider_transport_stub)` and then checked by QA; stub timeout/error envelopes map to stable categories such as `provider_timeout`. This remains a stub: `network_used=false`, `model_call_count=0`, and real provider credentials are never read.
+
+live provider transport stub 是 real provider guard 后面的第一道 transport seam。只有 `providerTransportStubEnabled=true` 且显式注入 stub transport 时，它才构造无密钥 request envelope，包含 route、模型画像、超时、token/成本上限、event id、slot、source count 和 evidence count；不包含 API key、prompt、正文或 source payload。stub 成功响应可解析成 `SynthesisDraft(synthesis_mode=live_provider_transport_stub)` 并进入 QA；stub timeout/error envelope 会映射到 `provider_timeout` 等稳定分类。它仍然只是 stub：`network_used=false`、`model_call_count=0`，不会读取真实 provider 凭据。
 
 ## 4. Dependency Matrix / 依赖清单
 
