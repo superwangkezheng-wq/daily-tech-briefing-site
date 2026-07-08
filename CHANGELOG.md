@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.15 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Live Canary Execution Gate.
+- Recorded that explicit `canaryExecutionEnabled` plus `canaryFixtureEnabled` can produce exactly one fixture canary draft while real network/model calls remain disabled.
+- Clarified that the gate stays inside the Synthesis Engine boundary: it does not affect source health, event selection, publisher behavior, or V10 production.
+
 ## 1.2.14 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Live Synthesis Adapter Contract Shadow module.

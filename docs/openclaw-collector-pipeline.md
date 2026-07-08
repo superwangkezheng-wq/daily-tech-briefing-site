@@ -132,6 +132,7 @@ Current audited shadow metrics:
 | Synthesis adapter model profile | deepseek-v4-flash |
 | Synthesis adapter model calls | 0 |
 | Live synthesis contract | blocked / contract-only |
+| Live canary execution gate | one fixture draft only, explicit switch |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -154,6 +155,7 @@ Current audited shadow metrics:
 | Synthesis adapter 模型画像 | deepseek-v4-flash |
 | Synthesis adapter 模型调用 | 0 |
 | Live synthesis contract | blocked / 仅合同 |
+| Live canary execution gate | 显式开关下仅 1 条 fixture draft |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -169,6 +171,10 @@ V10 parity 层故意保守：它证明新 shadow delivery 形态可以提供 V10
 The live synthesis adapter contract now exists as a fail-closed shadow object. Its audited fields cover `provider_route`, `model_profile_id`, `timeout_ms`, `max_input_chars`, `max_output_tokens`, `max_estimated_cost_usd`, canary input/output schemas, and failure modes. Current blocking reasons are `live_adapter_contract_only`, `network_disabled`, and `model_calls_disabled`.
 
 live synthesis adapter 合同现在已经存在，但仍是 fail-closed shadow object。它的审计字段覆盖 `provider_route`、`model_profile_id`、`timeout_ms`、`max_input_chars`、`max_output_tokens`、`max_estimated_cost_usd`、canary 输入/输出 schema 和失败模式。当前阻断原因为 `live_adapter_contract_only`、`network_disabled`、`model_calls_disabled`。
+
+The live canary execution gate is also bounded to the Synthesis Engine. With `canaryExecutionEnabled=true` and `canaryFixtureEnabled=true`, it may produce exactly one fixture `SynthesisDraft` for QA validation while `network_used=false`, `model_call_count=0`, and publishing remains blocked. It must not alter source health, event selection, or publisher behavior.
+
+live canary execution gate 也被限定在 Synthesis Engine 内。只有 `canaryExecutionEnabled=true` 且 `canaryFixtureEnabled=true` 时，它才允许生成 1 条 fixture `SynthesisDraft` 用于 QA 验证，同时保持 `network_used=false`、`model_call_count=0`、发布继续阻断。它不得改变源健康、事件选择或发布行为。
 
 ## 4. Dependency Matrix / 依赖清单
 
