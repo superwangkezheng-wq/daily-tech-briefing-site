@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.29 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Publisher Execution Gate Shadow.
+- Recorded the final side-effect gate for publisher preflight, including explicit execution switch, dry-run mode, idempotency key validation, zero side-effect budget, and blocked real execute mode.
+- Noted that default/work tests, compile checks, shadow JSON assertions, and local adversarial review passed while CodeRabbit review remains queued due CLI rate limit.
+
 ## 1.2.28 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Publisher Rendering Contract Shadow.

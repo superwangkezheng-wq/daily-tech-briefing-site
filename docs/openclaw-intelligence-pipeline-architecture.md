@@ -19,6 +19,7 @@ Source Registry
   -> Publisher Target Contract
   -> Publisher Rendering Contract
   -> Publisher
+  -> Publisher Execution Gate
 ```
 
 The goal is not to add more branches for individual sources. The goal is to move source identity, fetch adapters, admission policy, selection policy, verification, and health behavior into explicit interfaces.
@@ -378,6 +379,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Publisher Target Contract | channel list and metadata-only target descriptors to target pass/block | channel allowlist, target required fields, no secret material, no sends |
 | Publisher Rendering Contract | selected stories and synthesis drafts to artifact shape pass/block | Markdown/cache/channel/archive schemas, render required fields, no content payloads |
 | Publisher | approved `DeliverySnapshot` to output surfaces | Markdown report, cache, channel message, archive |
+| Publisher Execution Gate | publisher preflight plan and execution policy to dry-run/blocked decision | explicit execution switch, mode, idempotency, side-effect budget |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
 ## Data Contracts
@@ -396,6 +398,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `DeliverySnapshotSchemaGateResult` | Side-effect-free schema pass/block status for delivery snapshot fields, story/draft consistency, channels, and idempotency inputs. |
 | `PublisherTargetContractResult` | Metadata-only target pass/block status for publisher channels, target fields, and secret-free target descriptors. |
 | `PublisherRenderingContractResult` | Side-effect-free render shape pass/block status for Markdown, cache, channel payload, and archive artifacts. |
+| `PublisherExecutionGateResult` | Final pre-side-effect dry-run/block status for Publisher execution mode, idempotency, and side-effect budget. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -457,6 +460,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1H | Add Delivery Snapshot Schema Gate before Publisher with fail-closed required-field, count, channel, and idempotency checks. | None |
 | 1I | Add Publisher Target Resolver / Channel Contract with metadata-only target checks and missing-target fail-closed behavior. | None |
 | 1J | Add Publisher Rendering Contract Shadow with artifact shape schemas and no write/send/content-payload behavior. | None |
+| 1K | Add Publisher Execution Gate Shadow with explicit dry-run/execute policy, idempotency validation, and zero side-effect budget. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

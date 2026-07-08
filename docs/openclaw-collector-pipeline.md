@@ -99,6 +99,7 @@ SourceProfile
   -> PublisherTargetContractResult
   -> PublisherRenderingContractResult
   -> PublisherPlan
+  -> PublisherExecutionGateResult
 ```
 
 The shadow flow is intentionally not a publisher. It loads the V10 source manifest, builds deterministic probe/raw/candidate/event/selection/synthesis/QA outputs, keeps `network_enabled=false`, keeps `publish_enabled=false`, and leaves `DeliverySnapshot.approved=false`.
@@ -122,6 +123,7 @@ SourceProfile
   -> PublisherTargetContractResult
   -> PublisherRenderingContractResult
   -> PublisherPlan
+  -> PublisherExecutionGateResult
 ```
 
 这个 shadow flow 不是发布器。它读取 V10 源 manifest，生成确定性的 probe/raw/candidate/event/selection/synthesis/QA 输出，同时保持 `network_enabled=false`、`publish_enabled=false`、`DeliverySnapshot.approved=false`。
@@ -257,6 +259,10 @@ Publisher Target Resolver / Channel Contract 是下一道发送前闸门。它�
 The Publisher Rendering Contract Shadow is the output-shape gate before any real write or send implementation. It describes the planned artifact schemas for the Markdown report, website cache, channel payloads, and archive manifest, checks selected-story and synthesis-draft render fields, and records story/channel counts. It intentionally returns no summary or impact content payloads, writes no files, sends no channels, and blocks Publisher if the rendering contract is missing or malformed.
 
 Publisher Rendering Contract Shadow 是真实写入或发送实现前的输出形状闸门。它描述 Markdown report、website cache、channel payloads、archive manifest 的 artifact schema，检查 selected story 与 synthesis draft 的渲染必需字段，并记录 story/channel count。它刻意不返回摘要或影响正文，不写文件，不发送渠道；Publisher 在缺少或未通过 rendering contract 时会 fail closed。
+
+The Publisher Execution Gate Shadow is the final pre-side-effect gate. It consumes `publisher_plan`, checks an explicit execution switch, supports a dry-run mode, validates the idempotency key, keeps a zero side-effect budget, and blocks real `execute` mode until a separate audited implementation exists. Even when dry-run is ready, `execution_allowed=false`, no files are written, no network is used, and no channel message is sent.
+
+Publisher Execution Gate Shadow 是进入真实副作用前的最后一道闸门。它消费 `publisher_plan`，检查显式执行开关，支持 dry-run mode，复核幂等键，保持零副作用预算，并在单独审计的真实执行实现出现前阻断 `execute` mode。即使 dry-run ready，`execution_allowed=false`，不写文件、不触网、不发送渠道消息。
 
 ## 4. Dependency Matrix / 依赖清单
 
