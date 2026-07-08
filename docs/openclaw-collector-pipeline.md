@@ -292,6 +292,10 @@ Publisher execution policy dry-run closure: the shadow CLI now accepts `--publis
 
 Publisher execution policy dry-run 封板：shadow CLI 现在可将 `--publisher-dry-run` 与 metadata-only publisher targets 组合使用。配置后，readiness report 不再把 `publisher_execution_policy` 列为缺口，但在 publisher preflight、delivery approval、V10 parity、live synthesis 和真实 publisher execution 尚未完成前，仍阻断 canary 与 production switch。publisher target metadata 加载现在会在 channel value 不是 JSON object 时 fail closed。default/work 检查、CLI publisher dry-run 断言、副作用不变量和本地对抗审查均通过；scoped CodeRabbit review 因 free CLI rate limit 排队。
 
+Publisher preflight diagnostics closure: `publisher_plan` now exposes `preflight_checks` and `preflight_summary`, turning the coarse `publisher_preflight_ready` blocker into diagnosable checks for delivery snapshot schema, target contract, rendering contract, story count, delivery approval, approval gate, and non-empty delivery snapshots. Readiness now surfaces those preflight check results without taking ownership of Publisher policy. The flow remains shadow-only: `publish_allowed=false` in default flow, `execution_allowed=false`, no network send, no file write, and no channel side effect. Default/work checks, CLI preflight assertions, redline scans, and scoped CodeRabbit review passed with 0 issues.
+
+Publisher preflight diagnostics 封板：`publisher_plan` 现在输出 `preflight_checks` 和 `preflight_summary`，把粗粒度的 `publisher_preflight_ready` blocker 拆成可诊断检查：delivery snapshot schema、target contract、rendering contract、story count、delivery approval、approval gate 和 non-empty delivery snapshot。Readiness 只暴露这些 preflight 结果，不接管 Publisher 策略。当前 flow 仍是 shadow-only：默认 `publish_allowed=false`、`execution_allowed=false`，不触网、不写文件、不发送渠道。default/work 检查、CLI preflight 断言、红线扫描与 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

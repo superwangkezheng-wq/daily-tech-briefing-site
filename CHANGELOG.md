@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.36 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Publisher Preflight Diagnostics Shadow module.
+- Recorded `publisher_plan.preflight_checks` and `publisher_plan.preflight_summary`, plus readiness exposure of per-check publisher preflight results while keeping publication blocked.
+- Re-ran default/work tests, compile checks, CLI preflight assertions, redline scans, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.35 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline publisher execution policy dry-run path.
