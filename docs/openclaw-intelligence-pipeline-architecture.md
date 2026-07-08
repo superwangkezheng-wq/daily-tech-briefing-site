@@ -302,6 +302,43 @@ Current reference metrics:
 
 This module proves the QA gate is no longer a loose keyword sentinel. It now reflects the live model-matrix conclusions while still making no model calls and no publishing changes.
 
+## Functional Module 7: DeliverySnapshot Approval Gate Shadow
+
+The seventh functional module adds a read-only approval gate for delivery snapshots:
+
+```text
+HealthSignal / SelectionCoverage / QAGateResult / DeliverySnapshot
+  -> evaluate_shadow_approval_gate()
+  -> ApprovalGateResult
+```
+
+Current behavior:
+
+- aggregates upstream source, candidate, event, selection, synthesis, QA, and model-aware trace status,
+- records positive checks such as `qa_gate_passed`, `model_trace_fail_closed`, and `primary_evidence_gate_enforced`,
+- records metrics such as selected stories, synthesis drafts, QA results, QA blocks, and primary-evidence blocks,
+- blocks publication with `shadow_mode`, `publishing_disabled`, and `delivery_snapshot_not_approved`,
+- keeps `DeliverySnapshot.approved=false`,
+- keeps `publish_enabled=false`,
+- produces no publishing side effects.
+
+Current reference metrics:
+
+| Metric | Value |
+| --- | ---: |
+| `source_count` | 97 |
+| `candidate_count` | 96 |
+| `event_cluster_count` | 96 |
+| `selected_story_count` | 20 |
+| `synthesis_draft_count` | 20 |
+| `qa_result_count` | 20 |
+| `qa_blocked_count` | 0 |
+| `blocked_primary_evidence` | 1 |
+| `approval_gate.result` | blocked |
+| `approval_gate.approved` | false |
+
+This module proves the quality chain can be summarized into a single approval decision while remaining deliberately fail-closed in shadow mode.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -333,7 +370,8 @@ That makes the main collector module shallow: callers and maintainers must under
 | Selection Engine | `EventCluster` to `SelectedStory` | slot quotas, diversity, coverage, fallback, ranking |
 | Synthesis Engine | `SelectedStory` to generated fields | summary, impact, title refinement, model trace, fallback |
 | QA Gate | generated fields to approved output | model-aware profiles, pollution taxonomy, truncation checks, regression fixtures, fail-closed trace |
-| Publisher | `DeliverySnapshot` to output surfaces | Markdown report, cache, channel message, archive |
+| Approval Gate | health, selection, synthesis, QA, and delivery snapshot to approval decision | blocked reasons, approval checks, publication readiness metrics |
+| Publisher | approved `DeliverySnapshot` to output surfaces | Markdown report, cache, channel message, archive |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
 ## Data Contracts
@@ -348,6 +386,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `SelectedStory` | A selected event with rank, slot, reason, coverage, and primary-evidence gate status. |
 | `SynthesisDraft` | A generated or shadow-generated title, summary, and impact draft for one selected story. |
 | `QAGateResult` | QA pass/block status for one synthesis draft, including model profile, pollution categories, blocked terms, and fail-closed trace. |
+| `ApprovalGateResult` | Read-only approval status, blocked reasons, checks, and metrics for one delivery snapshot. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -405,6 +444,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1D | Add Selection Policy shadow flow with rank, slot, coverage, and primary-evidence gates. | None |
 | 1E | Add Synthesis Contract and QA Gate shadow flow with deterministic drafts and pollution checks. | None |
 | 1F | Add Model-Aware QA Policy shadow flow using the 2026-07-08 model matrix, taxonomy, fixtures, and fail-closed trace. | None |
+| 1G | Add DeliverySnapshot Approval Gate shadow flow with blocked reasons, checks, and readiness metrics. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

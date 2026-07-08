@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.11 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline DeliverySnapshot Approval Gate shadow module.
+- Recorded that the approval gate aggregates source, candidate, event, selection, synthesis, QA, model trace, primary-evidence, and health signals into one read-only decision.
+- Clarified that the current shadow gate is intentionally blocked by `shadow_mode`, `publishing_disabled`, and `delivery_snapshot_not_approved`, with no publishing side effects.
+
 ## 1.2.10 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Model-Aware QA Policy shadow module.
