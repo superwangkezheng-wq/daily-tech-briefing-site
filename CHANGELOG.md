@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.30 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Healing Controller Shadow.
+- Recorded the decision-only healing plan that maps QA, evidence, publisher target/rendering, publisher plan, and execution-gate signals into non-executing retry/degrade/disable/alert decisions without source-specific hardcoding.
+- Noted that default/work tests, compile checks, shadow JSON assertions, and local adversarial review passed while CodeRabbit review remains queued due CLI rate limit.
+
 ## 1.2.29 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Publisher Execution Gate Shadow.

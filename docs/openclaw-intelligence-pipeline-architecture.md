@@ -20,6 +20,7 @@ Source Registry
   -> Publisher Rendering Contract
   -> Publisher
   -> Publisher Execution Gate
+  -> Healing Controller
 ```
 
 The goal is not to add more branches for individual sources. The goal is to move source identity, fetch adapters, admission policy, selection policy, verification, and health behavior into explicit interfaces.
@@ -399,6 +400,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `PublisherTargetContractResult` | Metadata-only target pass/block status for publisher channels, target fields, and secret-free target descriptors. |
 | `PublisherRenderingContractResult` | Side-effect-free render shape pass/block status for Markdown, cache, channel payload, and archive artifacts. |
 | `PublisherExecutionGateResult` | Final pre-side-effect dry-run/block status for Publisher execution mode, idempotency, and side-effect budget. |
+| `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -461,6 +463,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1I | Add Publisher Target Resolver / Channel Contract with metadata-only target checks and missing-target fail-closed behavior. | None |
 | 1J | Add Publisher Rendering Contract Shadow with artifact shape schemas and no write/send/content-payload behavior. | None |
 | 1K | Add Publisher Execution Gate Shadow with explicit dry-run/execute policy, idempotency validation, and zero side-effect budget. | None |
+| 1L | Add Healing Controller Shadow with decision-only retry/degrade/disable/alert planning and no source-specific hardcoding. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

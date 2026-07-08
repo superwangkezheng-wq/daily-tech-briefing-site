@@ -54,6 +54,7 @@ Current gate state:
 - Publisher Target Resolver / Channel Contract now validates metadata-only web, Feishu, WeChat, and archive targets before Publisher; Publisher fails closed if target metadata is missing, blocked, or tied to an unknown channel.
 - Publisher Rendering Contract Shadow now validates Markdown report, website cache, channel payload, and archive manifest shapes without returning content payloads, writing files, or sending channel messages.
 - Publisher Execution Gate Shadow now keeps final execution fail-closed behind an explicit switch, dry-run mode, idempotency-key validation, and a zero side-effect budget.
+- Healing Controller Shadow now converts QA, evidence, publisher, and execution-gate signals into decision-only retry/degrade/disable/alert plans without executing actions or hardcoding source-specific exceptions.
 - Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
