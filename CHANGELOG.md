@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.3 - 2026-07-08
+
+- Added the upstream OpenClaw Intelligence Pipeline architecture contract covering source registry, probes, collectors, pools, selection, synthesis, QA, publishing, and healing.
+- Updated the 1+N guide to make the new pipeline architecture a required maintenance document.
+- Corrected the collector model-chain documentation so it follows the upstream route contract and the 2026-07-08 summary model matrix instead of an older fixed primary-model note.
+- Kept the website package boundary explicit: the site consumes approved delivery snapshots and does not own source collection or source-selection decisions.
+
 ## 1.2.2 - 2026-07-08
 
 - Documented the upstream OpenClaw summary model output contract as a publishing-boundary gate for reports, wiki sources, and website caches.

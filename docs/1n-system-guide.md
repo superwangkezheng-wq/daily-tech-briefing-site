@@ -29,6 +29,7 @@ The website is a publishing and feedback layer. It must not silently become a cr
 | `docs/deployment.md` | Runtime, launchd, tunnel, and maintenance setup. |
 | `docs/operations.md` | Checks, refresh contract, privacy gate, and operator notes. |
 | `docs/openclaw-collector-pipeline.md` | Full upstream collection and product pipeline. |
+| `docs/openclaw-intelligence-pipeline-architecture.md` | Target upstream collector architecture: source registry, probes, pools, selection, synthesis, QA, and healing. |
 | `docs/commercial-readiness-review.md` | Current commercial readiness assessment and repair plan. |
 | `docs/incidents/` | Incident history, root cause, fix, verification, and prevention. |
 | `docs/incidents/2026-07-08-openclaw-summary-model-output-contract-and-matrix-closure.md` | Summary model output contract, live model matrix, and fallback boundary. |

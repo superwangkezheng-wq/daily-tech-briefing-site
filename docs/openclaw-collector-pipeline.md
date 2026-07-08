@@ -398,24 +398,24 @@ V10 参考采集器的日报不是无限堆料，而是紧凑输出：
 
 ## 7. Model Chain and summarize-pro / 模型链与 summarize-pro
 
-The reference OpenClaw setup uses:
+The reference OpenClaw setup uses a model-route contract rather than hardcoding one permanent provider in this public package. The private operator environment should keep the direct summarize route, fallback order, and model-output QA matrix in the upstream OpenClaw route contract.
+
+Current reference principles:
 
 - Summary adapter: `summarize-pro` through `summarize-openclaw.sh`.
-- Primary summary model: `moonshot/kimi-k2.6`.
-- Thinking disabled.
-- Temperature: `0.6`.
-- Configured summary fallback: local `qwen3.5-9b-q8`.
-- Separate agent/cron fallback route: Kimi -> CodePlan (`codex/gpt-5.5`) -> local.
+- The direct summarize route is governed upstream by the OpenClaw model-route contract.
+- The 2026-07-08 production matrix prefers DS Flash through the Volcengine alias, with Doubao Seed 2.0 Pro as a strong backup candidate.
+- Models that leak analysis steps, prompt restatement, character-count checks, implementation plans, or truncated fragments must fail closed and fall back.
+- Separate agent/cron routes such as CodePlan / GPT-style planning routes are not assumed to be usable by the direct summarize wrapper.
 - Policy: summarize only selected/final items, not every raw candidate.
 
 参考 OpenClaw 配置使用：
 
 - 摘要适配器：通过 `summarize-openclaw.sh` 调用 `summarize-pro`。
-- 主摘要模型：`moonshot/kimi-k2.6`。
-- 关闭 thinking。
-- temperature：`0.6`。
-- 摘要 fallback：本地 `qwen3.5-9b-q8`。
-- 独立的 agent/cron fallback：Kimi -> CodePlan (`codex/gpt-5.5`) -> 本地。
+- direct summarize 路线由上游 OpenClaw 模型路由合同治理。
+- 2026-07-08 生产矩阵推荐火山 alias 映射 DS Flash 为首选，Doubao Seed 2.0 Pro 为强备用候选。
+- 任何模型输出只要泄漏分析过程、提示词复述、字数自检、实现计划或截断残片，都必须 fail-closed 并触发 fallback。
+- CodePlan / GPT 风格规划路线属于 agent / cron 能力，不默认等同于 direct summarize wrapper 可用模型。
 - 策略：只对最终入选条目做摘要，不对所有候选原文滥用模型。
 
 The generation flow is:
