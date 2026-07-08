@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.35 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline publisher execution policy dry-run path.
+- Recorded the new `--publisher-dry-run` shadow CLI switch, readiness semantics that distinguish configured execution policy from publish readiness, and fail-closed metadata-channel validation.
+- Re-ran default/work tests, compile checks, CLI publisher dry-run assertions, side-effect invariants, and local adversarial review; scoped CodeRabbit review is queued by the free CLI rate limit.
+
 ## 1.2.34 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline publisher-target metadata dry-run path.

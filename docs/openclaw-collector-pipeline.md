@@ -288,6 +288,10 @@ Publisher-target metadata dry-run closure: `build_shadow_flow` and the shadow CL
 
 Publisher target metadata dry-run 封板：`build_shadow_flow` 与 shadow CLI 现在可显式接收 metadata-only 的 `web`、`feishu`、`wechat`、`archive` 目标描述。配置后，`publisher_target_contract` 可通过，readiness report 不再把 `publisher_target_metadata` 列为缺口；但 flow 仍不读取 secret 或环境变量，不发送渠道，并且在其他 readiness blockers 未消除前不允许 canary 或生产切换。default/work 检查、CLI metadata dry-run 断言与 scoped CodeRabbit review 均为 0 issues。
 
+Publisher execution policy dry-run closure: the shadow CLI now accepts `--publisher-dry-run` together with metadata-only publisher targets. When configured, the readiness report no longer lists `publisher_execution_policy` as missing, but it still blocks canary and production switching while publisher preflight, delivery approval, V10 parity, live synthesis, and real publisher execution remain incomplete. Publisher target metadata loading now fails closed when channel values are not JSON objects. Default/work checks, CLI publisher dry-run assertions, side-effect invariants, and local adversarial review passed; scoped CodeRabbit review is queued by the free CLI rate limit.
+
+Publisher execution policy dry-run 封板：shadow CLI 现在可将 `--publisher-dry-run` 与 metadata-only publisher targets 组合使用。配置后，readiness report 不再把 `publisher_execution_policy` 列为缺口，但在 publisher preflight、delivery approval、V10 parity、live synthesis 和真实 publisher execution 尚未完成前，仍阻断 canary 与 production switch。publisher target metadata 加载现在会在 channel value 不是 JSON object 时 fail closed。default/work 检查、CLI publisher dry-run 断言、副作用不变量和本地对抗审查均通过；scoped CodeRabbit review 因 free CLI rate limit 排队。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:
