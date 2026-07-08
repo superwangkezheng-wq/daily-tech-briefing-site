@@ -78,6 +78,84 @@ The collection layer intentionally comes before the website layer. This reposito
 
 采集层先于网页层。本仓库用示例 Markdown 可以直接跑通网页，但生产级采集依赖 OpenClaw。
 
+### 3.1 Upstream Intelligence Pipeline Shadow Contract / 上游新采集骨架影子合同
+
+The upstream OpenClaw Intelligence Pipeline is being rebuilt as a read-only shadow flow before it replaces the V10 collector. The current shadow chain is:
+
+```text
+SourceProfile
+  -> ProbeSignal
+  -> RawArtifact
+  -> Candidate
+  -> EventCluster
+  -> SelectedStory
+  -> SynthesisDraft
+  -> QAGateResult
+  -> DeliverySnapshot
+  -> ApprovalGateResult
+  -> V10ParityResult
+```
+
+The shadow flow is intentionally not a publisher. It loads the V10 source manifest, builds deterministic probe/raw/candidate/event/selection/synthesis/QA outputs, keeps `network_enabled=false`, keeps `publish_enabled=false`, and leaves `DeliverySnapshot.approved=false`.
+
+上游 OpenClaw Intelligence Pipeline 正在以只读 shadow flow 方式重建，尚未替换 V10 采集器。当前 shadow 链路是：
+
+```text
+SourceProfile
+  -> ProbeSignal
+  -> RawArtifact
+  -> Candidate
+  -> EventCluster
+  -> SelectedStory
+  -> SynthesisDraft
+  -> QAGateResult
+  -> DeliverySnapshot
+  -> ApprovalGateResult
+  -> V10ParityResult
+```
+
+这个 shadow flow 不是发布器。它读取 V10 源 manifest，生成确定性的 probe/raw/candidate/event/selection/synthesis/QA 输出，同时保持 `network_enabled=false`、`publish_enabled=false`、`DeliverySnapshot.approved=false`。
+
+Current audited shadow metrics:
+
+| Metric | Value |
+| --- | ---: |
+| Source profiles | 97 |
+| Probe signals | 96 |
+| Raw artifacts | 96 |
+| Candidates | 96 |
+| Event clusters | 96 |
+| Selected stories | 20 |
+| Synthesis drafts | 20 |
+| QA results | 20 |
+| QA blocked | 0 |
+| Primary-evidence blocks | 1 |
+| Approval gate | blocked |
+| V10 parity schema | passed |
+| V10 parity result | blocked |
+
+当前已审计 shadow 指标：
+
+| 指标 | 数值 |
+| --- | ---: |
+| 源画像 | 97 |
+| 探针信号 | 96 |
+| 原始工件 | 96 |
+| 候选 | 96 |
+| 事件簇 | 96 |
+| 入选故事 | 20 |
+| 摘要草稿 | 20 |
+| QA 结果 | 20 |
+| QA 拦截 | 0 |
+| Primary evidence 拦截 | 1 |
+| Approval gate | blocked |
+| V10 parity schema | passed |
+| V10 parity result | blocked |
+
+The V10 parity layer is deliberately conservative. It proves that the new shadow delivery shape can supply V10's required publishing fields: title, source, link, and summary. It also reports optional field gaps such as score, and it blocks content parity until real synthesis replaces `shadow_stub`, the delivery snapshot is approved, and a production cutover gate explicitly permits publishing.
+
+V10 parity 层故意保守：它证明新 shadow delivery 形态可以提供 V10 发布必需字段：标题、来源、链接、摘要；同时报告评分等可选字段缺口，并在真实 synthesis 替换 `shadow_stub`、`DeliverySnapshot` 获批、生产切换门禁显式放行前继续阻断内容 parity。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

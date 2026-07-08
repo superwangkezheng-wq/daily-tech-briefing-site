@@ -16,7 +16,8 @@ The project intentionally does not require a database. The durable source of tru
 
 ```mermaid
 flowchart LR
-  A["Scheduled collector writes Markdown reports"] --> B["NEWS_ARCHIVE_DIR"]
+  A0["OpenClaw V10 collector or approved Intelligence Pipeline DeliverySnapshot"] --> A["Scheduled collector writes Markdown reports"]
+  A --> B["NEWS_ARCHIVE_DIR"]
   B --> C["scripts/build-site-cache.js"]
   C --> D[".cache snapshots and detail JSON"]
   D --> E["server.js APIs"]
@@ -27,6 +28,17 @@ flowchart LR
   I --> J["Feedback digest Markdown"]
   I --> K["Optional channel push"]
 ```
+
+## Upstream Shadow Gates
+
+The upstream OpenClaw Intelligence Pipeline is currently shadow-only. Its V10 parity snapshot parses the Markdown report contract consumed by `src/report-parser.js` and compares it with the shadow `DeliverySnapshot` shape.
+
+Current gate state:
+
+- Required V10 fields pass schema parity: `title`, `source`, `link`, `summary`.
+- Optional score parity is still reported as missing.
+- Content parity remains blocked by `shadow_synthesis_stub` and `delivery_snapshot_not_approved`.
+- The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
 ## Optional Integrations
 

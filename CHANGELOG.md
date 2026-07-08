@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.12 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline V10 Parity Snapshot Shadow module.
+- Recorded that the parity layer parses the V10 Markdown report contract and compares it with the new shadow `DeliverySnapshot` shape without network, model, or publishing side effects.
+- Clarified the current conservative result: required V10 publishing fields pass schema parity, optional score remains missing, and content parity is intentionally blocked by `shadow_synthesis_stub` plus `delivery_snapshot_not_approved`.
+
 ## 1.2.11 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline DeliverySnapshot Approval Gate shadow module.
