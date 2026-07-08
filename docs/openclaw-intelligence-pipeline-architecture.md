@@ -80,6 +80,42 @@ The reference manifest currently produces:
 
 This module proves the pipeline can run a complete source -> probe -> raw-artifact pass before old V10 fetch logic is wrapped behind concrete adapters.
 
+## Functional Module 2: Normalizer / Candidate Pool Shadow Flow
+
+The second functional module maps shadow raw artifacts into auditable candidates:
+
+```text
+RawArtifact
+  -> normalize_shadow_artifact()
+  -> Candidate
+  -> Candidate Pool
+```
+
+Current behavior:
+
+- each enabled source raw artifact becomes one shadow candidate,
+- disabled sources still do not appear,
+- candidate titles are source names for contract verification only,
+- candidate URLs come from source configuration,
+- `published_at` remains null because the pipeline has not fetched real items,
+- evidence includes `shadow=true`,
+- evidence includes `network_used=false`,
+- aggregator candidates preserve `requires_primary_verification=true`,
+- no event clusters, selected stories, synthesis output, or publishing side effects are produced.
+
+Current reference metrics:
+
+| Metric | Value |
+| --- | ---: |
+| `source_count` | 97 |
+| `probe_count` | 96 |
+| `raw_artifact_count` | 96 |
+| `candidate_count` | 96 |
+| `event_cluster_count` | 0 |
+| `selected_story_count` | 0 |
+
+This module proves the new skeleton can hold a candidate pool before migrating V10's real parsing and normalization behavior.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -176,8 +212,9 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 0 | Freeze the target contract, diagrams, data objects, and golden samples. | None |
 | 1 | Introduce `SourceProfile`, `ProbeSignal`, `Candidate`, `EventCluster`, and `DeliverySnapshot` as shadow objects; load the current source manifest without network or publishing side effects. | None |
 | 1A | Add the read-only `SourceAdapter` seam and shadow probe / collector flow. | None |
-| 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Low |
-| 3 | Add Raw, Candidate, and Event pools. | Medium, improves dedupe |
+| 1B | Add the read-only normalizer and Candidate Pool shadow flow. | None |
+| 2 | Add Event Pool / dedupe shadow flow. | Low |
+| 3 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 4 | Move ranking, slot allocation, coverage, and fallback into a selection policy engine. | Medium |
 | 5 | Keep summary and impact generation behind the synthesis and QA gates. | Low, preserves fail-closed output quality |
 | 6 | Move retry, degrade, disable, recover, and alert behavior into a healing controller. | Medium |

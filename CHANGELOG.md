@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.6 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Normalizer / Candidate Pool shadow module.
+- Recorded the current shadow candidate metrics: 97 sources, 96 probe signals, 96 raw artifacts, 96 candidates, and no event clusters, selected stories, or publishing side effects.
+- Clarified that Phase 1B candidates are contract-verification objects, not final news items, and still carry `shadow=true` plus `network_used=false` evidence.
+
 ## 1.2.5 - 2026-07-08
 
 - Documented the first OpenClaw Intelligence Pipeline functional module: a read-only adapter seam plus probe and collector shadow flow.
