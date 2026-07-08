@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.10 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Model-Aware QA Policy shadow module.
+- Recorded that the QA gate now uses the 2026-07-08 model matrix: DS Flash, Doubao Seed 2.0 Pro, MiniMax3, Kimi 2.7, GLM5.2, DS Pro, LongCat, CodePlan/GPT-5.5, and the shadow stub profile.
+- Added documentation for pollution taxonomy, model-matrix regression fixtures, bounded QA trace, and fail-closed behavior without model calls or publishing side effects.
+
 ## 1.2.9 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Synthesis Contract and QA Gate shadow module.

@@ -229,6 +229,79 @@ Current reference metrics:
 
 This module proves the new skeleton can validate the summary contract and contamination gate before any real model output is allowed into a delivery snapshot.
 
+## Functional Module 6: Model-Aware QA Policy Shadow
+
+The sixth functional module turns the 2026-07-08 summary model matrix into structured QA policy:
+
+```text
+SynthesisDraft
+  -> MODEL_QA_PROFILES
+  -> POLLUTION_RULES
+  -> build_model_matrix_regression_fixtures()
+  -> QAGateResult(trace)
+```
+
+Policy sources:
+
+- `docs/incidents/2026-07-08-openclaw-summary-model-output-contract-and-matrix-closure.md`
+- `docs/openclaw-collector-pipeline.md`
+- `docs/operations.md`
+- upstream `summarize-openclaw.sh` quality-gate behavior
+
+Current model profiles:
+
+| Model or route | Role | Direct summary wrapper |
+| --- | --- | --- |
+| `deepseek-v4-flash` | preferred primary | allowed |
+| `doubao-seed-2.0-pro` | strong backup | allowed |
+| `minimax-m3` | usable with gates | allowed |
+| `kimi-k2.7-code` | usable with gates | allowed |
+| `glm-5.2` | not primary | allowed with gates |
+| `deepseek-v4-pro` | not primary | allowed with gates |
+| `LongCat-2.0` | not primary | allowed with gates |
+| `codeplan-gpt-5.5` | agent only | blocked |
+| `shadow_stub` | shadow contract | allowed |
+
+Current pollution taxonomy:
+
+- reasoning leak,
+- character-count self-check,
+- task restatement,
+- key-fact scaffolding,
+- source-text analysis,
+- implementation plan leakage,
+- limited-source-material disclaimer,
+- malformed prefix,
+- truncated fragment,
+- agent route used as a summary wrapper.
+
+Current regression fixtures:
+
+| Fixture | Expected result |
+| --- | --- |
+| DS Flash clean | pass |
+| Doubao Seed 2.0 Pro clean | pass |
+| GLM5.2 key-fact scaffold | block |
+| DS Pro task restatement | block |
+| MiniMax3 malformed prefix | block |
+| Kimi 2.7 count self-check | block |
+| LongCat reasoning leak | block |
+| CodePlan/GPT-5.5 agent-only route | block |
+
+Each `QAGateResult` now includes model profile metadata, pollution categories, blocked terms, and a bounded fail-closed trace. The trace is intentionally secret-free: it does not include prompt text, article text, source payloads, API keys, or credentials.
+
+Current reference metrics:
+
+| Metric | Value |
+| --- | ---: |
+| `model_profile_count` | 9 |
+| `model_matrix_fixture_count` | 8 |
+| `qa_result_count` | 20 |
+| `qa_blocked_count` | 0 |
+| `qa_policy.fail_closed` | true |
+
+This module proves the QA gate is no longer a loose keyword sentinel. It now reflects the live model-matrix conclusions while still making no model calls and no publishing changes.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -259,7 +332,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Event Pool | verified candidates to `EventCluster` | event-level dedupe and multi-source evidence grouping |
 | Selection Engine | `EventCluster` to `SelectedStory` | slot quotas, diversity, coverage, fallback, ranking |
 | Synthesis Engine | `SelectedStory` to generated fields | summary, impact, title refinement, model trace, fallback |
-| QA Gate | generated fields to approved output | pollution detection, truncation checks, schema checks, deterministic fallback |
+| QA Gate | generated fields to approved output | model-aware profiles, pollution taxonomy, truncation checks, regression fixtures, fail-closed trace |
 | Publisher | `DeliverySnapshot` to output surfaces | Markdown report, cache, channel message, archive |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
@@ -274,7 +347,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `EventCluster` | One real-world event represented by one or more candidates. |
 | `SelectedStory` | A selected event with rank, slot, reason, coverage, and primary-evidence gate status. |
 | `SynthesisDraft` | A generated or shadow-generated title, summary, and impact draft for one selected story. |
-| `QAGateResult` | QA pass/block status for one synthesis draft, including blocked pollution terms. |
+| `QAGateResult` | QA pass/block status for one synthesis draft, including model profile, pollution categories, blocked terms, and fail-closed trace. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -331,6 +404,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1C | Add Event Pool / dedupe shadow flow. | None |
 | 1D | Add Selection Policy shadow flow with rank, slot, coverage, and primary-evidence gates. | None |
 | 1E | Add Synthesis Contract and QA Gate shadow flow with deterministic drafts and pollution checks. | None |
+| 1F | Add Model-Aware QA Policy shadow flow using the 2026-07-08 model matrix, taxonomy, fixtures, and fail-closed trace. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
