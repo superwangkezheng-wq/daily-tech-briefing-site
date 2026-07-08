@@ -399,6 +399,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `DeliverySnapshotSchemaGateResult` | Side-effect-free schema pass/block status for delivery snapshot fields, story/draft consistency, channels, and idempotency inputs. |
 | `PublisherTargetContractResult` | Metadata-only target pass/block status for publisher channels, target fields, and secret-free target descriptors. |
 | `PublisherRenderingContractResult` | Side-effect-free render shape pass/block status for Markdown, cache, channel payload, and archive artifacts. |
+| `PublisherPlanResult` | Publisher preflight pass/block plan with channels, idempotency key, story count, and blocked reasons. |
 | `PublisherExecutionGateResult` | Final pre-side-effect dry-run/block status for Publisher execution mode, idempotency, and side-effect budget. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |

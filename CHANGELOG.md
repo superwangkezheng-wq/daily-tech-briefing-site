@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.32 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline contract-index and health-signal cleanup.
+- Recorded the ordered data-contract spine, added the `PublisherPlanResult` contract, and extended shadow health signals for delivery schema, publisher target/rendering/plan/execution, and healing controller gates.
+- Re-ran default/work tests, compile checks, shadow JSON assertions, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.31 - 2026-07-08
 
 - Recorded final CodeRabbit closure for the OpenClaw Intelligence Pipeline shadow spine after the Evidence Verifier, Publisher contracts, Delivery Snapshot Schema Gate, Publisher Target/Rendering/Execution gates, and Healing Controller updates.

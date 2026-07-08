@@ -274,6 +274,10 @@ Final review closure: after the full shadow spine landed, CodeRabbit raised one 
 
 最终复审封板：完整 shadow spine 落地后，CodeRabbit 对 Evidence Verifier 的 candidate rebuild 提出 1 个可维护性问题。该问题已用 `dataclasses.replace` 修复，两个 OpenClaw 实例重新通过本地测试、编译和 shadow 检查，最终 scoped CodeRabbit review 为 0 issues。
 
+Contract cleanup closure: the shadow snapshot now exposes an ordered data-contract spine from `SourceRegistry` through `HealingPlanResult`, including `PublisherPlanResult`. Health signals also cover the later delivery and publisher gates: delivery snapshot schema, publisher target contract, publisher rendering contract, publisher plan, publisher execution gate, and healing controller. Default/work checks and scoped CodeRabbit review passed with 0 issues.
+
+合同清理封板：shadow snapshot 现在按 spine 顺序暴露 data contracts，从 `SourceRegistry` 到 `HealingPlanResult`，并补齐 `PublisherPlanResult`。Health signals 也覆盖后半段 delivery/publisher gates：delivery snapshot schema、publisher target contract、publisher rendering contract、publisher plan、publisher execution gate 和 healing controller。default/work 检查与 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:
