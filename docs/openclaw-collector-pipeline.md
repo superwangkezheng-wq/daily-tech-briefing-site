@@ -284,6 +284,10 @@ Production-readiness report closure: the shadow flow now emits `ReadinessReportR
 
 生产切换前 readiness report 封板：shadow flow 现在会在任何生产切换前输出 `ReadinessReportResult`。在 live synthesis、V10 content parity、delivery approval、publisher target metadata、publisher execution policy、真实 publisher execution implementation 全部具备前，`canary_allowed=false` 且 `production_switch_allowed=false`。dry-run readiness 与生产切换分开报告。default/work 检查与 scoped CodeRabbit review 均为 0 issues。
 
+Publisher-target metadata dry-run closure: `build_shadow_flow` and the shadow CLI can now accept explicit metadata-only target descriptors for `web`, `feishu`, `wechat`, and `archive`. When configured, `publisher_target_contract` passes and the readiness report no longer lists `publisher_target_metadata` as missing; the flow still does not read secrets or environment variables, does not send channels, and does not allow canary or production switching while the other readiness blockers remain. Default/work checks, CLI metadata dry-run assertions, and scoped CodeRabbit review passed with 0 issues.
+
+Publisher target metadata dry-run 封板：`build_shadow_flow` 与 shadow CLI 现在可显式接收 metadata-only 的 `web`、`feishu`、`wechat`、`archive` 目标描述。配置后，`publisher_target_contract` 可通过，readiness report 不再把 `publisher_target_metadata` 列为缺口；但 flow 仍不读取 secret 或环境变量，不发送渠道，并且在其他 readiness blockers 未消除前不允许 canary 或生产切换。default/work 检查、CLI metadata dry-run 断言与 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

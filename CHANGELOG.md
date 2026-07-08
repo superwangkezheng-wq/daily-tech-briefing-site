@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.34 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline publisher-target metadata dry-run path.
+- Recorded explicit metadata-only target injection for shadow flow and CLI snapshots, keeping secrets/environment reads out of the contract while removing `publisher_target_metadata` from readiness blockers when configured.
+- Re-ran default/work tests, compile checks, CLI metadata dry-run assertions, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.33 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline production-readiness report shadow gate.
