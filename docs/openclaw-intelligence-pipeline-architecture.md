@@ -151,6 +151,43 @@ Current reference metrics:
 
 This module proves the new skeleton can form an event pool before any ranking, slot allocation, summary generation, or publishing behavior moves away from the V10 production path.
 
+## Functional Module 4: Selection Policy Shadow Flow
+
+The fourth functional module maps shadow event clusters into auditable selected stories:
+
+```text
+EventCluster
+  -> select_shadow_stories()
+  -> SelectedStory
+  -> Selection Coverage / Gate Results
+```
+
+Current behavior:
+
+- the selector uses `selectionTargets.totalFinalCount` as the shadow selection limit,
+- selected stories include `rank`, `slot`, `reason`, `coverage`, and `primary_evidence_ok`,
+- `slot` is derived from the first candidate's source family,
+- aggregator events that require primary verification are blocked unless the event cluster also contains primary evidence,
+- `selection_coverage` reports selected count, primary-evidence blocks, capacity skips, and selected counts by slot,
+- `selection_gate_results` records selected, blocked, and capacity-skipped events,
+- the delivery snapshot remains `approved=false`,
+- no synthesis output or publishing side effects are produced.
+
+Current reference metrics:
+
+| Metric | Value |
+| --- | ---: |
+| `source_count` | 97 |
+| `probe_count` | 96 |
+| `raw_artifact_count` | 96 |
+| `candidate_count` | 96 |
+| `event_cluster_count` | 96 |
+| `selected_story_count` | 20 |
+| `blocked_primary_evidence` | 1 |
+| `skipped_capacity` | 75 |
+
+This module proves the new skeleton can exercise ranking, slot assignment, coverage accounting, and primary-evidence gating before synthesis, QA, or publishing behavior moves away from the V10 production path.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -194,7 +231,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `RawArtifact` | Raw fetched material such as a feed item, HTML page, API item, or video metadata. |
 | `Candidate` | Normalized item with title, URL, source, timestamp, snippet, and evidence fields. |
 | `EventCluster` | One real-world event represented by one or more candidates. |
-| `SelectedStory` | A selected event with rank, slot, reason, and evidence. |
+| `SelectedStory` | A selected event with rank, slot, reason, coverage, and primary-evidence gate status. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -249,8 +286,9 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1A | Add the read-only `SourceAdapter` seam and shadow probe / collector flow. | None |
 | 1B | Add the read-only normalizer and Candidate Pool shadow flow. | None |
 | 1C | Add Event Pool / dedupe shadow flow. | None |
+| 1D | Add Selection Policy shadow flow with rank, slot, coverage, and primary-evidence gates. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
-| 3 | Move ranking, slot allocation, coverage, and fallback into a selection policy engine. | Medium |
+| 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Keep summary and impact generation behind the synthesis and QA gates. | Low, preserves fail-closed output quality |
 | 5 | Move retry, degrade, disable, recover, and alert behavior into a healing controller. | Medium |
 | 6 | Archive or remove stale collector versions and stale operator docs. | Operational cleanup |

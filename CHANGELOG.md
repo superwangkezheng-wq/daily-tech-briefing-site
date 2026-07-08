@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.8 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Selection Policy shadow module.
+- Recorded the current shadow selection metrics: 97 sources, 96 probe signals, 96 raw artifacts, 96 candidates, 96 event clusters, 20 selected stories, 1 primary-evidence block, and no publishing side effects.
+- Clarified that Phase 1D selected stories carry rank, slot, reason, coverage, and primary-evidence gate status while the V10 production path remains unchanged.
+
 ## 1.2.7 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Event Pool / dedupe shadow module.
