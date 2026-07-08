@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.26 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Delivery Snapshot Schema Gate.
+- Recorded the new fail-closed schema preflight between delivery snapshot approval and Publisher Shadow Contract, covering required story/draft fields, story-count consistency, channel allowlist, and idempotency inputs.
+- Noted that default/work tests, compile checks, shadow JSON assertions, and local adversarial review passed while CodeRabbit review remains queued due CLI rate limit.
+
 ## 1.2.25 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Publisher Shadow Contract.

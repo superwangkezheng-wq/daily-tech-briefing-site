@@ -95,6 +95,8 @@ SourceProfile
   -> DeliverySnapshot
   -> ApprovalGateResult
   -> V10ParityResult
+  -> DeliverySnapshotSchemaGateResult
+  -> PublisherPlan
 ```
 
 The shadow flow is intentionally not a publisher. It loads the V10 source manifest, builds deterministic probe/raw/candidate/event/selection/synthesis/QA outputs, keeps `network_enabled=false`, keeps `publish_enabled=false`, and leaves `DeliverySnapshot.approved=false`.
@@ -114,6 +116,8 @@ SourceProfile
   -> DeliverySnapshot
   -> ApprovalGateResult
   -> V10ParityResult
+  -> DeliverySnapshotSchemaGateResult
+  -> PublisherPlan
 ```
 
 这个 shadow flow 不是发布器。它读取 V10 源 manifest，生成确定性的 probe/raw/candidate/event/selection/synthesis/QA 输出，同时保持 `network_enabled=false`、`publish_enabled=false`、`DeliverySnapshot.approved=false`。
@@ -237,6 +241,10 @@ live response fallback contract 是第一个具备 Healing Controller 形状的�
 The Publisher Shadow Contract is a preflight-only publishing module. It consumes the delivery snapshot and approval gate summaries, then emits `publisher_plan` with target channels (`web`, `feishu`, `wechat`, `archive`), an idempotency key, story count, approval blockers, and redlines such as no network send, no file write, no channel side effect, and no reverse collection effect. In the current default shadow flow it remains blocked because the delivery snapshot is not approved and the approval gate is blocked. Local adversarial review passed; CodeRabbit review for this substep is queued because the CLI rate limit was reached.
 
 Publisher Shadow Contract 是一个仅预检的发布模块。它消费 delivery snapshot 与 approval gate 摘要，输出 `publisher_plan`，包含目标渠道（`web`、`feishu`、`wechat`、`archive`）、幂等键、story count、approval blockers，以及 no network send、no file write、no channel side effect、no reverse collection effect 等红线。当前默认 shadow flow 中，它仍因 delivery snapshot 未批准、approval gate blocked 而阻断。本地对抗审查已通过；本子目标 CodeRabbit review 因 CLI 门限进入待复审队列。
+
+The Delivery Snapshot Schema Gate now sits immediately before the Publisher Shadow Contract. It checks that the delivery snapshot id and approval flag are present, story counts match the selected-story and synthesis-draft payloads, selected stories contain event id, rank, slot, coverage, and primary candidate URL, synthesis drafts contain title, summary, and impact, channels are from the allowlist, and idempotency inputs are available. It does not approve, publish, write files, call networks, or change business policy. Publisher now fails closed when this schema gate is missing or blocked.
+
+Delivery Snapshot Schema Gate 现在位于 Publisher Shadow Contract 之前。它检查 delivery snapshot id 与 approval flag、story count 与 selected story / synthesis draft payload 是否一致，selected story 是否包含 event id、rank、slot、coverage、primary candidate URL，synthesis draft 是否包含 title、summary、impact，channel 是否在 allowlist 内，以及幂等键输入是否齐全。它不批准、不发布、不写文件、不触网、不改业务策略。Publisher 在缺少或未通过该 schema gate 时会 fail closed。
 
 ## 4. Dependency Matrix / 依赖清单
 

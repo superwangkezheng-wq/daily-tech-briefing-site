@@ -50,6 +50,7 @@ Current gate state:
 - The live response QA handoff routes send-shadow drafts through the existing model-aware QA matrix, approval gate, and V10 parity while keeping publishing disabled.
 - The live response fallback contract converts QA-blocked live drafts into decision-only retry/degrade/alert plans; it never executes network/model retries or enables publishing.
 - Publisher Shadow Contract now emits a side-effect-free preflight plan with channel targets, idempotency key, approval blockers, and no network/file/channel writes.
+- Delivery Snapshot Schema Gate now validates delivery snapshot fields, selected-story and synthesis-draft consistency, channel allowlist, and idempotency inputs before Publisher; Publisher fails closed if the schema gate is missing or blocked.
 - Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
