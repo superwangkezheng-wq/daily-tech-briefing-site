@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.2 - 2026-07-08
+
+- Documented the upstream OpenClaw summary model output contract as a publishing-boundary gate for reports, wiki sources, and website caches.
+- Recorded the live model matrix: DS Flash as the preferred production summary model, Doubao Seed 2.0 Pro as the strongest backup, and CodePlan/GPT-5.5 as agent-only.
+- Documented the safe summary trace contract: provider/model/response-model/status/reason/fallback metadata only, with no prompt text, source text, or secrets.
+- Added the 2026-07-08 incident record for contaminated summary prevention, fallback behavior, validation, and future model onboarding rules.
+
 ## 1.2.1 - 2026-07-07
 
 - Documented the upstream OpenClaw AGI HUNT provider closure: canary, cache, disabled-by-default source config, daily-news candidate seam, and primary-verification semantics.

@@ -111,6 +111,15 @@ launchd services use the support cache at `~/Library/Application Support/daily-t
 - Lark skill refresh should update the local skill source without global PromptScript installation. Do not reintroduce `npx skills add larksuite/cli -y -g`.
 - See [2026-07-07 OpenClaw AGI HUNT Production Gate Closure](incidents/2026-07-07-openclaw-agihunt-production-gate-closure.md).
 
+## 2026-07-08 Summary Model Output Contract
+
+- Upstream OpenClaw summary output is a publishing boundary. A model candidate must be rejected before persistence when it includes prompt analysis, key-fact extraction scaffolding, task/constraint restatement, character-count self-checks, implementation plans, `Final answer` wrappers, or truncated fragments.
+- The summary wrapper should emit bounded, secret-free trace metadata: requested provider/model, returned response model when available, status, rejection reason, and fallback usage. It must not log prompt text, article text, or API keys.
+- Volcano-style aliases must not be treated as real model identities. Operators should record the returned `response_model` or the backend mapping used during the live canary.
+- The reference live matrix currently prefers DS Flash for production summaries and keeps Doubao Seed 2.0 Pro as the strongest backup. GLM5.2, DS Pro, Kimi 2.7, MiniMax3, and LongCat remain acceptable only when the quality gate can reject bad candidates and fall back cleanly.
+- CodePlan/GPT-5.5 is an agent planning/coding route, not an HTTP-compatible summary wrapper.
+- See [2026-07-08 OpenClaw Summary Model Output Contract And Matrix Closure](incidents/2026-07-08-openclaw-summary-model-output-contract-and-matrix-closure.md).
+
 ## Feedback Digest
 
 ```bash

@@ -31,6 +31,7 @@ The website is a publishing and feedback layer. It must not silently become a cr
 | `docs/openclaw-collector-pipeline.md` | Full upstream collection and product pipeline. |
 | `docs/commercial-readiness-review.md` | Current commercial readiness assessment and repair plan. |
 | `docs/incidents/` | Incident history, root cause, fix, verification, and prevention. |
+| `docs/incidents/2026-07-08-openclaw-summary-model-output-contract-and-matrix-closure.md` | Summary model output contract, live model matrix, and fallback boundary. |
 
 ## Change Discipline
 
@@ -61,6 +62,8 @@ launchd changes must update all of these together:
 - schedule or launchd contract test.
 
 Optional integration changes must define the disabled state. A skipped optional qmd or tunnel job must not leave a stale installed LaunchAgent reporting old failures.
+
+Summary-model changes must update the upstream route contract and regression matrix together. The publishing layer should only consume clean summary/impact text or deterministic fallback text; model reasoning, prompt restatement, character-count checks, and truncated fragments are release blockers.
 
 ## Gates
 

@@ -2,7 +2,7 @@
 
 # 每日科技信息站
 
-当前版本：`1.1.13`
+当前版本：`1.2.2`
 
 英文首页：[README.md](README.md)
 
@@ -44,6 +44,8 @@
 - agent 风格的 chat 和 cron 可使用 Kimi -> CodePlan (`codex/gpt-5.5`) -> 本地 fallback。
 - direct summarize wrapper 只能使用 HTTP 兼容摘要模型；Codex harness 不能自动当作 summarize fallback。
 - 替换模型 API 前，应审计 default/work 实例、cron payload、插件脚本、provider 配置和 thinking/reasoning 控制。
+- 摘要输出现在被视为发布边界合同：提示词分析、关键事实提取脚手架、字数自检、实现计划和截断残片必须在日报、wiki source 或网站 cache 消费前被拒绝。
+- 参考 live matrix 以 DS Flash 作为首选摘要模型，Doubao Seed 2.0 Pro 作为最稳备用；CodePlan/GPT-5.5 仍只作为 agent route，不作为 HTTP 摘要模型。
 
 ## 2026-06-07 Ops Policy 合同
 

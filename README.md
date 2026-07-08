@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.1.13`
+Current version: `1.2.2`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 
@@ -44,6 +44,8 @@ The public package contains no private tokens, no personal paths, no bundled run
 - Agent-style chat and cron routes can use Kimi -> CodePlan (`codex/gpt-5.5`) -> local fallback.
 - Direct summarize wrappers should use HTTP-compatible summary models; a Codex harness model is not automatically a summarize fallback.
 - Operators should audit default/work instances, cron payloads, plugin scripts, provider settings, and thinking/reasoning controls before swapping model APIs.
+- Summary output is now treated as a publish-boundary contract: prompt analysis, key-fact extraction scaffolding, character-count self-checks, implementation plans, and truncated fragments must be rejected before reports, wiki sources, or website caches consume them.
+- The reference live matrix keeps DS Flash as the preferred summary model, with Doubao Seed 2.0 Pro as the strongest backup. CodePlan/GPT-5.5 remains an agent route, not an HTTP summarizer.
 
 ## 2026-06-07 Ops Policy Contract
 
