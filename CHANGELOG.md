@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.13 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Real Synthesis Adapter Shadow module.
+- Recorded the new `SynthesisAdapterAudit` contract and `fixture_canary` adapter seam between `SelectedStory` and `SynthesisDraft`.
+- Clarified that QA now runs against the adapter-declared DS Flash model profile while the adapter remains zero-network, zero-model-call, and fail-closed behind `synthesis_adapter_not_live`.
+
 ## 1.2.12 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline V10 Parity Snapshot Shadow module.

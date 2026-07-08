@@ -89,6 +89,7 @@ SourceProfile
   -> Candidate
   -> EventCluster
   -> SelectedStory
+  -> SynthesisAdapterAudit
   -> SynthesisDraft
   -> QAGateResult
   -> DeliverySnapshot
@@ -107,6 +108,7 @@ SourceProfile
   -> Candidate
   -> EventCluster
   -> SelectedStory
+  -> SynthesisAdapterAudit
   -> SynthesisDraft
   -> QAGateResult
   -> DeliverySnapshot
@@ -126,6 +128,9 @@ Current audited shadow metrics:
 | Candidates | 96 |
 | Event clusters | 96 |
 | Selected stories | 20 |
+| Synthesis adapter | fixture_canary |
+| Synthesis adapter model profile | deepseek-v4-flash |
+| Synthesis adapter model calls | 0 |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -144,6 +149,9 @@ Current audited shadow metrics:
 | 候选 | 96 |
 | 事件簇 | 96 |
 | 入选故事 | 20 |
+| Synthesis adapter | fixture_canary |
+| Synthesis adapter 模型画像 | deepseek-v4-flash |
+| Synthesis adapter 模型调用 | 0 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -152,9 +160,9 @@ Current audited shadow metrics:
 | V10 parity schema | passed |
 | V10 parity result | blocked |
 
-The V10 parity layer is deliberately conservative. It proves that the new shadow delivery shape can supply V10's required publishing fields: title, source, link, and summary. It also reports optional field gaps such as score, and it blocks content parity until real synthesis replaces `shadow_stub`, the delivery snapshot is approved, and a production cutover gate explicitly permits publishing.
+The V10 parity layer is deliberately conservative. It proves that the new shadow delivery shape can supply V10's required publishing fields: title, source, link, and summary. It also reports optional field gaps such as score, and it blocks content parity until the synthesis adapter switches from `fixture_canary` to an audited live adapter, the delivery snapshot is approved, and a production cutover gate explicitly permits publishing.
 
-V10 parity 层故意保守：它证明新 shadow delivery 形态可以提供 V10 发布必需字段：标题、来源、链接、摘要；同时报告评分等可选字段缺口，并在真实 synthesis 替换 `shadow_stub`、`DeliverySnapshot` 获批、生产切换门禁显式放行前继续阻断内容 parity。
+V10 parity 层故意保守：它证明新 shadow delivery 形态可以提供 V10 发布必需字段：标题、来源、链接、摘要；同时报告评分等可选字段缺口，并在 synthesis adapter 从 `fixture_canary` 切换到已审计 live adapter、`DeliverySnapshot` 获批、生产切换门禁显式放行前继续阻断内容 parity。
 
 ## 4. Dependency Matrix / 依赖清单
 

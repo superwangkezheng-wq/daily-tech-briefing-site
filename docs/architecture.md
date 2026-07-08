@@ -37,7 +37,8 @@ Current gate state:
 
 - Required V10 fields pass schema parity: `title`, `source`, `link`, `summary`.
 - Optional score parity is still reported as missing.
-- Content parity remains blocked by `shadow_synthesis_stub` and `delivery_snapshot_not_approved`.
+- Synthesis now passes through a zero-network `fixture_canary` adapter with `model_profile_id=deepseek-v4-flash`.
+- Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
 ## Optional Integrations
