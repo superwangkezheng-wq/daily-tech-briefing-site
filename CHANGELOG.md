@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.27 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Publisher Target Resolver / Channel Contract.
+- Recorded the new metadata-only target contract for `web`, `feishu`, `wechat`, and `archive`, including required target fields, channel allowlist, no secret material, and Publisher fail-closed behavior when target metadata is missing.
+- Noted that default/work tests, compile checks, shadow JSON assertions, and local adversarial review passed while CodeRabbit review remains queued due CLI rate limit.
+
 ## 1.2.26 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Delivery Snapshot Schema Gate.

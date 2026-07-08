@@ -96,6 +96,7 @@ SourceProfile
   -> ApprovalGateResult
   -> V10ParityResult
   -> DeliverySnapshotSchemaGateResult
+  -> PublisherTargetContractResult
   -> PublisherPlan
 ```
 
@@ -117,6 +118,7 @@ SourceProfile
   -> ApprovalGateResult
   -> V10ParityResult
   -> DeliverySnapshotSchemaGateResult
+  -> PublisherTargetContractResult
   -> PublisherPlan
 ```
 
@@ -238,13 +240,17 @@ The live response fallback contract is the first Healing Controller-shaped decis
 
 live response fallback contract 是第一个具备 Healing Controller 形状的响应后决策模块，用于 QA 拦截后的 live draft。它消费 QA 结果和源模型画像，输出稳定决策 schema：干净 draft 为 `not_needed/no_action`，非首选模型被拦截时为 `retry_with_fallback_model`，首选模型已被拦截时为 `degrade_to_shadow_fixture`。它记录 retry budget、degrade permission、alert severity、QA categories 和 reasons，同时保持 `network_retry_allowed=false`、不执行模型调用、`publish_allowed=false`，trace 不包含 prompt、正文、API key、source payload 或原始 provider payload。已对 shadow pipeline 改动运行 CodeRabbit review，最终复审为 0 issues。
 
-The Publisher Shadow Contract is a preflight-only publishing module. It consumes the delivery snapshot and approval gate summaries, then emits `publisher_plan` with target channels (`web`, `feishu`, `wechat`, `archive`), an idempotency key, story count, approval blockers, and redlines such as no network send, no file write, no channel side effect, and no reverse collection effect. In the current default shadow flow it remains blocked because the delivery snapshot is not approved and the approval gate is blocked. Local adversarial review passed; CodeRabbit review for this substep is queued because the CLI rate limit was reached.
+The Publisher Shadow Contract is a preflight-only publishing module. It consumes the delivery snapshot, schema gate, target contract, and approval gate summaries, then emits `publisher_plan` with target channels (`web`, `feishu`, `wechat`, `archive`), an idempotency key, story count, approval blockers, and redlines such as no network send, no file write, no channel side effect, and no reverse collection effect. In the current default shadow flow it remains blocked because the delivery snapshot is not approved, the approval gate is blocked, and publisher target metadata has not been resolved. Local adversarial review passed; CodeRabbit review for this substep is queued because the CLI rate limit was reached.
 
-Publisher Shadow Contract 是一个仅预检的发布模块。它消费 delivery snapshot 与 approval gate 摘要，输出 `publisher_plan`，包含目标渠道（`web`、`feishu`、`wechat`、`archive`）、幂等键、story count、approval blockers，以及 no network send、no file write、no channel side effect、no reverse collection effect 等红线。当前默认 shadow flow 中，它仍因 delivery snapshot 未批准、approval gate blocked 而阻断。本地对抗审查已通过；本子目标 CodeRabbit review 因 CLI 门限进入待复审队列。
+Publisher Shadow Contract 是一个仅预检的发布模块。它消费 delivery snapshot、schema gate、target contract 与 approval gate 摘要，输出 `publisher_plan`，包含目标渠道（`web`、`feishu`、`wechat`、`archive`）、幂等键、story count、approval blockers，以及 no network send、no file write、no channel side effect、no reverse collection effect 等红线。当前默认 shadow flow 中，它仍因 delivery snapshot 未批准、approval gate blocked，以及 publisher target metadata 尚未解析而阻断。本地对抗审查已通过；本子目标 CodeRabbit review 因 CLI 门限进入待复审队列。
 
 The Delivery Snapshot Schema Gate now sits immediately before the Publisher Shadow Contract. It checks that the delivery snapshot id and approval flag are present, story counts match the selected-story and synthesis-draft payloads, selected stories contain event id, rank, slot, coverage, and primary candidate URL, synthesis drafts contain title, summary, and impact, channels are from the allowlist, and idempotency inputs are available. It does not approve, publish, write files, call networks, or change business policy. Publisher now fails closed when this schema gate is missing or blocked.
 
 Delivery Snapshot Schema Gate 现在位于 Publisher Shadow Contract 之前。它检查 delivery snapshot id 与 approval flag、story count 与 selected story / synthesis draft payload 是否一致，selected story 是否包含 event id、rank、slot、coverage、primary candidate URL，synthesis draft 是否包含 title、summary、impact，channel 是否在 allowlist 内，以及幂等键输入是否齐全。它不批准、不发布、不写文件、不触网、不改业务策略。Publisher 在缺少或未通过该 schema gate 时会 fail closed。
+
+The Publisher Target Resolver / Channel Contract is the next pre-send gate. It accepts only metadata-only target descriptors for `web`, `feishu`, `wechat`, and `archive`, checks required fields such as `surface_id`, `base_path`, `target_ref`, and `archive_ref`, rejects unknown channels, and returns `publisher_target_contract`. It never reads environment variables, returns no secret material, sends no channel message, and writes no files. Publisher now fails closed when this target contract is missing or blocked.
+
+Publisher Target Resolver / Channel Contract 是下一道发送前闸门。它只接受 metadata-only 的目标描述，覆盖 `web`、`feishu`、`wechat`、`archive`，检查 `surface_id`、`base_path`、`target_ref`、`archive_ref` 等必需字段，拒绝未知 channel，并输出 `publisher_target_contract`。它不读取环境变量，不返回 secret material，不发送渠道消息，不写文件。Publisher 在缺少或未通过该 target contract 时会 fail closed。
 
 ## 4. Dependency Matrix / 依赖清单
 
