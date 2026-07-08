@@ -133,6 +133,7 @@ Current audited shadow metrics:
 | Synthesis adapter model calls | 0 |
 | Live synthesis contract | blocked / contract-only |
 | Live canary execution gate | one fixture draft only, explicit switch |
+| Provider adapter harness | recorded replay, explicit injection |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -156,6 +157,7 @@ Current audited shadow metrics:
 | Synthesis adapter 模型调用 | 0 |
 | Live synthesis contract | blocked / 仅合同 |
 | Live canary execution gate | 显式开关下仅 1 条 fixture draft |
+| Provider adapter harness | 录制回放，显式注入 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -175,6 +177,10 @@ live synthesis adapter 合同现在已经存在，但仍是 fail-closed shadow o
 The live canary execution gate is also bounded to the Synthesis Engine. With `canaryExecutionEnabled=true` and `canaryFixtureEnabled=true`, it may produce exactly one fixture `SynthesisDraft` for QA validation while `network_used=false`, `model_call_count=0`, and publishing remains blocked. It must not alter source health, event selection, or publisher behavior.
 
 live canary execution gate 也被限定在 Synthesis Engine 内。只有 `canaryExecutionEnabled=true` 且 `canaryFixtureEnabled=true` 时，它才允许生成 1 条 fixture `SynthesisDraft` 用于 QA 验证，同时保持 `network_used=false`、`model_call_count=0`、发布继续阻断。它不得改变源健康、事件选择或发布行为。
+
+The provider adapter harness is the next Synthesis Engine seam before any real provider call. With `providerReplayEnabled=true` and an injected recorded harness, it replays provider-shaped responses, parses clean responses into `SynthesisDraft`, classifies provider errors such as `provider_timeout`, and emits a bounded `SynthesisAdapterAudit`. It keeps `network_used=false`, `model_call_count=0`, `estimated_cost_usd=0.0`, and excludes `api_key`, prompt, article text, and source payload from traces. The default pipeline still uses `fixture_canary`.
+
+provider adapter harness 是真实 provider 调用前的下一道 Synthesis Engine seam。只有 `providerReplayEnabled=true` 且显式注入 recorded harness 时，它才回放 provider 形态响应，把干净响应解析成 `SynthesisDraft`，把 `provider_timeout` 等 provider 错误归类到审计，并输出受限的 `SynthesisAdapterAudit`。它保持 `network_used=false`、`model_call_count=0`、`estimated_cost_usd=0.0`，trace 不包含 `api_key`、prompt、正文或 source payload。默认 pipeline 仍使用 `fixture_canary`。
 
 ## 4. Dependency Matrix / 依赖清单
 

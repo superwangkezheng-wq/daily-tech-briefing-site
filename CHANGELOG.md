@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.16 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Provider Adapter Harness Shadow module.
+- Recorded the recorded-replay harness for provider-shaped responses, including response parsing, provider error classification, and safe audit traces.
+- Clarified that provider replay remains inside the Synthesis Engine, uses no network or model calls by default, reuses QA gates, and does not publish or replace V10 production.
+
 ## 1.2.15 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Live Canary Execution Gate.

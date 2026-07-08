@@ -40,6 +40,7 @@ Current gate state:
 - Synthesis now passes through a zero-network `fixture_canary` adapter with `model_profile_id=deepseek-v4-flash`.
 - The live synthesis adapter is contract-only: timeout, cost, schema, and failure-mode audit fields exist, but network and model calls are disabled.
 - The live canary execution gate can emit one fixture draft only under explicit switches, and remains inside the Synthesis Engine boundary.
+- The provider adapter harness can replay recorded provider-shaped responses under explicit injection, parse them into `SynthesisDraft`, classify provider errors, and keep `network_used=false` plus `model_call_count=0`.
 - Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
