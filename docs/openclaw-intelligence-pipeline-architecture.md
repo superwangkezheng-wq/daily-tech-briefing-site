@@ -116,6 +116,41 @@ Current reference metrics:
 
 This module proves the new skeleton can hold a candidate pool before migrating V10's real parsing and normalization behavior.
 
+## Functional Module 3: Event Pool / Dedupe Shadow Flow
+
+The third functional module groups shadow candidates into auditable event clusters:
+
+```text
+Candidate
+  -> cluster_shadow_candidates()
+  -> EventCluster
+  -> Event Pool
+```
+
+Current behavior:
+
+- each shadow candidate is assigned a deterministic `event_key`,
+- URLs are deduplicated after URL fragments are removed,
+- candidate titles are used only as the event-key fallback when a URL is missing,
+- each event cluster preserves the first candidate URL as `primary_candidate_url`,
+- each event cluster reports `candidate_count`, `evidence_count`, and source names,
+- each event cluster remains `selected=false`,
+- the shadow snapshot exposes `event_pool` health as `ok`,
+- no selected stories, synthesis output, or publishing side effects are produced.
+
+Current reference metrics:
+
+| Metric | Value |
+| --- | ---: |
+| `source_count` | 97 |
+| `probe_count` | 96 |
+| `raw_artifact_count` | 96 |
+| `candidate_count` | 96 |
+| `event_cluster_count` | 96 |
+| `selected_story_count` | 0 |
+
+This module proves the new skeleton can form an event pool before any ranking, slot allocation, summary generation, or publishing behavior moves away from the V10 production path.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -213,12 +248,12 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1 | Introduce `SourceProfile`, `ProbeSignal`, `Candidate`, `EventCluster`, and `DeliverySnapshot` as shadow objects; load the current source manifest without network or publishing side effects. | None |
 | 1A | Add the read-only `SourceAdapter` seam and shadow probe / collector flow. | None |
 | 1B | Add the read-only normalizer and Candidate Pool shadow flow. | None |
-| 2 | Add Event Pool / dedupe shadow flow. | Low |
-| 3 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
-| 4 | Move ranking, slot allocation, coverage, and fallback into a selection policy engine. | Medium |
-| 5 | Keep summary and impact generation behind the synthesis and QA gates. | Low, preserves fail-closed output quality |
-| 6 | Move retry, degrade, disable, recover, and alert behavior into a healing controller. | Medium |
-| 7 | Archive or remove stale collector versions and stale operator docs. | Operational cleanup |
+| 1C | Add Event Pool / dedupe shadow flow. | None |
+| 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
+| 3 | Move ranking, slot allocation, coverage, and fallback into a selection policy engine. | Medium |
+| 4 | Keep summary and impact generation behind the synthesis and QA gates. | Low, preserves fail-closed output quality |
+| 5 | Move retry, degrade, disable, recover, and alert behavior into a healing controller. | Medium |
+| 6 | Archive or remove stale collector versions and stale operator docs. | Operational cleanup |
 
 ## Review Checklist
 

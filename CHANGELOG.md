@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.7 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Event Pool / dedupe shadow module.
+- Recorded the current shadow event metrics: 97 sources, 96 probe signals, 96 raw artifacts, 96 candidates, 96 event clusters, and no selected stories or publishing side effects.
+- Clarified that Phase 1C event keys deduplicate by defragmented URL with title fallback, while preserving evidence count, primary candidate URL, and source names.
+
 ## 1.2.6 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Normalizer / Candidate Pool shadow module.
