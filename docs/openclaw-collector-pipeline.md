@@ -296,6 +296,10 @@ Publisher preflight diagnostics closure: `publisher_plan` now exposes `preflight
 
 Publisher preflight diagnostics 封板：`publisher_plan` 现在输出 `preflight_checks` 和 `preflight_summary`，把粗粒度的 `publisher_preflight_ready` blocker 拆成可诊断检查：delivery snapshot schema、target contract、rendering contract、story count、delivery approval、approval gate 和 non-empty delivery snapshot。Readiness 只暴露这些 preflight 结果，不接管 Publisher 策略。当前 flow 仍是 shadow-only：默认 `publish_allowed=false`、`execution_allowed=false`，不触网、不写文件、不发送渠道。default/work 检查、CLI preflight 断言、红线扫描与 scoped CodeRabbit review 均为 0 issues。
 
+Approval Gate dry-run policy closure: the shadow flow and CLI now accept a metadata-only `--approval-policy` JSON object. A dry-run manual approval can mark the delivery snapshot approved, clear `delivery_snapshot_approval` and `publisher_preflight_ready` when publisher targets and execution dry-run policy are also configured, and make `readiness_report.dry_run_ready=true`. This remains a dry-run gate only: production switching stays blocked by live synthesis, V10 parity, and the absence of real publisher execution, while `execution_allowed=false` and no network/file/channel side effects occur. Default/work checks, CLI approval dry-run assertions, redline scans, and scoped CodeRabbit review passed with 0 issues.
+
+Approval Gate dry-run policy 封板：shadow flow 与 CLI 现在可接收 metadata-only 的 `--approval-policy` JSON object。dry-run manual approval 可以把 delivery snapshot 标为 approved；当 publisher targets 和 execution dry-run policy 也配置后，会清除 `delivery_snapshot_approval` 与 `publisher_preflight_ready`，并使 `readiness_report.dry_run_ready=true`。这仍然只是 dry-run gate：production switch 继续被 live synthesis、V10 parity 和真实 publisher execution 缺失阻断，同时 `execution_allowed=false`，不触网、不写文件、不发送渠道。default/work 检查、CLI approval dry-run 断言、红线扫描与 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

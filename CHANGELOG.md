@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.37 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Approval Gate dry-run policy interface.
+- Recorded `--approval-policy` shadow CLI support, metadata-only approval traces, delivery-snapshot approval propagation, and dry-run readiness with publisher execution still blocked from real side effects.
+- Re-ran default/work tests, compile checks, CLI approval dry-run assertions, redline scans, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.36 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Publisher Preflight Diagnostics Shadow module.
