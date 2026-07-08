@@ -52,6 +52,7 @@ Current gate state:
 - Publisher Shadow Contract now emits a side-effect-free preflight plan with channel targets, idempotency key, approval blockers, and no network/file/channel writes.
 - Delivery Snapshot Schema Gate now validates delivery snapshot fields, selected-story and synthesis-draft consistency, channel allowlist, and idempotency inputs before Publisher; Publisher fails closed if the schema gate is missing or blocked.
 - Publisher Target Resolver / Channel Contract now validates metadata-only web, Feishu, WeChat, and archive targets before Publisher; Publisher fails closed if target metadata is missing, blocked, or tied to an unknown channel.
+- Publisher Rendering Contract Shadow now validates Markdown report, website cache, channel payload, and archive manifest shapes without returning content payloads, writing files, or sending channel messages.
 - Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 

@@ -17,6 +17,7 @@ Source Registry
   -> Delivery Snapshot
   -> Delivery Snapshot Schema Gate
   -> Publisher Target Contract
+  -> Publisher Rendering Contract
   -> Publisher
 ```
 
@@ -375,6 +376,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Approval Gate | health, selection, synthesis, QA, and delivery snapshot to approval decision | blocked reasons, approval checks, publication readiness metrics |
 | Delivery Snapshot Schema Gate | delivery snapshot, selected stories, synthesis drafts, and channel list to schema pass/block | required field checks, story-count consistency, channel allowlist, idempotency inputs |
 | Publisher Target Contract | channel list and metadata-only target descriptors to target pass/block | channel allowlist, target required fields, no secret material, no sends |
+| Publisher Rendering Contract | selected stories and synthesis drafts to artifact shape pass/block | Markdown/cache/channel/archive schemas, render required fields, no content payloads |
 | Publisher | approved `DeliverySnapshot` to output surfaces | Markdown report, cache, channel message, archive |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
@@ -393,6 +395,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `ApprovalGateResult` | Read-only approval status, blocked reasons, checks, and metrics for one delivery snapshot. |
 | `DeliverySnapshotSchemaGateResult` | Side-effect-free schema pass/block status for delivery snapshot fields, story/draft consistency, channels, and idempotency inputs. |
 | `PublisherTargetContractResult` | Metadata-only target pass/block status for publisher channels, target fields, and secret-free target descriptors. |
+| `PublisherRenderingContractResult` | Side-effect-free render shape pass/block status for Markdown, cache, channel payload, and archive artifacts. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -453,6 +456,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1G | Add DeliverySnapshot Approval Gate shadow flow with blocked reasons, checks, and readiness metrics. | None |
 | 1H | Add Delivery Snapshot Schema Gate before Publisher with fail-closed required-field, count, channel, and idempotency checks. | None |
 | 1I | Add Publisher Target Resolver / Channel Contract with metadata-only target checks and missing-target fail-closed behavior. | None |
+| 1J | Add Publisher Rendering Contract Shadow with artifact shape schemas and no write/send/content-payload behavior. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

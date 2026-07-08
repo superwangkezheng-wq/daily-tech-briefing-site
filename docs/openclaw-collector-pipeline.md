@@ -97,6 +97,7 @@ SourceProfile
   -> V10ParityResult
   -> DeliverySnapshotSchemaGateResult
   -> PublisherTargetContractResult
+  -> PublisherRenderingContractResult
   -> PublisherPlan
 ```
 
@@ -119,6 +120,7 @@ SourceProfile
   -> V10ParityResult
   -> DeliverySnapshotSchemaGateResult
   -> PublisherTargetContractResult
+  -> PublisherRenderingContractResult
   -> PublisherPlan
 ```
 
@@ -251,6 +253,10 @@ Delivery Snapshot Schema Gate 现在位于 Publisher Shadow Contract 之前。�
 The Publisher Target Resolver / Channel Contract is the next pre-send gate. It accepts only metadata-only target descriptors for `web`, `feishu`, `wechat`, and `archive`, checks required fields such as `surface_id`, `base_path`, `target_ref`, and `archive_ref`, rejects unknown channels, and returns `publisher_target_contract`. It never reads environment variables, returns no secret material, sends no channel message, and writes no files. Publisher now fails closed when this target contract is missing or blocked.
 
 Publisher Target Resolver / Channel Contract 是下一道发送前闸门。它只接受 metadata-only 的目标描述，覆盖 `web`、`feishu`、`wechat`、`archive`，检查 `surface_id`、`base_path`、`target_ref`、`archive_ref` 等必需字段，拒绝未知 channel，并输出 `publisher_target_contract`。它不读取环境变量，不返回 secret material，不发送渠道消息，不写文件。Publisher 在缺少或未通过该 target contract 时会 fail closed。
+
+The Publisher Rendering Contract Shadow is the output-shape gate before any real write or send implementation. It describes the planned artifact schemas for the Markdown report, website cache, channel payloads, and archive manifest, checks selected-story and synthesis-draft render fields, and records story/channel counts. It intentionally returns no summary or impact content payloads, writes no files, sends no channels, and blocks Publisher if the rendering contract is missing or malformed.
+
+Publisher Rendering Contract Shadow 是真实写入或发送实现前的输出形状闸门。它描述 Markdown report、website cache、channel payloads、archive manifest 的 artifact schema，检查 selected story 与 synthesis draft 的渲染必需字段，并记录 story/channel count。它刻意不返回摘要或影响正文，不写文件，不发送渠道；Publisher 在缺少或未通过 rendering contract 时会 fail closed。
 
 ## 4. Dependency Matrix / 依赖清单
 

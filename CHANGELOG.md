@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.28 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Publisher Rendering Contract Shadow.
+- Recorded the side-effect-free artifact shape contract for Markdown report, website cache, channel payloads, and archive manifest, including no content payload return, no file writes, and no channel sends.
+- Noted that default/work tests, compile checks, shadow JSON assertions, and local adversarial review passed while CodeRabbit review remains queued due CLI rate limit.
+
 ## 1.2.27 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Publisher Target Resolver / Channel Contract.
