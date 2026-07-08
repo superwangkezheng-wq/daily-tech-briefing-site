@@ -126,7 +126,9 @@ Current audited shadow metrics:
 | Probe signals | 96 |
 | Raw artifacts | 96 |
 | Candidates | 96 |
-| Event clusters | 96 |
+| Verified candidates | 95 |
+| Evidence verification blocks | 1 |
+| Event clusters | 95 |
 | Selected stories | 20 |
 | Synthesis adapter | fixture_canary |
 | Synthesis adapter model profile | deepseek-v4-flash |
@@ -157,7 +159,9 @@ Current audited shadow metrics:
 | 探针信号 | 96 |
 | 原始工件 | 96 |
 | 候选 | 96 |
-| 事件簇 | 96 |
+| verified candidate | 95 |
+| Evidence verification blocks | 1 |
+| 事件簇 | 95 |
 | 入选故事 | 20 |
 | Synthesis adapter | fixture_canary |
 | Synthesis adapter 模型画像 | deepseek-v4-flash |
@@ -207,6 +211,10 @@ live provider transport stub 是 real provider guard 后面的第一道 transpor
 The HTTP transport implementation contract shadow is the next pre-implementation seam. With `providerHttpContractEnabled=true`, it records endpoint host/path, retry count, retry backoff, request redlines, response redlines, and a metadata-only secret resolver contract. Without a secret resolver it blocks with `secret_resolver_missing`; with a resolver it still blocks with `http_transport_contract_only`. The resolver may expose only metadata such as resolver id and secret name, never secret material. The contract contains no HTTP client and keeps `network_used=false`, `model_call_count=0`, and `provider_call_count=0`.
 
 HTTP transport implementation contract shadow 是真正 HTTP 实现前的下一道预实现 seam。只有 `providerHttpContractEnabled=true` 时，它才记录 endpoint host/path、retry 次数、retry backoff、request redlines、response redlines，以及 metadata-only 的 secret resolver 合同。没有 resolver 时以 `secret_resolver_missing` 阻断；有 resolver 时仍以 `http_transport_contract_only` 阻断。resolver 只能暴露 resolver id、secret name 等元数据，不能暴露 secret material。该合同不包含 HTTP client，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。
+
+The Evidence Verifier is now an explicit shadow layer between Normalizer and Event Pool. It consumes `Candidate` records, emits verified candidates with `verified=true` and verification trace fields, and blocks candidates that require primary verification but lack `primary_evidence_url`. In the current source universe this keeps 96 normalized candidates auditable, passes 95 verified candidates into Event Pool, and blocks 1 aggregated-signal candidate before selection. It does not summarize, rank, publish, or beautify text.
+
+Evidence Verifier 现在是 Normalizer 与 Event Pool 之间的显式 shadow 层。它消费 `Candidate`，输出带有 `verified=true` 和 verification trace 的 verified candidate，并阻断要求 primary verification 但缺少 `primary_evidence_url` 的候选。当前源矩阵中，96 个 normalized candidate 仍保留可审计，95 个 verified candidate 进入 Event Pool，1 个 aggregated-signal candidate 在 Selection 前被阻断。它不摘要、不排序、不发布、不美化表达。
 
 The HTTP transport dry-run is the first sanitized request-plan implementation. With `providerHttpDryRunEnabled=true` and a metadata-only resolver, it produces `request_plan` containing method `POST`, a URL assembled from endpoint scheme/host/path, a header allowlist such as `Content-Type` and `User-Agent`, a SHA-256 body schema hash, timeout, and retry budget. It does not call `send()`, does not include Authorization, does not read provider keys, and keeps `network_used=false`, `model_call_count=0`, and `provider_call_count=0`. Without a resolver, the dry-run is blocked before a plan is emitted.
 

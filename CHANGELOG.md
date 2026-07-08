@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.24 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Evidence Verifier shadow contract.
+- Recorded the new `Candidate -> verified candidate -> EventCluster` flow, moving primary-evidence filtering before Event Pool while keeping Selection as a backup gate.
+- Noted that local adversarial tests passed, while CodeRabbit review for this substep was blocked by CLI rate limit and should be retried after reset or repository connection.
+
 ## 1.2.23 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Live Response Fallback Contract.

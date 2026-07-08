@@ -37,6 +37,7 @@ Current gate state:
 
 - Required V10 fields pass schema parity: `title`, `source`, `link`, `summary`.
 - Optional score parity is still reported as missing.
+- Evidence Verifier now sits between Normalizer and Event Pool, producing verified candidates and blocking candidates that require primary evidence but do not provide it.
 - Synthesis now passes through a zero-network `fixture_canary` adapter with `model_profile_id=deepseek-v4-flash`.
 - The live synthesis adapter is contract-only: timeout, cost, schema, and failure-mode audit fields exist, but network and model calls are disabled.
 - The live canary execution gate can emit one fixture draft only under explicit switches, and remains inside the Synthesis Engine boundary.
