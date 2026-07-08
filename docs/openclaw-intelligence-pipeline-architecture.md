@@ -188,6 +188,47 @@ Current reference metrics:
 
 This module proves the new skeleton can exercise ranking, slot assignment, coverage accounting, and primary-evidence gating before synthesis, QA, or publishing behavior moves away from the V10 production path.
 
+## Functional Module 5: Synthesis Contract + QA Gate Shadow Flow
+
+The fifth functional module adds deterministic synthesis drafts and a shadow QA gate:
+
+```text
+SelectedStory
+  -> build_shadow_synthesis_drafts()
+  -> SynthesisDraft
+  -> run_shadow_qa_gate()
+  -> QAGateResult
+```
+
+Current behavior:
+
+- each selected story produces one deterministic `SynthesisDraft`,
+- drafts include `title`, `summary`, `impact`, `model_used`, and `synthesis_mode`,
+- `model_used=none` proves no real model call is made,
+- `synthesis_mode=shadow_stub` proves the content is a contract placeholder,
+- the QA gate checks title, summary, and impact for prompt/reasoning pollution,
+- blocked pollution terms include `Extract Key Facts`, `Analyze the Source Text`, `Company:`, `Product:`, `分析请求`, `输入文本`, and related instruction residues,
+- clean deterministic drafts pass QA,
+- polluted fixture drafts are blocked with `reason=pollution_detected`,
+- the delivery snapshot remains `approved=false`,
+- no real synthesis output or publishing side effects are produced.
+
+Current reference metrics:
+
+| Metric | Value |
+| --- | ---: |
+| `source_count` | 97 |
+| `probe_count` | 96 |
+| `raw_artifact_count` | 96 |
+| `candidate_count` | 96 |
+| `event_cluster_count` | 96 |
+| `selected_story_count` | 20 |
+| `synthesis_draft_count` | 20 |
+| `qa_result_count` | 20 |
+| `qa_blocked_count` | 0 |
+
+This module proves the new skeleton can validate the summary contract and contamination gate before any real model output is allowed into a delivery snapshot.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -232,6 +273,8 @@ That makes the main collector module shallow: callers and maintainers must under
 | `Candidate` | Normalized item with title, URL, source, timestamp, snippet, and evidence fields. |
 | `EventCluster` | One real-world event represented by one or more candidates. |
 | `SelectedStory` | A selected event with rank, slot, reason, coverage, and primary-evidence gate status. |
+| `SynthesisDraft` | A generated or shadow-generated title, summary, and impact draft for one selected story. |
+| `QAGateResult` | QA pass/block status for one synthesis draft, including blocked pollution terms. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
@@ -287,9 +330,10 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1B | Add the read-only normalizer and Candidate Pool shadow flow. | None |
 | 1C | Add Event Pool / dedupe shadow flow. | None |
 | 1D | Add Selection Policy shadow flow with rank, slot, coverage, and primary-evidence gates. | None |
+| 1E | Add Synthesis Contract and QA Gate shadow flow with deterministic drafts and pollution checks. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
-| 4 | Keep summary and impact generation behind the synthesis and QA gates. | Low, preserves fail-closed output quality |
+| 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
 | 5 | Move retry, degrade, disable, recover, and alert behavior into a healing controller. | Medium |
 | 6 | Archive or remove stale collector versions and stale operator docs. | Operational cleanup |
 

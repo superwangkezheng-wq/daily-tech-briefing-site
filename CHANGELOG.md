@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.9 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Synthesis Contract and QA Gate shadow module.
+- Recorded the current shadow synthesis metrics: 20 deterministic drafts, 20 QA results, 0 QA blocks, no model calls, and no publishing side effects.
+- Clarified that Phase 1E QA blocks prompt/reasoning pollution such as `Extract Key Facts`, `Analyze the Source Text`, `Company:`, `Product:`, `分析请求`, and `输入文本`.
+
 ## 1.2.8 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Selection Policy shadow module.
