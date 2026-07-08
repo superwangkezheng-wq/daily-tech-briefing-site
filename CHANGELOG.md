@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.31 - 2026-07-08
+
+- Recorded final CodeRabbit closure for the OpenClaw Intelligence Pipeline shadow spine after the Evidence Verifier, Publisher contracts, Delivery Snapshot Schema Gate, Publisher Target/Rendering/Execution gates, and Healing Controller updates.
+- Fixed the CodeRabbit-raised Evidence Verifier maintainability issue by switching verified candidate rebuilding to `dataclasses.replace`.
+- Re-ran default/work tests, compile checks, shadow JSON assertions, public package checks, and CodeRabbit review; final CodeRabbit review raised 0 issues.
+
 ## 1.2.30 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Healing Controller Shadow.
