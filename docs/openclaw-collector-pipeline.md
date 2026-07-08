@@ -143,6 +143,7 @@ Current audited shadow metrics:
 | HTTP transport send shadow | injected fake client only, default off |
 | Live response QA handoff | model-aware QA + approval/V10 parity, no publish |
 | Live response fallback contract | decision-only retry/degrade/alert plan |
+| Publisher shadow contract | side-effect-free preflight, no channel send |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -176,6 +177,7 @@ Current audited shadow metrics:
 | HTTP transport send shadow | 仅注入 fake client，默认关闭 |
 | Live response QA handoff | 模型矩阵 QA + approval/V10 parity，不发布 |
 | Live response fallback contract | 只生成 retry/degrade/alert 决策 |
+| Publisher shadow contract | 仅发布预检，不写文件/不推渠道 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -231,6 +233,10 @@ live response QA handoff 是第一个响应后的安全交接模块。它接收 
 The live response fallback contract is the first Healing Controller-shaped decision module for QA-blocked live drafts. It consumes QA results and the source model profile, then emits a stable decision schema: `not_needed/no_action` for clean drafts, `retry_with_fallback_model` for blocked non-primary models, or `degrade_to_shadow_fixture` when the preferred model is already blocked. It records retry budget, degrade permission, alert severity, QA categories, and reasons, while keeping `network_retry_allowed=false`, model-call execution disabled, `publish_allowed=false`, and traces free of prompts, article text, API keys, source payload, and raw provider payload. CodeRabbit review was run on the shadow pipeline changes and the final review raised 0 issues.
 
 live response fallback contract 是第一个具备 Healing Controller 形状的响应后决策模块，用于 QA 拦截后的 live draft。它消费 QA 结果和源模型画像，输出稳定决策 schema：干净 draft 为 `not_needed/no_action`，非首选模型被拦截时为 `retry_with_fallback_model`，首选模型已被拦截时为 `degrade_to_shadow_fixture`。它记录 retry budget、degrade permission、alert severity、QA categories 和 reasons，同时保持 `network_retry_allowed=false`、不执行模型调用、`publish_allowed=false`，trace 不包含 prompt、正文、API key、source payload 或原始 provider payload。已对 shadow pipeline 改动运行 CodeRabbit review，最终复审为 0 issues。
+
+The Publisher Shadow Contract is a preflight-only publishing module. It consumes the delivery snapshot and approval gate summaries, then emits `publisher_plan` with target channels (`web`, `feishu`, `wechat`, `archive`), an idempotency key, story count, approval blockers, and redlines such as no network send, no file write, no channel side effect, and no reverse collection effect. In the current default shadow flow it remains blocked because the delivery snapshot is not approved and the approval gate is blocked. Local adversarial review passed; CodeRabbit review for this substep is queued because the CLI rate limit was reached.
+
+Publisher Shadow Contract 是一个仅预检的发布模块。它消费 delivery snapshot 与 approval gate 摘要，输出 `publisher_plan`，包含目标渠道（`web`、`feishu`、`wechat`、`archive`）、幂等键、story count、approval blockers，以及 no network send、no file write、no channel side effect、no reverse collection effect 等红线。当前默认 shadow flow 中，它仍因 delivery snapshot 未批准、approval gate blocked 而阻断。本地对抗审查已通过；本子目标 CodeRabbit review 因 CLI 门限进入待复审队列。
 
 ## 4. Dependency Matrix / 依赖清单
 

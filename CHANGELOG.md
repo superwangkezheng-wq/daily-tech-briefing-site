@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.25 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Publisher Shadow Contract.
+- Recorded the side-effect-free publisher preflight plan with channels, idempotency key, approval/delivery blocked reasons, and no network/file/channel sends.
+- Noted that local adversarial review passed while CodeRabbit review remains queued for the Evidence Verifier and Publisher shadow substeps due CLI rate limit.
+
 ## 1.2.24 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Evidence Verifier shadow contract.

@@ -49,6 +49,7 @@ Current gate state:
 - The HTTP transport send shadow is default-off and only accepts an injected non-network fake client; response audit records status and field shape, not raw provider payload.
 - The live response QA handoff routes send-shadow drafts through the existing model-aware QA matrix, approval gate, and V10 parity while keeping publishing disabled.
 - The live response fallback contract converts QA-blocked live drafts into decision-only retry/degrade/alert plans; it never executes network/model retries or enables publishing.
+- Publisher Shadow Contract now emits a side-effect-free preflight plan with channel targets, idempotency key, approval blockers, and no network/file/channel writes.
 - Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
