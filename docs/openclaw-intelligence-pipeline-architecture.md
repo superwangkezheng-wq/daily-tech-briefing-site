@@ -20,6 +20,30 @@ Source Registry
 
 The goal is not to add more branches for individual sources. The goal is to move source identity, fetch adapters, admission policy, selection policy, verification, and health behavior into explicit interfaces.
 
+## Boundary Correction
+
+This pipeline covers information collection and publication only. It must stay separate from the OpenClaw operator-maintenance plane.
+
+| Plane | Owns |
+| --- | --- |
+| Information collection and publishing | source registry, probes, collectors, pools, selection, synthesis, QA, delivery snapshots, website publication |
+| OpenClaw operator maintenance | AssetSync / unified upgrade, ProductionGuard, BusinessSmoke, DailyAcceptance, SkillEvolution, memory layers, model-route hot switching, status schema, HealthDashboard |
+
+The pipeline may emit health signals for its own modules, but it must not own unified upgrade policy or OpenClaw runtime maintenance decisions. Those belong to a separate review and architecture track.
+
+## Phase 1 Shadow Skeleton
+
+The first implementation phase is intentionally read-only:
+
+```text
+openclaw_intelligence_pipeline
+  -> load source manifest
+  -> produce governed SourceProfile objects
+  -> produce a shadow snapshot
+```
+
+The Phase 1 runner does not fetch from the network, does not summarize, and does not publish. It exists to make the source matrix and data contracts testable before production behavior changes.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -114,7 +138,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | Phase | Goal | Behavior change |
 | --- | --- | --- |
 | 0 | Freeze the target contract, diagrams, data objects, and golden samples. | None |
-| 1 | Introduce `SourceProfile`, `ProbeSignal`, `Candidate`, `EventCluster`, and `DeliverySnapshot` as shadow objects. | None |
+| 1 | Introduce `SourceProfile`, `ProbeSignal`, `Candidate`, `EventCluster`, and `DeliverySnapshot` as shadow objects; load the current source manifest without network or publishing side effects. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind a real seam. | Low |
 | 3 | Add Raw, Candidate, and Event pools. | Medium, improves dedupe |
 | 4 | Move ranking, slot allocation, coverage, and fallback into a selection policy engine. | Medium |

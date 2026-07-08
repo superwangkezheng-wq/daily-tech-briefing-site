@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.4 - 2026-07-08
+
+- Clarified that the OpenClaw Intelligence Pipeline covers information collection and publishing only, not the OpenClaw operator-maintenance plane.
+- Documented the Phase 1 shadow skeleton contract: load the source manifest, map governed source profiles, and produce read-only snapshots with no network or publishing side effects.
+- Explicitly separated AssetSync / unified upgrade, ProductionGuard, BusinessSmoke, DailyAcceptance, SkillEvolution, memory layers, model-route hot switching, status schema, and HealthDashboard into a later OpenClaw maintenance review track.
+
 ## 1.2.3 - 2026-07-08
 
 - Added the upstream OpenClaw Intelligence Pipeline architecture contract covering source registry, probes, collectors, pools, selection, synthesis, QA, publishing, and healing.
