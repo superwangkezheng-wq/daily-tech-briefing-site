@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.20 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline HTTP Transport Dry-Run Implementation.
+- Recorded the dry-run request plan with method, URL, header allowlist, body schema hash, timeout, and retry budget while keeping provider calls at zero.
+- Clarified that dry-run requires a metadata-only secret resolver and still excludes Authorization, API keys, prompts, article text, and source payload from traces.
+
 ## 1.2.19 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline HTTP Transport Implementation Contract Shadow.

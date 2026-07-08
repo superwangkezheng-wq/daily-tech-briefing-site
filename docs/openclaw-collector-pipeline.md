@@ -137,6 +137,7 @@ Current audited shadow metrics:
 | Real provider canary guard | preflight only, adapter not implemented |
 | Live provider transport stub | secret-free envelope, no real network |
 | HTTP transport contract shadow | endpoint/retry/secret contract, fail-closed |
+| HTTP transport dry-run | sanitized request plan, no send |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -164,6 +165,7 @@ Current audited shadow metrics:
 | Real provider canary guard | 仅预检，adapter 未实现 |
 | Live provider transport stub | 无密钥 envelope，不触真实网络 |
 | HTTP transport contract shadow | endpoint/retry/secret 合同，fail-closed |
+| HTTP transport dry-run | 安全 request plan，不发送 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -199,6 +201,10 @@ live provider transport stub 是 real provider guard 后面的第一道 transpor
 The HTTP transport implementation contract shadow is the next pre-implementation seam. With `providerHttpContractEnabled=true`, it records endpoint host/path, retry count, retry backoff, request redlines, response redlines, and a metadata-only secret resolver contract. Without a secret resolver it blocks with `secret_resolver_missing`; with a resolver it still blocks with `http_transport_contract_only`. The resolver may expose only metadata such as resolver id and secret name, never secret material. The contract contains no HTTP client and keeps `network_used=false`, `model_call_count=0`, and `provider_call_count=0`.
 
 HTTP transport implementation contract shadow 是真正 HTTP 实现前的下一道预实现 seam。只有 `providerHttpContractEnabled=true` 时，它才记录 endpoint host/path、retry 次数、retry backoff、request redlines、response redlines，以及 metadata-only 的 secret resolver 合同。没有 resolver 时以 `secret_resolver_missing` 阻断；有 resolver 时仍以 `http_transport_contract_only` 阻断。resolver 只能暴露 resolver id、secret name 等元数据，不能暴露 secret material。该合同不包含 HTTP client，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。
+
+The HTTP transport dry-run is the first sanitized request-plan implementation. With `providerHttpDryRunEnabled=true` and a metadata-only resolver, it produces `request_plan` containing method `POST`, a URL assembled from endpoint scheme/host/path, a header allowlist such as `Content-Type` and `User-Agent`, a SHA-256 body schema hash, timeout, and retry budget. It does not call `send()`, does not include Authorization, does not read provider keys, and keeps `network_used=false`, `model_call_count=0`, and `provider_call_count=0`. Without a resolver, the dry-run is blocked before a plan is emitted.
+
+HTTP transport dry-run 是第一个安全 request-plan 实现。只有 `providerHttpDryRunEnabled=true` 且注入 metadata-only resolver 时，它才生成 `request_plan`，包含 `POST` method、由 endpoint scheme/host/path 组成的 URL、`Content-Type` 和 `User-Agent` 等 headers allowlist、SHA-256 body schema hash、timeout 和 retry budget。它不调用 `send()`，不包含 Authorization，不读取 provider key，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。缺少 resolver 时，dry-run 会在生成 plan 前阻断。
 
 ## 4. Dependency Matrix / 依赖清单
 

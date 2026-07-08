@@ -44,6 +44,7 @@ Current gate state:
 - The real provider canary guard now evaluates live-provider preflight policy, but still blocks before any actual provider adapter exists.
 - The live provider transport stub defines a secret-free request/response envelope and timeout/error mapping while still using no real network or model call.
 - The HTTP transport implementation contract shadow records endpoint, retry, secret resolver, and redline semantics while remaining fail-closed and network-free.
+- The HTTP transport dry-run can produce a sanitized request plan, but still sends nothing and records no Authorization, key, prompt, article text, or source payload.
 - Content parity remains blocked by `synthesis_adapter_not_live` and `delivery_snapshot_not_approved`.
 - The site still consumes Markdown reports from `NEWS_ARCHIVE_DIR`; no shadow flow writes, publishes, or replaces V10.
 
