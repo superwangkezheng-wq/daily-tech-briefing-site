@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.19 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline HTTP Transport Implementation Contract Shadow.
+- Recorded the metadata-only secret resolver interface, endpoint/retry contract, request/response redlines, and fail-closed audit when resolver or HTTP implementation is missing.
+- Clarified that even with a resolver configured, the contract remains `http_transport_contract_only`: no HTTP client, no provider key read, no network, and no model call.
+
 ## 1.2.18 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Live Provider Transport Stub seam.

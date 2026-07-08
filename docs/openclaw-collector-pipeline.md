@@ -136,6 +136,7 @@ Current audited shadow metrics:
 | Provider adapter harness | recorded replay, explicit injection |
 | Real provider canary guard | preflight only, adapter not implemented |
 | Live provider transport stub | secret-free envelope, no real network |
+| HTTP transport contract shadow | endpoint/retry/secret contract, fail-closed |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -162,6 +163,7 @@ Current audited shadow metrics:
 | Provider adapter harness | 录制回放，显式注入 |
 | Real provider canary guard | 仅预检，adapter 未实现 |
 | Live provider transport stub | 无密钥 envelope，不触真实网络 |
+| HTTP transport contract shadow | endpoint/retry/secret 合同，fail-closed |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -193,6 +195,10 @@ real provider canary guard 是真实调用前的预检策略门，不是 provide
 The live provider transport stub is the first transport seam behind the real provider guard. With `providerTransportStubEnabled=true` and an injected stub transport, it builds a secret-free request envelope containing route, model profile, timeouts, token and cost ceilings, event id, slot, source count, and evidence count. It excludes API keys, prompts, article text, and source payload. Stub success responses can be parsed into `SynthesisDraft(synthesis_mode=live_provider_transport_stub)` and then checked by QA; stub timeout/error envelopes map to stable categories such as `provider_timeout`. This remains a stub: `network_used=false`, `model_call_count=0`, and real provider credentials are never read.
 
 live provider transport stub 是 real provider guard 后面的第一道 transport seam。只有 `providerTransportStubEnabled=true` 且显式注入 stub transport 时，它才构造无密钥 request envelope，包含 route、模型画像、超时、token/成本上限、event id、slot、source count 和 evidence count；不包含 API key、prompt、正文或 source payload。stub 成功响应可解析成 `SynthesisDraft(synthesis_mode=live_provider_transport_stub)` 并进入 QA；stub timeout/error envelope 会映射到 `provider_timeout` 等稳定分类。它仍然只是 stub：`network_used=false`、`model_call_count=0`，不会读取真实 provider 凭据。
+
+The HTTP transport implementation contract shadow is the next pre-implementation seam. With `providerHttpContractEnabled=true`, it records endpoint host/path, retry count, retry backoff, request redlines, response redlines, and a metadata-only secret resolver contract. Without a secret resolver it blocks with `secret_resolver_missing`; with a resolver it still blocks with `http_transport_contract_only`. The resolver may expose only metadata such as resolver id and secret name, never secret material. The contract contains no HTTP client and keeps `network_used=false`, `model_call_count=0`, and `provider_call_count=0`.
+
+HTTP transport implementation contract shadow 是真正 HTTP 实现前的下一道预实现 seam。只有 `providerHttpContractEnabled=true` 时，它才记录 endpoint host/path、retry 次数、retry backoff、request redlines、response redlines，以及 metadata-only 的 secret resolver 合同。没有 resolver 时以 `secret_resolver_missing` 阻断；有 resolver 时仍以 `http_transport_contract_only` 阻断。resolver 只能暴露 resolver id、secret name 等元数据，不能暴露 secret material。该合同不包含 HTTP client，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。
 
 ## 4. Dependency Matrix / 依赖清单
 
