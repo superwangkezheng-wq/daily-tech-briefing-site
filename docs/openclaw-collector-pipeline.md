@@ -131,6 +131,7 @@ Current audited shadow metrics:
 | Synthesis adapter | fixture_canary |
 | Synthesis adapter model profile | deepseek-v4-flash |
 | Synthesis adapter model calls | 0 |
+| Live synthesis contract | blocked / contract-only |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -152,6 +153,7 @@ Current audited shadow metrics:
 | Synthesis adapter | fixture_canary |
 | Synthesis adapter 模型画像 | deepseek-v4-flash |
 | Synthesis adapter 模型调用 | 0 |
+| Live synthesis contract | blocked / 仅合同 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -163,6 +165,10 @@ Current audited shadow metrics:
 The V10 parity layer is deliberately conservative. It proves that the new shadow delivery shape can supply V10's required publishing fields: title, source, link, and summary. It also reports optional field gaps such as score, and it blocks content parity until the synthesis adapter switches from `fixture_canary` to an audited live adapter, the delivery snapshot is approved, and a production cutover gate explicitly permits publishing.
 
 V10 parity 层故意保守：它证明新 shadow delivery 形态可以提供 V10 发布必需字段：标题、来源、链接、摘要；同时报告评分等可选字段缺口，并在 synthesis adapter 从 `fixture_canary` 切换到已审计 live adapter、`DeliverySnapshot` 获批、生产切换门禁显式放行前继续阻断内容 parity。
+
+The live synthesis adapter contract now exists as a fail-closed shadow object. Its audited fields cover `provider_route`, `model_profile_id`, `timeout_ms`, `max_input_chars`, `max_output_tokens`, `max_estimated_cost_usd`, canary input/output schemas, and failure modes. Current blocking reasons are `live_adapter_contract_only`, `network_disabled`, and `model_calls_disabled`.
+
+live synthesis adapter 合同现在已经存在，但仍是 fail-closed shadow object。它的审计字段覆盖 `provider_route`、`model_profile_id`、`timeout_ms`、`max_input_chars`、`max_output_tokens`、`max_estimated_cost_usd`、canary 输入/输出 schema 和失败模式。当前阻断原因为 `live_adapter_contract_only`、`network_disabled`、`model_calls_disabled`。
 
 ## 4. Dependency Matrix / 依赖清单
 

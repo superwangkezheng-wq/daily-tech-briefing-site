@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.14 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Live Synthesis Adapter Contract Shadow module.
+- Recorded the live adapter contract fields for provider route, model profile, timeout, input/output limits, estimated cost ceiling, and failure modes.
+- Clarified that the live contract remains fail-closed with `network_disabled`, `model_calls_disabled`, and `live_adapter_contract_only`; it does not call a model, fetch the network, publish, or replace V10.
+
 ## 1.2.13 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Real Synthesis Adapter Shadow module.
