@@ -134,6 +134,7 @@ Current audited shadow metrics:
 | Live synthesis contract | blocked / contract-only |
 | Live canary execution gate | one fixture draft only, explicit switch |
 | Provider adapter harness | recorded replay, explicit injection |
+| Real provider canary guard | preflight only, adapter not implemented |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -158,6 +159,7 @@ Current audited shadow metrics:
 | Live synthesis contract | blocked / 仅合同 |
 | Live canary execution gate | 显式开关下仅 1 条 fixture draft |
 | Provider adapter harness | 录制回放，显式注入 |
+| Real provider canary guard | 仅预检，adapter 未实现 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -181,6 +183,10 @@ live canary execution gate 也被限定在 Synthesis Engine 内。只有 `canary
 The provider adapter harness is the next Synthesis Engine seam before any real provider call. With `providerReplayEnabled=true` and an injected recorded harness, it replays provider-shaped responses, parses clean responses into `SynthesisDraft`, classifies provider errors such as `provider_timeout`, and emits a bounded `SynthesisAdapterAudit`. It keeps `network_used=false`, `model_call_count=0`, `estimated_cost_usd=0.0`, and excludes `api_key`, prompt, article text, and source payload from traces. The default pipeline still uses `fixture_canary`.
 
 provider adapter harness 是真实 provider 调用前的下一道 Synthesis Engine seam。只有 `providerReplayEnabled=true` 且显式注入 recorded harness 时，它才回放 provider 形态响应，把干净响应解析成 `SynthesisDraft`，把 `provider_timeout` 等 provider 错误归类到审计，并输出受限的 `SynthesisAdapterAudit`。它保持 `network_used=false`、`model_call_count=0`、`estimated_cost_usd=0.0`，trace 不包含 `api_key`、prompt、正文或 source payload。默认 pipeline 仍使用 `fixture_canary`。
+
+The real provider canary guard is a preflight policy gate, not a provider caller. With `realProviderCanaryEnabled=true`, it requires `canaryExecutionEnabled=true`, explicit network/model switches, provider route allowlist, model allowlist, cost ceiling, timeout ceiling, and `maxCanaryItems=1`. If the policy fails, it blocks with specific reasons such as `network_disabled`, `provider_route_not_allowed`, `cost_limit_exceeded`, or `canary_limit_exceeded`. If the policy passes, it still blocks with `real_provider_adapter_not_implemented`, keeping `network_used=false`, `model_call_count=0`, and `provider_call_count=0`.
+
+real provider canary guard 是真实调用前的预检策略门，不是 provider caller。只有 `realProviderCanaryEnabled=true` 时，它才检查 `canaryExecutionEnabled=true`、显式网络/模型开关、provider route allowlist、模型 allowlist、成本上限、超时上限以及 `maxCanaryItems=1`。策略失败时会用 `network_disabled`、`provider_route_not_allowed`、`cost_limit_exceeded`、`canary_limit_exceeded` 等原因阻断；策略通过时仍以 `real_provider_adapter_not_implemented` 阻断，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。
 
 ## 4. Dependency Matrix / 依赖清单
 

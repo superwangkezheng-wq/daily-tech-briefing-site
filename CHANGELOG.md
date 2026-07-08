@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.17 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Real Provider Canary Guard.
+- Recorded explicit live-provider preflight gates for network/model switches, provider route allowlist, model allowlist, cost ceiling, timeout ceiling, and single-item canary limits.
+- Clarified that a policy-passing guard still blocks with `real_provider_adapter_not_implemented`, so no real network or model call occurs until a separate audited adapter is added.
+
 ## 1.2.16 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Provider Adapter Harness Shadow module.
