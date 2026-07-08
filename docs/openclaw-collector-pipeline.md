@@ -140,6 +140,7 @@ Current audited shadow metrics:
 | HTTP transport dry-run | sanitized request plan, no send |
 | HTTP transport send shadow | injected fake client only, default off |
 | Live response QA handoff | model-aware QA + approval/V10 parity, no publish |
+| Live response fallback contract | decision-only retry/degrade/alert plan |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -170,6 +171,7 @@ Current audited shadow metrics:
 | HTTP transport dry-run | 安全 request plan，不发送 |
 | HTTP transport send shadow | 仅注入 fake client，默认关闭 |
 | Live response QA handoff | 模型矩阵 QA + approval/V10 parity，不发布 |
+| Live response fallback contract | 只生成 retry/degrade/alert 决策 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -217,6 +219,10 @@ HTTP transport send shadow 是 dry-run plan 后面的第一个“发送形状”
 The live response QA handoff is the first post-response safety handoff. It accepts send-shadow `SynthesisDraft` objects plus the adapter audit and upstream selection context, then reuses the existing model-aware QA matrix, shadow approval gate, and V10 parity gate. Clean drafts may pass QA but remain unpublished because delivery approval and V10 content parity stay blocked; polluted drafts such as `Extract Key Facts`, `Company:`, `Product:`, `分析请求`, or reasoning/task restatement output fail closed through QA. The handoff trace does not contain prompts, article text, API keys, source payload, or raw provider payload.
 
 live response QA handoff 是第一个响应后的安全交接模块。它接收 send-shadow 产出的 `SynthesisDraft`、adapter audit 和上游 selection context，然后复用已有的模型感知 QA 矩阵、shadow approval gate 和 V10 parity gate。干净 draft 可以通过 QA，但仍因为 delivery approval 和 V10 content parity 被阻断而不发布；被污染的 draft，例如包含 `Extract Key Facts`、`Company:`、`Product:`、`分析请求` 或推理/任务复述内容，会通过 QA fail closed。handoff trace 不包含 prompt、正文、API key、source payload 或原始 provider payload。
+
+The live response fallback contract is the first Healing Controller-shaped decision module for QA-blocked live drafts. It consumes QA results and the source model profile, then emits a stable decision schema: `not_needed/no_action` for clean drafts, `retry_with_fallback_model` for blocked non-primary models, or `degrade_to_shadow_fixture` when the preferred model is already blocked. It records retry budget, degrade permission, alert severity, QA categories, and reasons, while keeping `network_retry_allowed=false`, model-call execution disabled, `publish_allowed=false`, and traces free of prompts, article text, API keys, source payload, and raw provider payload. CodeRabbit review was run on the shadow pipeline changes and the final review raised 0 issues.
+
+live response fallback contract 是第一个具备 Healing Controller 形状的响应后决策模块，用于 QA 拦截后的 live draft。它消费 QA 结果和源模型画像，输出稳定决策 schema：干净 draft 为 `not_needed/no_action`，非首选模型被拦截时为 `retry_with_fallback_model`，首选模型已被拦截时为 `degrade_to_shadow_fixture`。它记录 retry budget、degrade permission、alert severity、QA categories 和 reasons，同时保持 `network_retry_allowed=false`、不执行模型调用、`publish_allowed=false`，trace 不包含 prompt、正文、API key、source payload 或原始 provider payload。已对 shadow pipeline 改动运行 CodeRabbit review，最终复审为 0 issues。
 
 ## 4. Dependency Matrix / 依赖清单
 

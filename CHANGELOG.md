@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.23 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Live Response Fallback Contract.
+- Recorded decision-only fallback planning for QA-blocked live responses: no action, retry with fallback model, or degrade to shadow fixture while keeping network/model retries disabled.
+- Captured the CodeRabbit review cycle for the new shadow pipeline, including follow-up hardening for fail-closed model profiles, primary-evidence enforcement, portable manifests, health status accuracy, and stable fallback schema.
+
 ## 1.2.22 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline Live Response QA Handoff module.
