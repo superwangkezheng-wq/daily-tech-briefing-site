@@ -101,6 +101,7 @@ SourceProfile
   -> PublisherPlan
   -> PublisherExecutionGateResult
   -> HealingPlanResult
+  -> ReadinessReportResult
 ```
 
 The shadow flow is intentionally not a publisher. It loads the V10 source manifest, builds deterministic probe/raw/candidate/event/selection/synthesis/QA outputs, keeps `network_enabled=false`, keeps `publish_enabled=false`, and leaves `DeliverySnapshot.approved=false`.
@@ -126,6 +127,7 @@ SourceProfile
   -> PublisherPlan
   -> PublisherExecutionGateResult
   -> HealingPlanResult
+  -> ReadinessReportResult
 ```
 
 这个 shadow flow 不是发布器。它读取 V10 源 manifest，生成确定性的 probe/raw/candidate/event/selection/synthesis/QA 输出，同时保持 `network_enabled=false`、`publish_enabled=false`、`DeliverySnapshot.approved=false`。
@@ -277,6 +279,10 @@ Final review closure: after the full shadow spine landed, CodeRabbit raised one 
 Contract cleanup closure: the shadow snapshot now exposes an ordered data-contract spine from `SourceRegistry` through `HealingPlanResult`, including `PublisherPlanResult`. Health signals also cover the later delivery and publisher gates: delivery snapshot schema, publisher target contract, publisher rendering contract, publisher plan, publisher execution gate, and healing controller. Default/work checks and scoped CodeRabbit review passed with 0 issues.
 
 合同清理封板：shadow snapshot 现在按 spine 顺序暴露 data contracts，从 `SourceRegistry` 到 `HealingPlanResult`，并补齐 `PublisherPlanResult`。Health signals 也覆盖后半段 delivery/publisher gates：delivery snapshot schema、publisher target contract、publisher rendering contract、publisher plan、publisher execution gate 和 healing controller。default/work 检查与 scoped CodeRabbit review 均为 0 issues。
+
+Production-readiness report closure: the shadow flow now emits `ReadinessReportResult` before any production switch. It keeps `canary_allowed=false` and `production_switch_allowed=false` until live synthesis, V10 content parity, delivery approval, publisher target metadata, publisher execution policy, and real publisher execution implementation are all present. Dry-run readiness is reported separately from production switching. Default/work checks and scoped CodeRabbit review passed with 0 issues.
+
+生产切换前 readiness report 封板：shadow flow 现在会在任何生产切换前输出 `ReadinessReportResult`。在 live synthesis、V10 content parity、delivery approval、publisher target metadata、publisher execution policy、真实 publisher execution implementation 全部具备前，`canary_allowed=false` 且 `production_switch_allowed=false`。dry-run readiness 与生产切换分开报告。default/work 检查与 scoped CodeRabbit review 均为 0 issues。
 
 ## 4. Dependency Matrix / 依赖清单
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.33 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline production-readiness report shadow gate.
+- Recorded explicit canary and production-switch blockers for live synthesis, V10 content parity, delivery approval, publisher target metadata, publisher execution policy, and real publisher execution implementation.
+- Re-ran default/work tests, compile checks, readiness shadow assertions, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.32 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline contract-index and health-signal cleanup.

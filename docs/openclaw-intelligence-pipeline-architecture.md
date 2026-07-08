@@ -402,6 +402,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `PublisherPlanResult` | Publisher preflight pass/block plan with channels, idempotency key, story count, and blocked reasons. |
 | `PublisherExecutionGateResult` | Final pre-side-effect dry-run/block status for Publisher execution mode, idempotency, and side-effect budget. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
+| `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
 
