@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.5 - 2026-07-08
+
+- Documented the first OpenClaw Intelligence Pipeline functional module: a read-only adapter seam plus probe and collector shadow flow.
+- Recorded the current shadow flow metrics: 97 sources, 96 probe signals, 96 raw artifacts, and zero candidates, selected stories, or publishing side effects.
+- Kept the Phase 1A module separate from OpenClaw operator maintenance and from the production V10 collector entry point.
+
 ## 1.2.4 - 2026-07-08
 
 - Clarified that the OpenClaw Intelligence Pipeline covers information collection and publishing only, not the OpenClaw operator-maintenance plane.

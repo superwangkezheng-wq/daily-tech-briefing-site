@@ -44,6 +44,42 @@ openclaw_intelligence_pipeline
 
 The Phase 1 runner does not fetch from the network, does not summarize, and does not publish. It exists to make the source matrix and data contracts testable before production behavior changes.
 
+## Functional Module 1: Adapter + Probe / Collector Shadow Flow
+
+The first functional module adds a real adapter seam while staying read-only:
+
+```text
+SourceProfile
+  -> SourceAdapter.probe()
+  -> ProbeSignal
+  -> SourceAdapter.collect()
+  -> RawArtifact
+```
+
+Current behavior:
+
+- enabled sources produce `ProbeSignal` objects,
+- enabled sources produce shadow `RawArtifact` objects,
+- disabled sources are skipped,
+- no network calls are made,
+- no candidates are normalized,
+- no stories are selected,
+- no delivery snapshot is approved,
+- no publishing surface is touched.
+
+The reference manifest currently produces:
+
+| Metric | Value |
+| --- | ---: |
+| `source_count` | 97 |
+| `probe_count` | 96 |
+| `raw_artifact_count` | 96 |
+| `candidate_count` | 0 |
+| `event_cluster_count` | 0 |
+| `selected_story_count` | 0 |
+
+This module proves the pipeline can run a complete source -> probe -> raw-artifact pass before old V10 fetch logic is wrapped behind concrete adapters.
+
 ## Current Friction
 
 The reference V10 collector works, but it combines too many responsibilities:
@@ -139,7 +175,8 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | --- | --- | --- |
 | 0 | Freeze the target contract, diagrams, data objects, and golden samples. | None |
 | 1 | Introduce `SourceProfile`, `ProbeSignal`, `Candidate`, `EventCluster`, and `DeliverySnapshot` as shadow objects; load the current source manifest without network or publishing side effects. | None |
-| 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind a real seam. | Low |
+| 1A | Add the read-only `SourceAdapter` seam and shadow probe / collector flow. | None |
+| 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Low |
 | 3 | Add Raw, Candidate, and Event pools. | Medium, improves dedupe |
 | 4 | Move ranking, slot allocation, coverage, and fallback into a selection policy engine. | Medium |
 | 5 | Keep summary and impact generation behind the synthesis and QA gates. | Low, preserves fail-closed output quality |
