@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.21 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline HTTP Transport Send Contract Shadow module.
+- Recorded the explicit `providerHttpSendEnabled` gate, injected fake HTTP client seam, non-network preflight, and sanitized response trace.
+- Clarified that send shadow remains default-off, rejects network-marked clients, excludes Authorization/API keys/prompts/article text/source payload, and still does not publish or replace V10.
+
 ## 1.2.20 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline HTTP Transport Dry-Run Implementation.

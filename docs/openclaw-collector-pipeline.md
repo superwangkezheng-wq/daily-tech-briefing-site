@@ -138,6 +138,7 @@ Current audited shadow metrics:
 | Live provider transport stub | secret-free envelope, no real network |
 | HTTP transport contract shadow | endpoint/retry/secret contract, fail-closed |
 | HTTP transport dry-run | sanitized request plan, no send |
+| HTTP transport send shadow | injected fake client only, default off |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -166,6 +167,7 @@ Current audited shadow metrics:
 | Live provider transport stub | 无密钥 envelope，不触真实网络 |
 | HTTP transport contract shadow | endpoint/retry/secret 合同，fail-closed |
 | HTTP transport dry-run | 安全 request plan，不发送 |
+| HTTP transport send shadow | 仅注入 fake client，默认关闭 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -205,6 +207,10 @@ HTTP transport implementation contract shadow 是真正 HTTP 实现前的下一�
 The HTTP transport dry-run is the first sanitized request-plan implementation. With `providerHttpDryRunEnabled=true` and a metadata-only resolver, it produces `request_plan` containing method `POST`, a URL assembled from endpoint scheme/host/path, a header allowlist such as `Content-Type` and `User-Agent`, a SHA-256 body schema hash, timeout, and retry budget. It does not call `send()`, does not include Authorization, does not read provider keys, and keeps `network_used=false`, `model_call_count=0`, and `provider_call_count=0`. Without a resolver, the dry-run is blocked before a plan is emitted.
 
 HTTP transport dry-run 是第一个安全 request-plan 实现。只有 `providerHttpDryRunEnabled=true` 且注入 metadata-only resolver 时，它才生成 `request_plan`，包含 `POST` method、由 endpoint scheme/host/path 组成的 URL、`Content-Type` 和 `User-Agent` 等 headers allowlist、SHA-256 body schema hash、timeout 和 retry budget。它不调用 `send()`，不包含 Authorization，不读取 provider key，并保持 `network_used=false`、`model_call_count=0`、`provider_call_count=0`。缺少 resolver 时，dry-run 会在生成 plan 前阻断。
+
+The HTTP transport send shadow is the first send-shaped contract behind the dry-run plan. With `providerHttpSendEnabled=true`, a metadata-only resolver, and an injected fake client marked `network_used=false`, it may pass the sanitized request plan and request envelope to the fake client, parse a provider-shaped success response into `SynthesisDraft(synthesis_mode=http_transport_send_shadow)`, and keep the trace bounded to request schema plus response status/field shape. It remains default-off, blocks missing clients and clients marked as network-capable, excludes Authorization, API keys, prompts, article text, source payload, and raw provider payload from traces, and does not publish or replace V10.
+
+HTTP transport send shadow 是 dry-run plan 后面的第一个“发送形状”合同。只有 `providerHttpSendEnabled=true`、注入 metadata-only resolver，并注入标记为 `network_used=false` 的 fake client 时，它才允许把安全 request plan 和 request envelope 交给 fake client，把 provider 形态成功响应解析为 `SynthesisDraft(synthesis_mode=http_transport_send_shadow)`，并且 trace 只保留 request schema 与 response 状态/字段形状。它默认关闭，会阻断缺失 client 或标记为可触网的 client；trace 不包含 Authorization、API key、prompt、正文、source payload 或原始 provider payload，也不发布、不替换 V10。
 
 ## 4. Dependency Matrix / 依赖清单
 
