@@ -2,7 +2,7 @@
 
 # Daily Tech Briefing Site
 
-Current version: `1.2.21`
+Current version: `1.2.22`
 
 Chinese version: [README.zh-CN.md](README.zh-CN.md)
 

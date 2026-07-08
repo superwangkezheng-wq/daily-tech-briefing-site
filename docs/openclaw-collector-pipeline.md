@@ -139,6 +139,7 @@ Current audited shadow metrics:
 | HTTP transport contract shadow | endpoint/retry/secret contract, fail-closed |
 | HTTP transport dry-run | sanitized request plan, no send |
 | HTTP transport send shadow | injected fake client only, default off |
+| Live response QA handoff | model-aware QA + approval/V10 parity, no publish |
 | Synthesis drafts | 20 |
 | QA results | 20 |
 | QA blocked | 0 |
@@ -168,6 +169,7 @@ Current audited shadow metrics:
 | HTTP transport contract shadow | endpoint/retry/secret 合同，fail-closed |
 | HTTP transport dry-run | 安全 request plan，不发送 |
 | HTTP transport send shadow | 仅注入 fake client，默认关闭 |
+| Live response QA handoff | 模型矩阵 QA + approval/V10 parity，不发布 |
 | 摘要草稿 | 20 |
 | QA 结果 | 20 |
 | QA 拦截 | 0 |
@@ -211,6 +213,10 @@ HTTP transport dry-run 是第一个安全 request-plan 实现。只有 `provider
 The HTTP transport send shadow is the first send-shaped contract behind the dry-run plan. With `providerHttpSendEnabled=true`, a metadata-only resolver, and an injected fake client marked `network_used=false`, it may pass the sanitized request plan and request envelope to the fake client, parse a provider-shaped success response into `SynthesisDraft(synthesis_mode=http_transport_send_shadow)`, and keep the trace bounded to request schema plus response status/field shape. It remains default-off, blocks missing clients and clients marked as network-capable, excludes Authorization, API keys, prompts, article text, source payload, and raw provider payload from traces, and does not publish or replace V10.
 
 HTTP transport send shadow 是 dry-run plan 后面的第一个“发送形状”合同。只有 `providerHttpSendEnabled=true`、注入 metadata-only resolver，并注入标记为 `network_used=false` 的 fake client 时，它才允许把安全 request plan 和 request envelope 交给 fake client，把 provider 形态成功响应解析为 `SynthesisDraft(synthesis_mode=http_transport_send_shadow)`，并且 trace 只保留 request schema 与 response 状态/字段形状。它默认关闭，会阻断缺失 client 或标记为可触网的 client；trace 不包含 Authorization、API key、prompt、正文、source payload 或原始 provider payload，也不发布、不替换 V10。
+
+The live response QA handoff is the first post-response safety handoff. It accepts send-shadow `SynthesisDraft` objects plus the adapter audit and upstream selection context, then reuses the existing model-aware QA matrix, shadow approval gate, and V10 parity gate. Clean drafts may pass QA but remain unpublished because delivery approval and V10 content parity stay blocked; polluted drafts such as `Extract Key Facts`, `Company:`, `Product:`, `分析请求`, or reasoning/task restatement output fail closed through QA. The handoff trace does not contain prompts, article text, API keys, source payload, or raw provider payload.
+
+live response QA handoff 是第一个响应后的安全交接模块。它接收 send-shadow 产出的 `SynthesisDraft`、adapter audit 和上游 selection context，然后复用已有的模型感知 QA 矩阵、shadow approval gate 和 V10 parity gate。干净 draft 可以通过 QA，但仍因为 delivery approval 和 V10 content parity 被阻断而不发布；被污染的 draft，例如包含 `Extract Key Facts`、`Company:`、`Product:`、`分析请求` 或推理/任务复述内容，会通过 QA fail closed。handoff trace 不包含 prompt、正文、API key、source payload 或原始 provider payload。
 
 ## 4. Dependency Matrix / 依赖清单
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.22 - 2026-07-08
+
+- Documented the OpenClaw Intelligence Pipeline Live Response QA Handoff module.
+- Recorded that send-shadow drafts now flow through the existing model-aware QA matrix, approval gate, and V10 parity checks without publishing.
+- Clarified that polluted live-response drafts fail closed through QA while clean drafts remain blocked from publication by shadow approval and V10 parity.
+
 ## 1.2.21 - 2026-07-08
 
 - Documented the OpenClaw Intelligence Pipeline HTTP Transport Send Contract Shadow module.
