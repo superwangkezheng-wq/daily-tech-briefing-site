@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.43 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Release Dossier / Operator Approval Packet Shadow module.
+- Recorded the operator approval packet that aggregates readiness, regression, publisher execution contract, production switch gate, CodeRabbit evidence status, redlines, and manual approval requirements without enabling production switching.
+- Re-ran default/work tests, compile checks, full dry-run approval-packet assertions, redline scans, and public package checks. CodeRabbit follow-up review remains pending due the free CLI rate limit and is recorded as an explicit unresolved review item.
+
 ## 1.2.42 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Shadow vs V10 Regression Evaluation Harness.
