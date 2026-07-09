@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.62 - 2026-07-10
+
+- Added the native read-only `builder_podcast` live adapter for the follow-builders `feed-podcasts.json` aggregate feed.
+- Reclassified podcast aggregate collection from `controlled_external` to `native_read_only` after verifying that the adapter needs only bounded HTTP GET and performs no subprocess, browser, cache write, file write, or channel send.
+- Separated the stable feed profile from rotating podcast program names: optional manifest `podcastName` filters a program explicitly, while a feed-level profile accepts the first valid current episode.
+- Kept transcript bodies out of RawArtifact and Candidate payloads; evidence records only the response hash, episode count, podcast name, and transcript availability.
+- Added invalid-payload source-health classification as `content_unparseable` for parser fallback planning.
+- Recorded real read-only default/work canaries against the current remote feed: 1 artifact, 1 candidate, fidelity `passed`, all source-health counters zero, and all write/send side effects disabled.
+- Re-ran 164 tests in both OpenClaw instances, compile checks, real canaries, and scoped CodeRabbit review. CodeRabbit raised 0 issues.
+- Kept formal production launch and V10 cutover disabled; WeChat discovery/mirror and Bilibili remain controlled and default-blocked.
+
 ## 1.2.61 - 2026-07-09
 
 - Documented the Collector Execution Policy seam for controlled adapters in the OpenClaw Intelligence Pipeline.
