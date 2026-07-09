@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.58 - 2026-07-09
+
+- Documented the `builder_feed` live adapter extraction for the OpenClaw Intelligence Pipeline.
+- Added the builder live adapter beside `aggregator_api`, `html`, and `rss`; it consumes the follow-builders `feed-x.json` aggregate feed instead of fetching X profile pages.
+- Preserved the V10 builder semantics: profiles absent from the current feed are treated as `builder_feed_candidate_absent` warnings, not source-health failures, while invalid builder feed JSON remains `content_unparseable`.
+- Hardened live collector policy parsing by bounding `timeoutSeconds`, `maxSources`, `minCandidates`, and `freshnessWindowHours`, and preserved original byte length metadata alongside response body hashes.
+- Recorded real read-only canary evidence: `builder_feed` collector and fidelity both `passed` with 3 sources, 3 raw artifacts, 2 candidates, 0 source-health issues, and no write/send side effects.
+- Re-ran default/work tests, compile checks, real read-only builder/aggregator canaries, production-code redline scan, and final scoped CodeRabbit review. CodeRabbit raised 0 issues after two findings were fixed.
+- Kept formal production launch and V10 cutover disabled.
+
 ## 1.2.57 - 2026-07-09
 
 - Documented the Live Artifact Fidelity source-health evidence split for the OpenClaw Intelligence Pipeline.
