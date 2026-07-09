@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.42 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Shadow vs V10 Regression Evaluation Harness.
+- Recorded machine-readable no-worse-than-current-production metrics for story-count parity, QA block rate, source mix, slot coverage, duplicate-event rate, and production-disconnected evaluation before production switch assessment.
+- Re-ran default/work tests, compile checks, full dry-run regression assertions, redline scans, and public package checks. CodeRabbit initially raised 3 issues in the regression evaluator; all were fixed and locally revalidated, while the follow-up CodeRabbit review is pending due the free CLI rate limit.
+
 ## 1.2.41 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Production Entrypoint Switch Gate Shadow module.
