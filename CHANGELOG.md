@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.57 - 2026-07-09
+
+- Documented the Live Artifact Fidelity source-health evidence split for the OpenClaw Intelligence Pipeline.
+- Added `source_health` and `source_health_summary` to live artifact fidelity, distinguishing `network_failure`, `http_not_ok`, `content_unparseable`, `hash_unavailable`, and `unsupported_adapter` instead of leaving failed sources as a flat `artifact_hash_missing` blocker.
+- Wired Healing Controller to consume source-health summaries as decision-only plans: network failures map to retry planning, HTTP failures and hash gaps map to source-fidelity degradation, and parse failures map to parser fallback requirements.
+- Fixed CodeRabbit-raised live collector issues: urllib redirects are disabled before body reads, fallback feed parsing preserves entity/character references, and normal XML parse failures can fall back to feed/HTML parsing while unsafe `DOCTYPE` / `ENTITY` content remains blocked.
+- Recorded the real read-only canary evidence: `aggregator_api` fidelity `passed`; RSS fidelity remained `blocked` with `network_failure=2` and `hash_unavailable=2`; HTML fidelity remained `blocked` because one candidate lacked published-time metadata.
+- Re-ran default/work tests, compile checks, production-code redline scan, real read-only aggregator/RSS/HTML canaries, and final scoped CodeRabbit review. CodeRabbit raised 0 issues after the three findings were fixed.
+- Kept formal production launch and V10 cutover disabled.
+
 ## 1.2.56 - 2026-07-09
 
 - Documented the `aggregator_api` live adapter extraction for the OpenClaw Intelligence Pipeline.

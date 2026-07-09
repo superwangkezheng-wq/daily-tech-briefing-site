@@ -477,13 +477,12 @@ The 2026-07-09 read-only RSS canary produced:
 | Live adapter registry | `aggregator_api`, `html`, `rss` |
 | Source scope | 5 `mainNewsSources` RSS profiles |
 | Raw artifacts | 5 |
-| Candidates | 4 |
-| Artifact hashes | 4 |
+| Candidates | 3 |
+| Artifact hashes | 3 |
 | Raw body leaks | 0 |
-| Adapter-backed candidates | 4 |
-| Candidate Quality Gate | 3 qualified, result `blocked` because one candidate failed freshness |
-| Qualified Candidate Replay | 3 selected stories, result `passed`, `production_cutover_allowed=false` |
-| Live Artifact Fidelity | `blocked` because one failed source still lacks an artifact hash |
+| Adapter-backed candidates | 3 |
+| Source health summary | `network_failure=2`, `hash_unavailable=2` |
+| Live Artifact Fidelity | `blocked` by `artifact_hash_missing` and `source_health_issue_detected` |
 | XML safety | `defusedxml` is used when available; fallback parsing rejects `DOCTYPE` / `ENTITY` payloads and does not use unsafe XML parsing |
 | CodeRabbit final review | 0 issues |
 
@@ -494,18 +493,21 @@ The 2026-07-09 read-only HTML canary produced:
 | Live adapter registry | `aggregator_api`, `html`, `rss` |
 | Source scope | 3 HTML profiles |
 | Raw artifacts | 3 |
-| Candidates | 2 |
-| Artifact hashes | 2 |
+| Candidates | 3 |
+| Artifact hashes | 3 |
 | Raw body leaks | 0 |
 | Published candidates | 2 |
-| Live Artifact Fidelity | `blocked` because one failed source lacks an artifact hash |
+| Source health summary | all zero |
+| Live Artifact Fidelity | `blocked` because one candidate lacks published-time metadata |
 | Side effects | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
 
 This means the adapter skeleton is usable, but production launch remains blocked by real-source fidelity issues rather than by the adapter seam itself.
 
 The Healing Controller now consumes live artifact fidelity blockers as module-level signals, without hardcoding aggregator or source names. It maps `artifact_hash_missing` to a source-fidelity degrade plan and `candidate_published_at_missing` to a published-time fallback requirement. The plan remains decision-only: no retry, source disable, alert send, publish, or production switch is executed.
 
-CodeRabbit raised two valid issues in this slice. The live collector now rejects non-HTTP(S) URL schemes before `urlopen`, and an enabled canary without explicit `maxSources` defaults to the bounded canary limit instead of selecting zero sources. The follow-up CodeRabbit review raised 0 issues.
+Live Artifact Fidelity now also emits source-health evidence. The source-health summary distinguishes `network_failure`, `http_not_ok`, `content_unparseable`, `hash_unavailable`, and `unsupported_adapter`, so `artifact_hash_missing` can be traced to an actual source-health class before any retry/degrade/disable decision is considered. Healing consumes only the summary and still executes nothing.
+
+CodeRabbit raised five valid issues across this adapter/fidelity slice. The live collector now rejects non-HTTP(S) URL schemes before fetching, disables urllib redirects before body reads, preserves entity/character references in fallback feed parsing, falls back on normal XML parse failures while keeping unsafe `DOCTYPE` / `ENTITY` blocked, and defaults enabled canaries without explicit `maxSources` to the bounded canary limit. The follow-up CodeRabbit review raised 0 issues.
 
 ## First Read-Only Production Evaluation
 
@@ -654,6 +656,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1N | Extract RSS live collection behind a live adapter contract and add Live Artifact Fidelity diagnostics. | None |
 | 1O | Complete the HTML/RSS live adapter split under the same hash-only artifact and candidate-evidence contract. | None |
 | 1P | Add the Aggregator API live adapter and feed live artifact fidelity blockers into the Healing Controller as decision-only source-health signals. | None |
+| 1Q | Split live artifact fidelity failures into source-health evidence classes and harden redirect/XML fallback behavior. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
