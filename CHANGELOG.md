@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.56 - 2026-07-09
+
+- Documented the `aggregator_api` live adapter extraction for the OpenClaw Intelligence Pipeline.
+- Added the aggregator live adapter beside `html` and `rss`, using `apiBase/items` when available instead of fetching an aggregator homepage, while keeping hash-only artifacts and primary-evidence candidate output.
+- Added Healing Controller decisions for live artifact fidelity blockers: `artifact_hash_missing` now maps to a source-fidelity degrade plan, and `candidate_published_at_missing` maps to a published-time fallback requirement; both remain decision-only and execute nothing.
+- Fixed CodeRabbit-raised issues: live collector URL fetching now rejects non-HTTP(S) schemes, and enabled canaries without explicit `maxSources` default to the bounded canary limit instead of selecting zero sources.
+- Recorded the real read-only canary evidence: `aggregator_api` passed with 1 source, 1 raw artifact, 1 candidate, 1 artifact hash, 0 raw-body leaks, 1 published candidate, and fidelity `passed`.
+- Re-ran default/work tests, compile checks, production-code redline scan, real read-only aggregator/RSS/HTML canaries, and final scoped CodeRabbit review. CodeRabbit raised 0 issues after the two findings were fixed.
+- Kept formal production launch and V10 cutover disabled.
+
 ## 1.2.55 - 2026-07-09
 
 - Documented the completed HTML/RSS live adapter split for the OpenClaw Intelligence Pipeline.

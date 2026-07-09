@@ -453,13 +453,28 @@ The 2026-07-09 live collector evidence canary opened only a bounded read-only RS
 
 The first adapter extraction step keeps the public `build_live_collector_evidence` entrypoint but routes RSS canary collection through a registered live adapter contract. Unsupported adapters are skipped without network use and reported as `live_adapter_not_supported`.
 
-The HTML/RSS split is now explicit in the live adapter registry. RSS parsing extracts feed item title, URL, and published time from feed metadata. HTML parsing extracts the page title, canonical URL, and published time from `article:published_time`, `datePublished`, `publishDate`, `pubDate`, or `time[datetime]` metadata. Both adapters emit hash-only raw artifacts and candidate evidence under the same `live_collector_adapter` contract.
+The live adapter registry now has three read-only adapters: `aggregator_api`, `html`, and `rss`. Aggregator parsing consumes JSON item payloads and requires primary evidence. RSS parsing extracts feed item title, URL, and published time from feed metadata. HTML parsing extracts the page title, canonical URL, and published time from `article:published_time`, `datePublished`, `publishDate`, `pubDate`, or `time[datetime]` metadata. All three adapters emit hash-only raw artifacts and candidate evidence under the same `live_collector_adapter` contract.
+
+The 2026-07-09 read-only aggregator canary produced:
+
+| Evidence | Result |
+| --- | --- |
+| Live adapter registry | `aggregator_api`, `html`, `rss` |
+| Source scope | 1 `aihotSource` aggregator API profile |
+| Raw artifacts | 1 |
+| Candidates | 1 |
+| Artifact hashes | 1 |
+| Raw body leaks | 0 |
+| Published candidates | 1 |
+| Live Artifact Fidelity | `passed` |
+| Primary evidence | required and mapped to the item URL |
+| Side effects | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
 
 The 2026-07-09 read-only RSS canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `html`, `rss` |
+| Live adapter registry | `aggregator_api`, `html`, `rss` |
 | Source scope | 5 `mainNewsSources` RSS profiles |
 | Raw artifacts | 5 |
 | Candidates | 4 |
@@ -476,17 +491,21 @@ The 2026-07-09 read-only HTML canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `html`, `rss` |
+| Live adapter registry | `aggregator_api`, `html`, `rss` |
 | Source scope | 3 HTML profiles |
 | Raw artifacts | 3 |
-| Candidates | 3 |
-| Artifact hashes | 3 |
+| Candidates | 2 |
+| Artifact hashes | 2 |
 | Raw body leaks | 0 |
 | Published candidates | 2 |
-| Live Artifact Fidelity | `blocked` because one HTML candidate lacks published-time metadata |
+| Live Artifact Fidelity | `blocked` because one failed source lacks an artifact hash |
 | Side effects | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
 
 This means the adapter skeleton is usable, but production launch remains blocked by real-source fidelity issues rather than by the adapter seam itself.
+
+The Healing Controller now consumes live artifact fidelity blockers as module-level signals, without hardcoding aggregator or source names. It maps `artifact_hash_missing` to a source-fidelity degrade plan and `candidate_published_at_missing` to a published-time fallback requirement. The plan remains decision-only: no retry, source disable, alert send, publish, or production switch is executed.
+
+CodeRabbit raised two valid issues in this slice. The live collector now rejects non-HTTP(S) URL schemes before `urlopen`, and an enabled canary without explicit `maxSources` defaults to the bounded canary limit instead of selecting zero sources. The follow-up CodeRabbit review raised 0 issues.
 
 ## First Read-Only Production Evaluation
 
@@ -634,6 +653,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1M | Add Live Collector Evidence Gate with bounded read-only source canary, artifact hashes, candidate quality replay, and no production cutover. | None |
 | 1N | Extract RSS live collection behind a live adapter contract and add Live Artifact Fidelity diagnostics. | None |
 | 1O | Complete the HTML/RSS live adapter split under the same hash-only artifact and candidate-evidence contract. | None |
+| 1P | Add the Aggregator API live adapter and feed live artifact fidelity blockers into the Healing Controller as decision-only source-health signals. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
