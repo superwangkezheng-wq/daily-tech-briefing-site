@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.50 - 2026-07-09
+
+- Documented the Dynamic V10 Selection Policy shadow implementation.
+- Added the explicit `v10DynamicSelectionPolicyEnabled` opt-in path for the shadow selector, keeping default selection behavior and production routing unchanged.
+- Recorded the dynamic selection formula: video/builder underfill backfills main news, and main news may use up to 6 roundup overflow items.
+- Verified the synthetic parity case where 25 main, 1 video, and 4 builder candidates produce the V10-shaped `21/1/4/26` output.
+- Captured the real candidate-pool finding: with the dynamic policy temporarily enabled, the current shadow pool produces `16/5/5/26`, so the remaining mismatch is a video/builder candidate fidelity issue rather than a total-count formula issue.
+- Re-ran default/work tests, compile checks, local redline checks, and public package checks. CodeRabbit remains pending because the free CLI review hit a rate limit.
+
 ## 1.2.49 - 2026-07-09
 
 - Documented the V10 Effective Selection Targets Plan for the OpenClaw Intelligence Pipeline shadow evaluator.

@@ -474,6 +474,19 @@ The V10 Effective Selection Targets Plan now converts those gaps into an auditab
 
 The target adjustments are `videoUnderfillBackfillItems=4`, `builderUnderfillBackfillItems=1`, `mainNewsBackfillItems=5`, `roundupOverflowItems=6`, and `totalOverflowItems=6`. The policy simulation can match the reference section counts, but it still keeps `production_cutover_allowed=false`. A boundary regression also proves that references beyond the configured 6-item roundup overflow cap remain blocked instead of being marked safe.
 
+The Dynamic V10 Selection Policy is now implemented as an explicit shadow selector opt-in:
+
+```json
+{
+  "v10DynamicSelectionPolicyEnabled": true,
+  "roundupOverflowMaxItems": 6
+}
+```
+
+When enabled, video and builder slots use the actual available candidate count instead of hard-selecting 5 items. Any video/builder underfill backfills `main_news`, and `main_news` can use up to 6 additional roundup overflow items. A synthetic parity case with 25 main-news candidates, 1 video candidate, and 4 builder candidates produces the expected V10-shaped `21/1/4/26` output.
+
+The real shadow candidate pool still produces `16/5/5/26` when the dynamic policy is temporarily enabled, while the V10 reference is `21/1/4/26`. That means the next blocker is candidate fidelity by slot, especially why shadow sees enough video/builder candidates while V10 production accepted only 1 video and 4 builder items. The next diagnostic should measure available, fixture-like, primary-evidence-backed, and V10-accepted candidates per slot before changing production routing.
+
 ## Source Governance Matrix
 
 Every source should be expressed as data before it is collected:
