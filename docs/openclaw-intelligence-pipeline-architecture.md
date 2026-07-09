@@ -425,6 +425,8 @@ That makes the main collector module shallow: callers and maintainers must under
 | `ProductionIntegrationEvaluationResult` | Dual-run integration evaluation result proving legacy production remains active while the new pipeline is attached to the real production environment in read-only parallel mode. |
 | `V10SelectionParityPolicyResult` | Read-only selection-layer diagnostic that compares configured targets, V10 reference section counts, shadow section counts, and policy gaps before any cutover. |
 | `SlotCandidateFidelityResult` | Slot-level diagnostic that compares candidates, verified candidates, selected stories, and V10 accepted counts by main/news/video/builder slot. |
+| `CandidateQualityGateResult` | Pre-production candidate qualification gate for live artifact, freshness, source trust, and content readiness; it does not select, summarize, publish, or authorize production replay. |
+| `QualifiedCandidateReplayResult` | Shadow replay that re-runs event pooling and selection over only quality-gate-qualified candidates while keeping production cutover disabled. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
@@ -497,6 +499,21 @@ The Slot Candidate Fidelity Diagnostic now measures that gap:
 | `builder` | 25 | 25 | 5 | 4 | 1 | 25 | 0 |
 
 Across the three core slots, all 71 candidates are shadow-only, none have network-used evidence, and all 71 are missing `published_at`. The next engineering blocker is therefore a candidate quality/live-evidence gate, not another selector quota tweak.
+
+The Candidate Quality Gate now makes that blocker explicit:
+
+| Quality Gate Metric | Current shadow result |
+| --- | ---: |
+| candidates | 96 |
+| qualified candidates | 0 |
+| disqualified candidates | 96 |
+| shadow-only candidates | 96 |
+| network-used candidates | 0 |
+| candidates missing `published_at` | 96 |
+
+The Qualified Candidate Replay consumes only quality-gate-approved candidates. With the current shadow pool, it produces `qualified_candidate_count=0`, `event_cluster_count=0`, and `selected_story_count=0`, so it remains blocked before any production cutover. A positive fixture proves that a live, fresh, trusted, content-ready candidate can replay successfully, but the replay contract still keeps `production_cutover_allowed=false`.
+
+The final CodeRabbit review for this slice raised 0 issues after fixes for slot-cap enforcement, no-reference V10 policy gaps, replay blocker semantics, live-synthesis model-call evidence, and HTTP send-shadow network rechecks.
 
 ## Source Governance Matrix
 

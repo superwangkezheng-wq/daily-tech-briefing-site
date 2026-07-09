@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.52 - 2026-07-09
+
+- Documented the Candidate Quality Gate Shadow and Qualified Candidate Replay Shadow modules for the OpenClaw Intelligence Pipeline.
+- Added `CandidateQualityGateResult` and `QualifiedCandidateReplayResult` as pre-production contracts, keeping production replay and cutover disabled.
+- Recorded the current quality-gate result: 96 shadow candidates, 0 qualified candidates, 96 disqualified candidates, no network-used evidence, and all candidates missing published timestamps.
+- Added qualified replay over only quality-gate-approved candidates; the current shadow pool replays to 0 selected stories and remains blocked before production cutover.
+- Fixed CodeRabbit-raised issues in selection parity, slot-cap enforcement, qualified replay semantics, live synthesis model-call evidence, and HTTP send-shadow network rechecks.
+- Re-ran default/work tests, compile checks, redline scans, public package checks, smoke tests, and final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+
 ## 1.2.51 - 2026-07-09
 
 - Documented the Slot Candidate Fidelity Diagnostic for the OpenClaw Intelligence Pipeline shadow evaluator.
