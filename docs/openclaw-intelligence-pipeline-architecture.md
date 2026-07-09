@@ -453,11 +453,13 @@ The 2026-07-09 live collector evidence canary opened only a bounded read-only RS
 
 The first adapter extraction step keeps the public `build_live_collector_evidence` entrypoint but routes RSS canary collection through a registered live adapter contract. Unsupported adapters are skipped without network use and reported as `live_adapter_not_supported`.
 
+The HTML/RSS split is now explicit in the live adapter registry. RSS parsing extracts feed item title, URL, and published time from feed metadata. HTML parsing extracts the page title, canonical URL, and published time from `article:published_time`, `datePublished`, `publishDate`, `pubDate`, or `time[datetime]` metadata. Both adapters emit hash-only raw artifacts and candidate evidence under the same `live_collector_adapter` contract.
+
 The 2026-07-09 read-only RSS canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `rss` |
+| Live adapter registry | `html`, `rss` |
 | Source scope | 5 `mainNewsSources` RSS profiles |
 | Raw artifacts | 5 |
 | Candidates | 4 |
@@ -469,6 +471,22 @@ The 2026-07-09 read-only RSS canary produced:
 | Live Artifact Fidelity | `blocked` because one failed source still lacks an artifact hash |
 | XML safety | `defusedxml` is used when available; fallback parsing rejects `DOCTYPE` / `ENTITY` payloads and does not use unsafe XML parsing |
 | CodeRabbit final review | 0 issues |
+
+The 2026-07-09 read-only HTML canary produced:
+
+| Evidence | Result |
+| --- | --- |
+| Live adapter registry | `html`, `rss` |
+| Source scope | 3 HTML profiles |
+| Raw artifacts | 3 |
+| Candidates | 3 |
+| Artifact hashes | 3 |
+| Raw body leaks | 0 |
+| Published candidates | 2 |
+| Live Artifact Fidelity | `blocked` because one HTML candidate lacks published-time metadata |
+| Side effects | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
+
+This means the adapter skeleton is usable, but production launch remains blocked by real-source fidelity issues rather than by the adapter seam itself.
 
 ## First Read-Only Production Evaluation
 
@@ -615,6 +633,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1L | Add Healing Controller Shadow with decision-only retry/degrade/disable/alert planning and no source-specific hardcoding. | None |
 | 1M | Add Live Collector Evidence Gate with bounded read-only source canary, artifact hashes, candidate quality replay, and no production cutover. | None |
 | 1N | Extract RSS live collection behind a live adapter contract and add Live Artifact Fidelity diagnostics. | None |
+| 1O | Complete the HTML/RSS live adapter split under the same hash-only artifact and candidate-evidence contract. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.55 - 2026-07-09
+
+- Documented the completed HTML/RSS live adapter split for the OpenClaw Intelligence Pipeline.
+- Added the `html` live adapter beside the existing `rss` adapter, keeping `build_live_collector_evidence` as the stable read-only canary entrypoint and exposing `trace.adapter_registry=["html","rss"]`.
+- Recorded the real RSS canary evidence: 5 sources, 5 raw artifacts, 4 candidates, 4 artifact hashes, 0 raw-body leaks, 4 published candidates, collector `passed`, and fidelity `blocked` by `artifact_hash_missing` for one failed source.
+- Recorded the real HTML canary evidence: 3 sources, 3 raw artifacts, 3 candidates, 3 artifact hashes, 0 raw-body leaks, 2 published candidates, collector `passed`, and fidelity `blocked` by `candidate_published_at_missing`.
+- Confirmed both canaries stayed read-only: `file_written=false`, `channel_sent=false`, and `side_effects_executed=false`.
+- Re-ran default/work tests, compile checks, production-code redline scan, real read-only RSS/HTML canaries, and final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+- Kept formal production launch and V10 cutover disabled while the fidelity blockers remain open.
+
 ## 1.2.54 - 2026-07-09
 
 - Documented the first Adapter Extraction / Live Artifact Fidelity step for the OpenClaw Intelligence Pipeline.
