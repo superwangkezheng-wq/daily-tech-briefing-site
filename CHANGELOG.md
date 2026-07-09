@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.39 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Live Synthesis Adapter Evidence shadow interface.
+- Recorded `--live-synthesis-evidence` CLI support, metadata-only recorded live-provider audit evidence, draft-count mismatch fail-closed behavior, and dry-run readiness with all non-shadow requirements cleared.
+- Re-ran default/work tests, compile checks, CLI live-synthesis evidence assertions, redline scans, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.38 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline V10 Content Parity Evidence shadow interface.
