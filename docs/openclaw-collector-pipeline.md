@@ -300,6 +300,10 @@ Approval Gate dry-run policy closure: the shadow flow and CLI now accept a metad
 
 Approval Gate dry-run policy 封板：shadow flow 与 CLI 现在可接收 metadata-only 的 `--approval-policy` JSON object。dry-run manual approval 可以把 delivery snapshot 标为 approved；当 publisher targets 和 execution dry-run policy 也配置后，会清除 `delivery_snapshot_approval` 与 `publisher_preflight_ready`，并使 `readiness_report.dry_run_ready=true`。这仍然只是 dry-run gate：production switch 继续被 live synthesis、V10 parity 和真实 publisher execution 缺失阻断，同时 `execution_allowed=false`，不触网、不写文件、不发送渠道。default/work 检查、CLI approval dry-run 断言、红线扫描与 scoped CodeRabbit review 均为 0 issues。
 
+V10 content parity evidence closure: the shadow flow and CLI now accept an external V10 Markdown reference through `--v10-reference-markdown`. When the reference parses, required fields are present, and the reference story count matches the shadow delivery snapshot, `v10_parity.result=passed` and readiness no longer lists `v10_content_parity`. A mismatched reference remains fail-closed with `v10_story_count_mismatch` and `v10_content_parity_not_proven`. This separates V10 content evidence from live synthesis: dry-run readiness may be true, but canary and production switching remain blocked until live synthesis and real publisher execution are implemented. Default/work checks, CLI V10 reference assertions, redline scans, and scoped CodeRabbit review passed with 0 issues.
+
+V10 content parity evidence 封板：shadow flow 与 CLI 现在可通过 `--v10-reference-markdown` 接收外部 V10 Markdown 参考日报。参考日报可解析、必需字段齐全，且 reference story count 与 shadow delivery snapshot 匹配时，`v10_parity.result=passed`，readiness 不再列出 `v10_content_parity`。数量不匹配的参考日报会继续 fail closed，返回 `v10_story_count_mismatch` 与 `v10_content_parity_not_proven`。这一步把 V10 content evidence 与 live synthesis 解耦：dry-run readiness 可以为 true，但 canary 和 production switch 仍会被 live synthesis 与真实 publisher execution 阻断。default/work 检查、CLI V10 reference 断言、红线扫描与 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

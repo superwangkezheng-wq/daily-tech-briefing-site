@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.38 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline V10 Content Parity Evidence shadow interface.
+- Recorded `--v10-reference-markdown` CLI support, external V10 Markdown reference evidence, story-count mismatch fail-closed behavior, and dry-run readiness with V10 parity separated from live synthesis.
+- Re-ran default/work tests, compile checks, CLI V10 reference assertions, redline scans, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.37 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Approval Gate dry-run policy interface.
