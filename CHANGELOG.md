@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.49 - 2026-07-09
+
+- Documented the V10 Effective Selection Targets Plan for the OpenClaw Intelligence Pipeline shadow evaluator.
+- Added the read-only target plan that explains the real 2026-07-09 V10 section mix as `totalFinalCount=26`, `mainNewsFinalCount=21`, `mainVideoFinalCount=1`, `builderFinalCount=4`, and `roundupOverflowItems=6`.
+- Captured the target adjustments: 4 video underfill backfill items, 1 builder underfill backfill item, 5 total main-news backfill items, and 6 roundup overflow items.
+- Added a boundary check proving references beyond the 6-item roundup overflow cap remain blocked instead of being treated as safe for cutover.
+- Re-ran default/work tests, compile checks, real-reference assertions, local redline checks, public package checks, and smoke tests. CodeRabbit remains pending because the free CLI review hit a rate limit.
+
 ## 1.2.48 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline V10 Selection Parity Policy shadow module.

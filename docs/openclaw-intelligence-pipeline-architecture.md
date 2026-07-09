@@ -462,6 +462,18 @@ The V10 Selection Parity Policy now turns that blocker into explicit next engine
 | `video_overselection_guard_required` | Shadow must avoid selecting 5 video items when V10 production accepted only 1. |
 | `builder_overselection_guard_required` | Shadow must avoid selecting 5 builder items when V10 production accepted only 4. |
 
+The V10 Effective Selection Targets Plan now converts those gaps into an auditable, read-only target plan:
+
+| Effective Target | Value for 2026-07-09 V10 reference |
+| --- | ---: |
+| `totalFinalCount` | 26 |
+| `mainNewsFinalCount` | 21 |
+| `mainVideoFinalCount` | 1 |
+| `builderFinalCount` | 4 |
+| `roundupOverflowItems` | 6 |
+
+The target adjustments are `videoUnderfillBackfillItems=4`, `builderUnderfillBackfillItems=1`, `mainNewsBackfillItems=5`, `roundupOverflowItems=6`, and `totalOverflowItems=6`. The policy simulation can match the reference section counts, but it still keeps `production_cutover_allowed=false`. A boundary regression also proves that references beyond the configured 6-item roundup overflow cap remain blocked instead of being marked safe.
+
 ## Source Governance Matrix
 
 Every source should be expressed as data before it is collected:
