@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.53 - 2026-07-09
+
+- Documented the Live Collector Evidence Gate canary for the OpenClaw Intelligence Pipeline.
+- Added `LiveCollectorEvidenceResult` as a read-only live artifact evidence contract, feeding Candidate Quality Gate and Qualified Candidate Replay without publishing or switching production.
+- Recorded the real canary evidence: 5 RSS sources probed, 5 raw artifacts, 4 candidates, 3 quality-gate-qualified candidates, replay selected 3 stories, and production cutover remained disabled.
+- Fixed the DeliverySnapshot shadow payload so `delivery_snapshot.stories` preserves selected story summaries instead of a count-only placeholder; schema and publisher preflight now derive the count from that payload.
+- Fixed CodeRabbit-raised synthesis and selection issues: malformed numeric/Decimal config parsing, explicit boolean parsing, endpoint dry-run validation, post-send network rechecks, secret-resolver trace sanitization, explicit zero slot caps, and zero roundup overflow.
+- Re-ran default/work tests, compile checks, production-code redline scans, real read-only canary, and final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+- Confirmed no file write, channel send, production switch, traffic shift, or legacy V10 shutdown was performed.
+
 ## 1.2.52 - 2026-07-09
 
 - Documented the Candidate Quality Gate Shadow and Qualified Candidate Replay Shadow modules for the OpenClaw Intelligence Pipeline.

@@ -427,10 +427,26 @@ That makes the main collector module shallow: callers and maintainers must under
 | `SlotCandidateFidelityResult` | Slot-level diagnostic that compares candidates, verified candidates, selected stories, and V10 accepted counts by main/news/video/builder slot. |
 | `CandidateQualityGateResult` | Pre-production candidate qualification gate for live artifact, freshness, source trust, and content readiness; it does not select, summarize, publish, or authorize production replay. |
 | `QualifiedCandidateReplayResult` | Shadow replay that re-runs event pooling and selection over only quality-gate-qualified candidates while keeping production cutover disabled. |
+| `LiveCollectorEvidenceResult` | Read-only live collector canary result that fetches a bounded source sample, records artifact hashes and candidate evidence, and feeds quality/replay gates without publishing or switching production. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
+
+## Live Collector Evidence Canary
+
+The 2026-07-09 live collector evidence canary opened only a bounded read-only RSS collection path. Legacy V10 stayed active, and the new pipeline remained blocked before production launch.
+
+| Evidence | Result |
+| --- | --- |
+| Source scope | 5 `mainNewsSources` RSS profiles |
+| Raw artifacts | 5 artifact records with body hashes and no raw body in the snapshot |
+| Candidates | 4 normalized live candidates |
+| Candidate Quality Gate | 3 qualified, 1 freshness failure, result `blocked` |
+| Qualified Candidate Replay | 3 selected stories, result `passed`, `production_cutover_allowed=false` |
+| Side-effect budget | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
+| Delivery snapshot | `stories` now preserves selected story summaries; count is derived by schema/publisher gates |
+| CodeRabbit final review | 0 issues |
 
 ## First Read-Only Production Evaluation
 
@@ -575,6 +591,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1J | Add Publisher Rendering Contract Shadow with artifact shape schemas and no write/send/content-payload behavior. | None |
 | 1K | Add Publisher Execution Gate Shadow with explicit dry-run/execute policy, idempotency validation, and zero side-effect budget. | None |
 | 1L | Add Healing Controller Shadow with decision-only retry/degrade/disable/alert planning and no source-specific hardcoding. | None |
+| 1M | Add Live Collector Evidence Gate with bounded read-only source canary, artifact hashes, candidate quality replay, and no production cutover. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
