@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.59 - 2026-07-09
+
+- Documented the `video` live adapter extraction for the OpenClaw Intelligence Pipeline.
+- Added a read-only YouTube official Atom feed path for video sources with manifest `channelId`; the adapter does not invoke `yt-dlp`, browser automation, Bilibili detail scripts, or page discovery.
+- Recorded real read-only video canary evidence: 2 YouTube sources, 2 raw artifacts, 2 candidates, 13/15 feed entries observed, fidelity `passed`, source health all zero, and no write/send side effects.
+- Hardened live collection so one adapter exception records a source-level `live_collector_error:*` warning and continues the canary instead of aborting the whole run.
+- Preserved HTTP error status in source health so HTTP failures are classified as `http_not_ok` instead of false `network_failure`.
+- Re-ran default/work tests, compile checks, real read-only video canary, production-code redline scan, and final scoped CodeRabbit review. CodeRabbit raised 0 issues after one finding was fixed.
+- Kept formal production launch and V10 cutover disabled.
+
 ## 1.2.58 - 2026-07-09
 
 - Documented the `builder_feed` live adapter extraction for the OpenClaw Intelligence Pipeline.
