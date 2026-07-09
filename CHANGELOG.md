@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.54 - 2026-07-09
+
+- Documented the first Adapter Extraction / Live Artifact Fidelity step for the OpenClaw Intelligence Pipeline.
+- Added `LiveArtifactFidelityResult` as a read-only diagnostic over live collector artifacts and candidates, checking artifact hashes, adapter contracts, raw-body leakage, candidate timestamps, and per-adapter counts.
+- Moved RSS live canary collection behind a registered live adapter contract, keeping unsupported adapters fail-closed and non-networked.
+- Hardened live feed handling after CodeRabbit review: artifact hashes now use raw response bytes or a transport-provided `body_sha256`, remote XML parsing uses `defusedxml` when available, and the fallback feed parser rejects `DOCTYPE` / `ENTITY` payloads without using unsafe XML parsing.
+- Recorded the real canary evidence: 5 RSS sources, 5 raw artifacts, 4 candidates, 4 artifact hashes, 0 raw-body leaks, 4 adapter-backed candidates, 3 quality-gate-qualified candidates, replay selected 3 stories, and production cutover remained disabled.
+- Captured the remaining fidelity blocker: one failed source still produces `artifact_hash_missing`, so live artifact fidelity remains blocked while collector/replay can still pass in read-only mode.
+- Re-ran default/work tests, compile checks, production-code redline scans, real read-only canary, and final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+
 ## 1.2.53 - 2026-07-09
 
 - Documented the Live Collector Evidence Gate canary for the OpenClaw Intelligence Pipeline.

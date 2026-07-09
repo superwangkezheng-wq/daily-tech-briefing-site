@@ -428,6 +428,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `CandidateQualityGateResult` | Pre-production candidate qualification gate for live artifact, freshness, source trust, and content readiness; it does not select, summarize, publish, or authorize production replay. |
 | `QualifiedCandidateReplayResult` | Shadow replay that re-runs event pooling and selection over only quality-gate-qualified candidates while keeping production cutover disabled. |
 | `LiveCollectorEvidenceResult` | Read-only live collector canary result that fetches a bounded source sample, records artifact hashes and candidate evidence, and feeds quality/replay gates without publishing or switching production. |
+| `LiveArtifactFidelityResult` | Read-only live artifact diagnostic that checks per-adapter artifact hashes, adapter contracts, raw-body leakage, candidate timestamps, and usable live candidate counts. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
@@ -446,6 +447,27 @@ The 2026-07-09 live collector evidence canary opened only a bounded read-only RS
 | Qualified Candidate Replay | 3 selected stories, result `passed`, `production_cutover_allowed=false` |
 | Side-effect budget | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
 | Delivery snapshot | `stories` now preserves selected story summaries; count is derived by schema/publisher gates |
+| CodeRabbit final review | 0 issues |
+
+## Adapter Extraction / Live Artifact Fidelity
+
+The first adapter extraction step keeps the public `build_live_collector_evidence` entrypoint but routes RSS canary collection through a registered live adapter contract. Unsupported adapters are skipped without network use and reported as `live_adapter_not_supported`.
+
+The 2026-07-09 read-only RSS canary produced:
+
+| Evidence | Result |
+| --- | --- |
+| Live adapter registry | `rss` |
+| Source scope | 5 `mainNewsSources` RSS profiles |
+| Raw artifacts | 5 |
+| Candidates | 4 |
+| Artifact hashes | 4 |
+| Raw body leaks | 0 |
+| Adapter-backed candidates | 4 |
+| Candidate Quality Gate | 3 qualified, result `blocked` because one candidate failed freshness |
+| Qualified Candidate Replay | 3 selected stories, result `passed`, `production_cutover_allowed=false` |
+| Live Artifact Fidelity | `blocked` because one failed source still lacks an artifact hash |
+| XML safety | `defusedxml` is used when available; fallback parsing rejects `DOCTYPE` / `ENTITY` payloads and does not use unsafe XML parsing |
 | CodeRabbit final review | 0 issues |
 
 ## First Read-Only Production Evaluation
@@ -592,6 +614,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1K | Add Publisher Execution Gate Shadow with explicit dry-run/execute policy, idempotency validation, and zero side-effect budget. | None |
 | 1L | Add Healing Controller Shadow with decision-only retry/degrade/disable/alert planning and no source-specific hardcoding. | None |
 | 1M | Add Live Collector Evidence Gate with bounded read-only source canary, artifact hashes, candidate quality replay, and no production cutover. | None |
+| 1N | Extract RSS live collection behind a live adapter contract and add Live Artifact Fidelity diagnostics. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
