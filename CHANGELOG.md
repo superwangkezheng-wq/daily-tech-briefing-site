@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.45 - 2026-07-09
+
+- Recorded final CodeRabbit closure for the OpenClaw Intelligence Pipeline shadow release modules.
+- Fixed the CodeRabbit-raised live synthesis guardrail parsing issue so explicit zero-valued limits and empty allowlists are preserved instead of replaced by defaults.
+- Re-ran default/work tests, compile checks, redline scans, public package checks, and scoped CodeRabbit review; final CodeRabbit review raised 0 issues.
+
 ## 1.2.44 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Release Dossier Evidence Archive Shadow module.

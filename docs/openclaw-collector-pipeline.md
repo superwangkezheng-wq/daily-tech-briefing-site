@@ -328,6 +328,10 @@ Release dossier archive closure: the shadow flow now emits `release_dossier_arch
 
 Release dossier archive 封板：shadow flow 现在会在 release dossier 之后输出 `release_dossier_archive`。归档模块生成稳定 manifest，包含 SHA-1 dossier digest、operator packet 状态、retention policy 与 production-disconnected 标记。它只是 manifest-only：`write_planned=false`、`file_written=false`、`production_system_connected=false`、`production_switch_allowed=false`。default/work 检查、archive-manifest 断言、红线扫描和本地对抗审查均通过。CodeRabbit follow-up review 仍因 free CLI rate limit 暂待补审。
 
+Final CodeRabbit closure: the scoped review for `scripts/openclaw_intelligence_pipeline` completed after the release dossier and archive modules. CodeRabbit raised one major issue in live synthesis guardrail parsing: explicit zero-valued limits and empty allowlists were being treated as missing and replaced by defaults. The parser now falls back only on `None`, preserves empty list/tuple allowlists, and has a regression test proving zero cost/timeout guardrails and empty allowed routes/profiles remain enforced. Default/work checks, compile checks, redline scans, public package checks, and scoped CodeRabbit review now pass with 0 issues.
+
+最终 CodeRabbit 封板：`scripts/openclaw_intelligence_pipeline` 的 scoped review 已在 release dossier 与 archive 模块之后完成。CodeRabbit 提出 1 个 major 问题：live synthesis guardrail parsing 会把显式 0 值限制和空 allowlist 当成缺失并替换为默认值。现在解析逻辑只在 `None` 时 fallback，保留空 list/tuple allowlist，并新增回归测试证明 zero cost/timeout guardrails 与空 allowed routes/profiles 会被继续执行。default/work 检查、编译检查、红线扫描、public package 检查与 scoped CodeRabbit review 当前均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:
