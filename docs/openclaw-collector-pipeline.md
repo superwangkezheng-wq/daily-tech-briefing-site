@@ -332,6 +332,10 @@ Final CodeRabbit closure: the scoped review for `scripts/openclaw_intelligence_p
 
 最终 CodeRabbit 封板：`scripts/openclaw_intelligence_pipeline` 的 scoped review 已在 release dossier 与 archive 模块之后完成。CodeRabbit 提出 1 个 major 问题：live synthesis guardrail parsing 会把显式 0 值限制和空 allowlist 当成缺失并替换为默认值。现在解析逻辑只在 `None` 时 fallback，保留空 list/tuple allowlist，并新增回归测试证明 zero cost/timeout guardrails 与空 allowed routes/profiles 会被继续执行。default/work 检查、编译检查、红线扫描、public package 检查与 scoped CodeRabbit review 当前均为 0 issues。
 
+Manual seed live adapter closure: `wechatSeedSources` now has a read-only `manual_seed` live adapter. It consumes manifest `articles[]`, builds hash-only artifacts and first-valid-article candidates, and never calls the network transport. The real manual seed canary found 2 sources, 2 artifacts, 2 candidates, `network_used=false`, and clean source health. The same slice also closed CodeRabbit hardening issues in normalizer evidence propagation, source cap parsing, AIHot cache/config handling, dynamic selection caps, primary-evidence validation, QA field checks, synthesis guardrails, approval secret detection, and V10 blank-reference handling. Default/work checks and final scoped CodeRabbit review passed with 0 issues.
+
+Manual seed live adapter 封板：`wechatSeedSources` 现在有了只读的 `manual_seed` live adapter。它消费 manifest 的 `articles[]`，生成 hash-only artifact 与第一个有效文章 candidate，且完全不调用网络 transport。真实 manual seed canary 结果为 2 个源、2 个 artifact、2 个 candidate、`network_used=false`、source health 全绿。同一切片也关闭了 CodeRabbit 对 normalizer evidence 透传、source cap 解析、AIHot cache/config、dynamic selection 总量、primary evidence 全量校验、QA 字段级检查、synthesis guardrail、approval secret 检测、V10 空白 reference 处理的硬化问题。default/work 检查与最终 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

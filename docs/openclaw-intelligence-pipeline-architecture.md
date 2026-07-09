@@ -453,13 +453,13 @@ The 2026-07-09 live collector evidence canary opened only a bounded read-only RS
 
 The first adapter extraction step keeps the public `build_live_collector_evidence` entrypoint but routes RSS canary collection through a registered live adapter contract. Unsupported adapters are skipped without network use and reported as `live_adapter_not_supported`.
 
-The live adapter registry now has five read-only adapters: `aggregator_api`, `builder_feed`, `html`, `rss`, and `video`. Aggregator parsing consumes JSON item payloads and requires primary evidence. Builder parsing consumes the follow-builders `feed-x.json` aggregate feed and filters by the manifest handle; it does not fetch X profile pages. Video parsing currently consumes YouTube official Atom feeds for manifest sources with `channelId`; it does not invoke `yt-dlp`, browser automation, Bilibili detail scripts, or page discovery. RSS parsing extracts feed item title, URL, and published time from feed metadata. HTML parsing extracts the page title, canonical URL, and published time from `article:published_time`, `datePublished`, `publishDate`, `pubDate`, or `time[datetime]` metadata. All five adapters emit hash-only raw artifacts and candidate evidence under the same `live_collector_adapter` contract.
+The live adapter registry now has six read-only adapters: `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, and `video`. Aggregator parsing consumes JSON item payloads and requires primary evidence. Builder parsing consumes the follow-builders `feed-x.json` aggregate feed and filters by the manifest handle; it does not fetch X profile pages. Manual seed parsing consumes `wechatSeedSources[*].articles[]` from the manifest and does not call the network transport. Video parsing currently consumes YouTube official Atom feeds for manifest sources with `channelId`; it does not invoke `yt-dlp`, browser automation, Bilibili detail scripts, or page discovery. RSS parsing extracts feed item title, URL, and published time from feed metadata. HTML parsing extracts the page title, canonical URL, and published time from `article:published_time`, `datePublished`, `publishDate`, `pubDate`, or `time[datetime]` metadata. All six adapters emit hash-only raw artifacts and candidate evidence under the same `live_collector_adapter` contract.
 
 The 2026-07-09 read-only aggregator canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `rss`, `video` |
+| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, `video` |
 | Source scope | 1 `aihotSource` aggregator API profile |
 | Raw artifacts | 1 |
 | Candidates | 1 |
@@ -474,7 +474,7 @@ The 2026-07-09 read-only RSS canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `rss`, `video` |
+| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, `video` |
 | Source scope | 5 `mainNewsSources` RSS profiles |
 | Raw artifacts | 5 |
 | Candidates | 3 |
@@ -490,7 +490,7 @@ The 2026-07-09 read-only HTML canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `rss`, `video` |
+| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, `video` |
 | Source scope | 3 HTML profiles |
 | Raw artifacts | 3 |
 | Candidates | 3 |
@@ -505,7 +505,7 @@ The 2026-07-09 read-only builder feed canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `rss`, `video` |
+| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, `video` |
 | Source scope | 3 `builderSources` profiles |
 | Raw artifacts | 3 |
 | Candidates | 2 |
@@ -521,7 +521,7 @@ The 2026-07-09 read-only video canary produced:
 
 | Evidence | Result |
 | --- | --- |
-| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `rss`, `video` |
+| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, `video` |
 | Source scope | 2 `mainVideoSources` YouTube profiles with manifest `channelId` |
 | Raw artifacts | 2 |
 | Candidates | 2 |
@@ -533,6 +533,22 @@ The 2026-07-09 read-only video canary produced:
 | Live Artifact Fidelity | `passed` |
 | Side effects | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
 
+The 2026-07-09 read-only manual seed canary produced:
+
+| Evidence | Result |
+| --- | --- |
+| Live adapter registry | `aggregator_api`, `builder_feed`, `html`, `manual_seed`, `rss`, `video` |
+| Source scope | 2 enabled `wechatSeedSources` profiles |
+| Raw artifacts | 2 |
+| Candidates | 2 |
+| Artifact hashes | 2 |
+| Raw body leaks | 0 |
+| Adapter-backed candidates | 2 |
+| Network used | `false` |
+| Source health summary | all zero |
+| Live Artifact Fidelity | `passed` |
+| Side effects | `file_written=false`, `channel_sent=false`, `side_effects_executed=false` |
+
 This means the adapter skeleton is usable, but production launch remains blocked by real-source fidelity issues rather than by the adapter seam itself.
 
 The Healing Controller now consumes live artifact fidelity blockers as module-level signals, without hardcoding aggregator or source names. It maps `artifact_hash_missing` to a source-fidelity degrade plan and `candidate_published_at_missing` to a published-time fallback requirement. The plan remains decision-only: no retry, source disable, alert send, publish, or production switch is executed.
@@ -540,6 +556,8 @@ The Healing Controller now consumes live artifact fidelity blockers as module-le
 Live Artifact Fidelity now also emits source-health evidence. The source-health summary distinguishes `network_failure`, `http_not_ok`, `content_unparseable`, `hash_unavailable`, and `unsupported_adapter`, so `artifact_hash_missing` can be traced to an actual source-health class before any retry/degrade/disable decision is considered. Healing consumes only the summary and still executes nothing.
 
 CodeRabbit raised eight valid issues across this adapter/fidelity slice. The live collector now rejects non-HTTP(S) URL schemes before fetching, disables urllib redirects before body reads, preserves entity/character references in fallback feed parsing, falls back on normal XML parse failures while keeping unsafe `DOCTYPE` / `ENTITY` blocked, defaults enabled canaries without explicit `maxSources` to the bounded canary limit, preserves original byte-length metadata with body hashes, bounds malformed policy numbers before collection, and records single-adapter exceptions as source-level warnings instead of aborting the canary. The follow-up CodeRabbit review raised 0 issues.
+
+The manual seed extraction also closed a CodeRabbit hardening pass across the adjacent shadow spine. Valid fixes included normalizer title and primary-evidence propagation, numeric source-cap normalization, AIHot private best-effort cache handling and malformed config fallback, dynamic V10 selection total-cap enforcement, all-required primary-evidence validation, per-field QA structural-fragment checks, synthesis endpoint/header/budget guardrails, approval secret-material detection, and blank V10 markdown reference handling. One suggested pipeline-order change was verified invalid because production integration depends on readiness, release dossier, and archive state; that order remains unchanged. The follow-up scoped CodeRabbit review raised 0 issues.
 
 ## First Read-Only Production Evaluation
 
@@ -691,6 +709,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1Q | Split live artifact fidelity failures into source-health evidence classes and harden redirect/XML fallback behavior. | None |
 | 1R | Add the Builder Feed live adapter using follow-builders JSON, bounded policy parsing, and original byte-length evidence. | None |
 | 1S | Add the YouTube Video live adapter using official Atom feeds and fail-soft adapter exception handling. | None |
+| 1T | Add the Manual Seed live adapter for manifest-backed WeChat seed articles and close adjacent CodeRabbit hardening issues. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

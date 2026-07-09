@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.60 - 2026-07-09
+
+- Documented the `manual_seed` live adapter extraction for the OpenClaw Intelligence Pipeline.
+- Added a read-only config-backed adapter for `wechatSeedSources`; it consumes manifest `articles[]`, does not call network transports, and emits hash-only `RawArtifact` plus a first valid article `Candidate`.
+- Recorded real read-only manual seed canary evidence: 2 enabled seed sources, 2 raw artifacts, 2 candidates, `network_used=false`, fidelity `passed`, source health all zero, and no write/send side effects.
+- Hardened adjacent spine issues found by CodeRabbit: normalizer title/evidence propagation, numeric source caps, AIHot cache/config handling, dynamic selection total cap, all-required primary evidence validation, per-field QA structural checks, synthesis endpoint/header/budget guardrails, approval secret-material detection, and blank V10 reference handling.
+- Re-ran default/work tests, compile checks, real read-only manual seed canary, and final scoped CodeRabbit review. CodeRabbit raised 0 issues after the valid findings were fixed; one pipeline-order suggestion was verified invalid and not applied.
+- Kept formal production launch and V10 cutover disabled.
+
 ## 1.2.59 - 2026-07-09
 
 - Documented the `video` live adapter extraction for the OpenClaw Intelligence Pipeline.
