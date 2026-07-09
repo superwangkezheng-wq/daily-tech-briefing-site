@@ -25,6 +25,7 @@ Source Registry
   -> Production Entrypoint Switch Gate
   -> Release Dossier
   -> Release Dossier Archive
+  -> Production Environment Evidence
   -> Production Integration Evaluation
   -> Healing Controller
 ```
@@ -392,6 +393,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Production Entrypoint Switch Gate | full dry-run evidence to canary-evaluation readiness | baseline parity, manual cutover requirement, zero traffic shift, no production output switch |
 | Release Dossier | full shadow readiness state and code-review evidence to operator packet | approval packet, CodeRabbit status, redlines, manual approval requirements |
 | Release Dossier Archive | release dossier to stable archive manifest | dossier digest, retention policy, manifest-only artifact, no file write |
+| Production Environment Evidence | existing V10 production logs and acceptance logs to read-only integration evidence | path/size/SHA-1 metadata, parse result, legacy-active signal, local-review fallback marker, no log body copy |
 | Production Integration Evaluation | archived approval packet and dual-run evidence to parallel evaluation readiness | legacy V10 active output, new pipeline read-only production-environment attachment, rollback references, no cutover/write/send |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
@@ -423,6 +425,28 @@ That makes the main collector module shallow: callers and maintainers must under
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
 | `HealthSignal` | Machine-readable status emitted by every pipeline module. |
+
+## First Read-Only Production Evaluation
+
+The first real read-only production evaluation used the 2026-07-09 V10 production logs:
+
+| Evidence | Result |
+| --- | --- |
+| latest V10 daily-news log | passed, `daily_news_v10 exit=0` |
+| latest daily-acceptance log | passed, `Summary: 0 error(s)` |
+| evidence body policy | no log body or tail copied into evidence |
+| production side effects | no production write, no channel send, no traffic shift |
+
+The production environment evidence passed, but the full pipeline correctly remained blocked by V10 parity:
+
+| Metric | V10 production reference | Shadow pipeline |
+| --- | ---: | ---: |
+| total stories | 26 | 20 |
+| `techNews` | 21 | 10 |
+| `videoItems` | 1 | 5 |
+| `aiCreators` | 4 | 5 |
+
+This is an expected blocker, not a release failure. It shows the new pipeline can safely attach to real production evidence while still refusing cutover until the real collector/selection behavior is no worse than V10.
 
 ## Source Governance Matrix
 

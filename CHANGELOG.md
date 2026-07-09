@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.47 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline read-only production environment evidence builder and first real dual-run evaluation.
+- Recorded that the evidence builder reads the latest V10 daily-news and daily-acceptance logs without copying log bodies, returning only paths, size, SHA-1 digests, parse results, and safety flags.
+- Improved shadow selection and V10 parity diagnostics: Selection now respects configured main/video/builder slot quotas, and V10 parity now compares section counts as well as total story count.
+- Captured the first real production comparison: V10 output had 26 stories with section mix `techNews=21`, `videoItems=1`, `aiCreators=4`, while shadow output had 20 stories with `techNews=10`, `videoItems=5`, `aiCreators=5`; production integration remains blocked and no cutover/write/send/traffic shift is allowed.
+- Fixed CodeRabbit-raised issues for SourceRegistry duplicate-index consistency, full-log evidence signal scanning without exposing log content, evidence gate semantics, malformed live-synthesis evidence parsing, and provider transport network preflight. Final scoped CodeRabbit review raised 0 issues.
+
 ## 1.2.46 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Production Integration Evaluation Shadow module.
