@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.40 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Publisher Real Execution Contract Shadow module.
+- Recorded the side-effect-free dry-run artifact plan, idempotency audit manifest, rollback plan, zero side-effect budget, and explicit baseline readiness proving the shadow output is not worse than the current V10 production reference without connecting to production systems.
+- Re-ran default/work tests, compile checks, full dry-run evidence assertions, redline scans, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.39 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Live Synthesis Adapter Evidence shadow interface.
