@@ -385,6 +385,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Shadow vs V10 Regression Evaluator | shadow delivery and V10 parity evidence to no-worse regression result | story-count parity, QA block rate, slot coverage, source mix, duplicate-event rate |
 | Production Entrypoint Switch Gate | full dry-run evidence to canary-evaluation readiness | baseline parity, manual cutover requirement, zero traffic shift, no production connection |
 | Release Dossier | full shadow readiness state and code-review evidence to operator packet | approval packet, CodeRabbit status, redlines, manual approval requirements |
+| Release Dossier Archive | release dossier to stable archive manifest | dossier digest, retention policy, manifest-only artifact, no file write |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
 ## Data Contracts
@@ -409,6 +410,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `ShadowV10RegressionEvaluationResult` | Machine-readable no-worse-than-current-production regression evaluation with coverage, QA, source mix, and duplicate metrics. |
 | `ProductionEntrypointSwitchGateResult` | Shadow production-entrypoint gate that can mark canary evaluation ready while forbidding production connection and traffic shift. |
 | `ReleaseDossierResult` | Operator approval packet that aggregates readiness, regression, publisher, switch-gate, code-review, and redline evidence. |
+| `ReleaseDossierArchiveResult` | Stable release-dossier archive manifest with digest and retention metadata, without writing files. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |

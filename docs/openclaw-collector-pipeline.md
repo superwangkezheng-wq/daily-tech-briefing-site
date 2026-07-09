@@ -324,6 +324,10 @@ Release dossier closure: the shadow flow now emits `release_dossier` after readi
 
 Release dossier 封板：shadow flow 现在会在 readiness 与 switch evaluation 之后输出 `release_dossier`。该 dossier 汇总 dry-run readiness、V10 regression evidence、publisher real execution contract、production entrypoint switch gate、CodeRabbit evidence 状态、红线和人工 operator approval 要求。没有 CodeRabbit evidence 时，dossier 保持 `review_pending`；传入 metadata-only 的 0 issue CodeRabbit evidence 后，可以变成 `approval_packet_ready`，但仍保持 `production_switch_allowed=false`、`production_system_connected=false`、`traffic_shift_allowed=false`。default/work 检查、完整 dry-run approval-packet 断言、红线扫描和本地对抗审查均通过。CodeRabbit follow-up review 因 free CLI rate limit 暂待补审，并已记录为未闭合审查项。
 
+Release dossier archive closure: the shadow flow now emits `release_dossier_archive` after the release dossier. The archive module builds a stable manifest with a SHA-1 dossier digest, operator packet status, retention policy, and production-disconnected flags. It is manifest-only: `write_planned=false`, `file_written=false`, `production_system_connected=false`, and `production_switch_allowed=false`. Default/work checks, archive-manifest assertions, redline scans, and local adversarial review passed. CodeRabbit follow-up review remains pending due the free CLI rate limit.
+
+Release dossier archive 封板：shadow flow 现在会在 release dossier 之后输出 `release_dossier_archive`。归档模块生成稳定 manifest，包含 SHA-1 dossier digest、operator packet 状态、retention policy 与 production-disconnected 标记。它只是 manifest-only：`write_planned=false`、`file_written=false`、`production_system_connected=false`、`production_switch_allowed=false`。default/work 检查、archive-manifest 断言、红线扫描和本地对抗审查均通过。CodeRabbit follow-up review 仍因 free CLI rate limit 暂待补审。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

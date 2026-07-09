@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.44 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Release Dossier Evidence Archive Shadow module.
+- Recorded the stable archive manifest and digest for release dossiers while keeping file writes, production connection, publishing, and traffic shift disabled.
+- Re-ran default/work tests, compile checks, archive-manifest assertions, redline scans, and public package checks. CodeRabbit follow-up review remains pending due the free CLI rate limit.
+
 ## 1.2.43 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Release Dossier / Operator Approval Packet Shadow module.
