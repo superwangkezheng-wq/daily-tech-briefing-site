@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.61 - 2026-07-09
+
+- Documented the Collector Execution Policy seam for controlled adapters in the OpenClaw Intelligence Pipeline.
+- Added a default-deny execution gate before live adapter dispatch for `wechat_discovery`, `wechat_mirror`, `builder_podcast`, and Bilibili `video` sources.
+- Preserved safe native read-only adapters while keeping subprocess, browser, cache writes, file writes, channel sends, and production side effects disabled for controlled sources.
+- Recorded real read-only WeChat discovery canary evidence: 3 selected manifest profiles, 3 `collector_controlled_execution_disabled` results, `network_used=false`, 0 artifacts, 0 candidates, and source health classified as `controlled_execution_blocked` rather than `network_failure`.
+- Re-ran default/work tests, compile checks, controlled-execution canaries, and final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+- Kept formal production launch, real WeChat/Bilibili execution, and V10 cutover disabled.
+
 ## 1.2.60 - 2026-07-09
 
 - Documented the `manual_seed` live adapter extraction for the OpenClaw Intelligence Pipeline.

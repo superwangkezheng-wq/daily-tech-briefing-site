@@ -336,6 +336,10 @@ Manual seed live adapter closure: `wechatSeedSources` now has a read-only `manua
 
 Manual seed live adapter 封板：`wechatSeedSources` 现在有了只读的 `manual_seed` live adapter。它消费 manifest 的 `articles[]`，生成 hash-only artifact 与第一个有效文章 candidate，且完全不调用网络 transport。真实 manual seed canary 结果为 2 个源、2 个 artifact、2 个 candidate、`network_used=false`、source health 全绿。同一切片也关闭了 CodeRabbit 对 normalizer evidence 透传、source cap 解析、AIHot cache/config、dynamic selection 总量、primary evidence 全量校验、QA 字段级检查、synthesis guardrail、approval secret 检测、V10 空白 reference 处理的硬化问题。default/work 检查与最终 scoped CodeRabbit review 均为 0 issues。
 
+Collector Execution Policy closure: controlled collectors now fail closed before live adapter dispatch. `wechat_discovery`, `wechat_mirror`, `builder_podcast`, and Bilibili `video` sources are selected into the canary when requested, but default to `collector_controlled_execution_disabled` with no network, subprocess, browser, cache write, file write, channel send, artifact, or candidate. Live Artifact Fidelity classifies this as `controlled_execution_blocked`, not `network_failure`, so operators can distinguish "needs a controlled adapter contract" from flaky connectivity. Default/work checks, controlled-execution canaries, and scoped CodeRabbit review passed with 0 issues.
+
+Collector Execution Policy 封板：受控采集器现在会在 live adapter dispatch 前 fail closed。`wechat_discovery`、`wechat_mirror`、`builder_podcast` 与 Bilibili `video` 源在被请求时会进入 canary，但默认返回 `collector_controlled_execution_disabled`，且不触网、不跑子进程、不启浏览器、不写 cache、不写文件、不发送渠道、不生成 artifact 或 candidate。Live Artifact Fidelity 将其归类为 `controlled_execution_blocked`，而不是 `network_failure`，从而把“需要受控 adapter 合同”和“网络不稳定”分开。default/work 检查、controlled-execution canary 与 scoped CodeRabbit review 均为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:
