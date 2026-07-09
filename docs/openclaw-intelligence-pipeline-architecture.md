@@ -424,6 +424,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `ReleaseDossierArchiveResult` | Stable release-dossier archive manifest with digest and retention metadata, without writing files. |
 | `ProductionIntegrationEvaluationResult` | Dual-run integration evaluation result proving legacy production remains active while the new pipeline is attached to the real production environment in read-only parallel mode. |
 | `V10SelectionParityPolicyResult` | Read-only selection-layer diagnostic that compares configured targets, V10 reference section counts, shadow section counts, and policy gaps before any cutover. |
+| `SlotCandidateFidelityResult` | Slot-level diagnostic that compares candidates, verified candidates, selected stories, and V10 accepted counts by main/news/video/builder slot. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
@@ -485,7 +486,17 @@ The Dynamic V10 Selection Policy is now implemented as an explicit shadow select
 
 When enabled, video and builder slots use the actual available candidate count instead of hard-selecting 5 items. Any video/builder underfill backfills `main_news`, and `main_news` can use up to 6 additional roundup overflow items. A synthetic parity case with 25 main-news candidates, 1 video candidate, and 4 builder candidates produces the expected V10-shaped `21/1/4/26` output.
 
-The real shadow candidate pool still produces `16/5/5/26` when the dynamic policy is temporarily enabled, while the V10 reference is `21/1/4/26`. That means the next blocker is candidate fidelity by slot, especially why shadow sees enough video/builder candidates while V10 production accepted only 1 video and 4 builder items. The next diagnostic should measure available, fixture-like, primary-evidence-backed, and V10-accepted candidates per slot before changing production routing.
+The real shadow candidate pool still produces `16/5/5/26` when the dynamic policy is temporarily enabled, while the V10 reference is `21/1/4/26`. That means the next blocker is candidate fidelity by slot, especially why shadow sees enough video/builder candidates while V10 production accepted only 1 video and 4 builder items.
+
+The Slot Candidate Fidelity Diagnostic now measures that gap:
+
+| Slot | Candidates | Verified | Selected | V10 accepted | Selected - V10 | Shadow-only | Network-used |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `main_news` | 32 | 32 | 10 | 21 | -11 | 32 | 0 |
+| `main_video` | 14 | 14 | 5 | 1 | 4 | 14 | 0 |
+| `builder` | 25 | 25 | 5 | 4 | 1 | 25 | 0 |
+
+Across the three core slots, all 71 candidates are shadow-only, none have network-used evidence, and all 71 are missing `published_at`. The next engineering blocker is therefore a candidate quality/live-evidence gate, not another selector quota tweak.
 
 ## Source Governance Matrix
 

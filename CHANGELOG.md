@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.51 - 2026-07-09
+
+- Documented the Slot Candidate Fidelity Diagnostic for the OpenClaw Intelligence Pipeline shadow evaluator.
+- Added the `SlotCandidateFidelityResult` contract, snapshot field, and health signal to compare candidates, verified candidates, selected stories, and V10 accepted counts by slot.
+- Captured the real 2026-07-09 fidelity output: main news `32/32/10/21`, video `14/14/5/1`, and builder `25/25/5/4` for candidates, verified, selected, and V10 accepted counts.
+- Recorded that all 71 core-slot candidates are shadow-only, network-used count is 0, and missing published-at count is 71, moving the next blocker from total-count policy to candidate quality/live-evidence fidelity.
+- Re-ran default/work tests, compile checks, real-reference assertions, local redline checks, and public package checks. CodeRabbit remains pending because the free CLI review hit a rate limit.
+
 ## 1.2.50 - 2026-07-09
 
 - Documented the Dynamic V10 Selection Policy shadow implementation.
