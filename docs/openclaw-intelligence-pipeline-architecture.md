@@ -12,6 +12,7 @@ Source Registry
   -> Evidence Verifier
   -> Event Pool
   -> Selection Engine
+  -> V10 Selection Parity Policy
   -> Synthesis Engine
   -> QA Gate
   -> Delivery Snapshot
@@ -380,6 +381,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Evidence Verifier | `Candidate` to verified candidate | primary evidence requirement, timestamp evidence, aggregator-source landing |
 | Event Pool | verified candidates to `EventCluster` | event-level dedupe and multi-source evidence grouping |
 | Selection Engine | `EventCluster` to `SelectedStory` | slot quotas, diversity, coverage, fallback, ranking |
+| V10 Selection Parity Policy | selection targets, V10 reference section mix, and shadow section mix to policy-gap diagnostics | dynamic total overflow, roundup overflow, video/builder underfill backfill, overselection guards |
 | Synthesis Engine | `SelectedStory` to generated fields | summary, impact, title refinement, model trace, fallback |
 | QA Gate | generated fields to approved output | model-aware profiles, pollution taxonomy, truncation checks, regression fixtures, fail-closed trace |
 | Approval Gate | health, selection, synthesis, QA, and delivery snapshot to approval decision | blocked reasons, approval checks, publication readiness metrics |
@@ -421,6 +423,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `ReleaseDossierResult` | Operator approval packet that aggregates readiness, regression, publisher, switch-gate, code-review, and redline evidence. |
 | `ReleaseDossierArchiveResult` | Stable release-dossier archive manifest with digest and retention metadata, without writing files. |
 | `ProductionIntegrationEvaluationResult` | Dual-run integration evaluation result proving legacy production remains active while the new pipeline is attached to the real production environment in read-only parallel mode. |
+| `V10SelectionParityPolicyResult` | Read-only selection-layer diagnostic that compares configured targets, V10 reference section counts, shadow section counts, and policy gaps before any cutover. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |
@@ -447,6 +450,17 @@ The production environment evidence passed, but the full pipeline correctly rema
 | `aiCreators` | 4 | 5 |
 
 This is an expected blocker, not a release failure. It shows the new pipeline can safely attach to real production evidence while still refusing cutover until the real collector/selection behavior is no worse than V10.
+
+The V10 Selection Parity Policy now turns that blocker into explicit next engineering gaps:
+
+| Policy Gap | Meaning |
+| --- | --- |
+| `total_overflow_required` | V10 can exceed the static `totalFinalCount=20` when production logic expands the report. |
+| `roundup_overflow_required` | V10 can append extra main-news roundup items beyond the static `mainNewsFinalCount=10`. |
+| `video_underfill_backfill_required` | V10 can publish fewer than 5 video items and let main-news fill the main pool. |
+| `builder_underfill_backfill_required` | V10 can publish fewer than 5 builder items and rebalance with main-pool content. |
+| `video_overselection_guard_required` | Shadow must avoid selecting 5 video items when V10 production accepted only 1. |
+| `builder_overselection_guard_required` | Shadow must avoid selecting 5 builder items when V10 production accepted only 4. |
 
 ## Source Governance Matrix
 

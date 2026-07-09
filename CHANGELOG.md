@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.48 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline V10 Selection Parity Policy shadow module.
+- Added a selection-layer diagnostic contract that compares configured shadow targets, V10 reference section counts, shadow section counts, and section deltas without publishing or changing production state.
+- Recorded the real 2026-07-09 V10 gap as a policy problem: V10 reference `techNews=21`, `videoItems=1`, `aiCreators=4`; shadow `techNews=10`, `videoItems=5`, `aiCreators=5`.
+- Captured recommended next policy gaps: dynamic total overflow, roundup overflow, video underfill backfill, builder underfill backfill, video overselection guard, and builder overselection guard.
+- Re-ran default/work tests, compile checks, real-reference assertions, and redline scans. CodeRabbit follow-up is pending due the free CLI rate limit.
+
 ## 1.2.47 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline read-only production environment evidence builder and first real dual-run evaluation.
