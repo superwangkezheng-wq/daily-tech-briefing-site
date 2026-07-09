@@ -382,6 +382,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | Publisher | approved `DeliverySnapshot` to output surfaces | Markdown report, cache, channel message, archive |
 | Publisher Execution Gate | publisher preflight plan and execution policy to dry-run/blocked decision | explicit execution switch, mode, idempotency, side-effect budget |
 | Publisher Real Execution Contract | publisher plan and execution gate to audited dry-run execution contract | dry-run artifacts, idempotency audit, rollback plan, zero side-effect budget, no production connection |
+| Production Entrypoint Switch Gate | full dry-run evidence to canary-evaluation readiness | baseline parity, manual cutover requirement, zero traffic shift, no production connection |
 | Healing Controller | health signals to actions | retry, degrade, disable, recover, alert |
 
 ## Data Contracts
@@ -403,6 +404,7 @@ That makes the main collector module shallow: callers and maintainers must under
 | `PublisherPlanResult` | Publisher preflight pass/block plan with channels, idempotency key, story count, and blocked reasons. |
 | `PublisherExecutionGateResult` | Final pre-side-effect dry-run/block status for Publisher execution mode, idempotency, and side-effect budget. |
 | `PublisherRealExecutionContractResult` | Audited real-execution dry-run contract with artifact plan, rollback plan, audit manifest, and zero side-effect budget. |
+| `ProductionEntrypointSwitchGateResult` | Shadow production-entrypoint gate that can mark canary evaluation ready while forbidding production connection and traffic shift. |
 | `HealingPlanResult` | Decision-only retry/degrade/disable/alert plan derived from module health and gate results. |
 | `ReadinessReportResult` | Production-readiness pass/block report separating dry-run, canary, and production-switch requirements. |
 | `DeliverySnapshot` | Approved publication snapshot consumed by website, Markdown archive, and channels. |

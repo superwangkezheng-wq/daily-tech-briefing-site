@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.41 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Production Entrypoint Switch Gate Shadow module.
+- Recorded canary-evaluation readiness that requires live synthesis evidence, current V10 production baseline parity, approved delivery, publisher dry-run readiness, and the real execution contract, while still keeping traffic shift, production connection, and production switch disabled.
+- Re-ran default/work tests, compile checks, full dry-run switch-gate assertions, redline scans, public package checks, and scoped CodeRabbit review; CodeRabbit raised 0 issues.
+
 ## 1.2.40 - 2026-07-09
 
 - Documented the OpenClaw Intelligence Pipeline Publisher Real Execution Contract Shadow module.
