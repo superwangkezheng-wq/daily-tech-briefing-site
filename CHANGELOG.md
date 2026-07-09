@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.46 - 2026-07-09
+
+- Documented the OpenClaw Intelligence Pipeline Production Integration Evaluation Shadow module.
+- Clarified the dual-run production evaluation model: legacy V10 remains the active production output path while the new pipeline may attach to the real production environment in read-only parallel evaluation.
+- Added the safety contract for legacy-active evidence, production-environment read-only evidence, rollback references, no shutdown, no cutover, no traffic shift, no production write, and no channel send.
+- Re-ran default/work tests, compile checks, default and full-evidence snapshot assertions, and redline scans. CodeRabbit re-review hit the free CLI rate limit after an earlier 0-issue review and remains queued for retry.
+
 ## 1.2.45 - 2026-07-09
 
 - Recorded final CodeRabbit closure for the OpenClaw Intelligence Pipeline shadow release modules.
