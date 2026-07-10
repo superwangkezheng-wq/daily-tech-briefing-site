@@ -98,6 +98,8 @@ The registry is an injected mapping from exact controlled key to runner. No glob
 
 This Python interface is not an operating-system sandbox. It prevents accidental capability plumbing and validates observable output, but a runner implementation could still perform hidden side effects if it were allowed to execute arbitrary code. Therefore no real runner may be registered in this phase. A future real runner requires a separately approved capability-constrained execution design that can enforce, rather than merely report, subprocess, browser, filesystem, cache, and channel permissions.
 
+The current shadow seam also installs a POSIX main-thread deadline around the synchronous runner call. It turns an overdue runner into a sanitized timeout result and restores the prior signal handler. If the process cannot safely install that deadline, controlled execution fails closed. This prevents the current timeout field from being merely declarative, but does not replace the future capability-constrained executor requirement.
+
 ### dispatch_controlled_collector
 
 The deep module entrypoint accepts a profile, an allowed Collector Execution Policy decision, the live policy, and the injected runner registry. It returns a normalized dispatch result that Live Collector can append without learning runner internals.

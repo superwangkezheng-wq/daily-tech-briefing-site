@@ -344,6 +344,14 @@ Builder Podcast native adapter closure: inspection of the V10 implementation sho
 
 Builder Podcast 原生只读 adapter 封板：核查 V10 后确认，播客采集只读取 follow-builders 的 `feed-podcasts.json` 聚合 feed，因此从受控 runner 重分类为 `native_read_only`。稳定画像对应 feed，节目名允许轮换；只有显式 `podcastName` 才做节目过滤，不再把 profile 名隐式当过滤条件。transcript 正文不会进入 artifact 或 candidate。default/work 真实 canary 均从当前 `AI & I by Every` episode 生成 1 个 artifact 和 1 个 candidate，fidelity 通过、health 计数全零、无写入/发送副作用；两实例 164 项测试与 compile 检查通过，CodeRabbit 为 0 issues。WeChat discovery/mirror 与 Bilibili 继续默认阻断。
 
+Controlled Collector Runner closure: controlled sources now leave the native adapter path after policy classification. An allowed key must have an exact injected runner; otherwise it returns `controlled_runner_unavailable`. A runner receives bounded timeout/response/network permissions and returns an untrusted envelope. Central validation rejects key or source mismatches, malformed envelopes, missing identity/hash/title/URL, raw-body leakage anywhere in the envelope, declared side effects, over-budget responses, and unauthorized network use. A main-thread POSIX deadline turns a slow runner into `controlled_runner_error:ControlledRunnerTimeout`; runner errors are isolated so later native sources continue. This is still a fake-runner shadow seam: no real runner is registered, and Healing remains decision-only. The final default/work suites each passed 186 tests; CodeRabbit raised 0 issues.
+
+Controlled Collector Runner 封板：受控源在 Policy 分类后会离开 native adapter 路径。被允许的 controlled key 必须精确命中注入 runner，否则返回 `controlled_runner_unavailable`。runner 只接收有限的 timeout/响应大小/网络权限，并返回不可信 envelope。中央验证会拒绝 key 或 source 不匹配、结构畸形、缺 runner identity/hash/title/URL、envelope 任意位置泄漏原文、声明副作用、响应超预算及未授权网络使用。主线程 POSIX deadline 会把慢 runner 收敛为 `controlled_runner_error:ControlledRunnerTimeout`；runner 异常被隔离，后续 native 源仍可继续。这仍是 fake-runner shadow seam：没有真实 runner 注册，Healing 也仍为 decision-only。最终 default/work 均通过 186 项测试，CodeRabbit 为 0 issues。
+
+QA matrix hardening: QA now selects each draft's `model_used` profile before applying route restrictions and pollution checks, using the batch profile only when the draft identity is absent. Trailing whitespace cannot hide a truncated field, and ordinary English `actually`/`wait` usage is no longer treated as leaked reasoning.
+
+QA 矩阵加固：QA 现在先按每条 draft 的 `model_used` 选择 profile，再执行路由限制和污染检查；只有草稿没有模型身份时才使用批次 fallback。尾部空白不能再隐藏截断字段，普通英文里的 `actually`/`wait` 也不再被误判为推理泄漏。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

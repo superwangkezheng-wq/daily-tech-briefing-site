@@ -1,6 +1,6 @@
 # Controlled Collector Runner Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Add a default-deny, injected, centrally validated Controlled Collector Runner seam without registering any real WeChat or Bilibili runner or changing production behavior.
 
@@ -24,13 +24,13 @@
 
 ## File Map
 
-- Create `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`: runner request/budget/envelope contracts, registry dispatch, validation, and normalized result.
-- Modify `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py`: route controlled profiles to the runner seam and expose runner trace counters.
-- Modify `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/live_artifact_fidelity.py`: classify controlled-runner health reasons.
-- Modify `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/healing_controller.py`: create decision-only controlled-runner responses.
-- Modify `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/__init__.py`: export the new public runner contracts.
-- Modify `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`: fake-runner and adversarial behavior tests through public interfaces.
-- Mechanically synchronize the same files into `/Users/REDACTED/.openclaw-work/workspace/` after default-instance verification.
+- Create `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`: runner request/budget/envelope contracts, registry dispatch, validation, and normalized result.
+- Modify `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py`: route controlled profiles to the runner seam and expose runner trace counters.
+- Modify `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/live_artifact_fidelity.py`: classify controlled-runner health reasons.
+- Modify `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/healing_controller.py`: create decision-only controlled-runner responses.
+- Modify `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/__init__.py`: export the new public runner contracts.
+- Modify `<openclaw-default-workspace>/scripts/test_openclaw_intelligence_pipeline.py`: fake-runner and adversarial behavior tests through public interfaces.
+- Mechanically synchronize the same files into `<openclaw-work-workspace>/` after default-instance verification.
 - Modify public docs, package version, and Obsidian only after code review and both-instance verification.
 
 ---
@@ -38,15 +38,15 @@
 ### Task 1: Missing-Runner Fail-Closed Dispatch
 
 **Files:**
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py:255-373`
-- Test: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py:4460`
+- Create: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py:255-373`
+- Test: `<openclaw-default-workspace>/scripts/test_openclaw_intelligence_pipeline.py:4460`
 
 **Interfaces:**
 - Consumes: `SourceProfile`, allowed Collector Execution Policy dictionaries, and `Mapping[str, ControlledCollectorRunner]`.
 - Produces: `dispatch_controlled_collector(profile, execution_policy, live_policy, runners) -> ControlledCollectorDispatchResult`.
 
-- [ ] **Step 1: Write the failing public-interface test**
+- [x] **Step 1: Write the failing public-interface test**
 
 Add a test that explicitly enables and allows `wechat_discovery`, passes no runner mapping, and asserts that it never calls native transport or reports a native adapter error:
 
@@ -87,7 +87,7 @@ def test_live_collector_allowed_controlled_source_requires_registered_runner(sel
     self.assertEqual(evidence["trace"]["controlled_runner_registry"], [])
 ```
 
-- [ ] **Step 2: Run the single test and verify RED**
+- [x] **Step 2: Run the single test and verify RED**
 
 Run:
 
@@ -97,7 +97,7 @@ python3 -m unittest scripts.test_openclaw_intelligence_pipeline.IntelligencePipe
 
 Expected: FAIL because controlled sources currently fall through to `live_adapter_not_supported` and the runner trace fields do not exist.
 
-- [ ] **Step 3: Add minimal runner contracts and missing-runner result**
+- [x] **Step 3: Add minimal runner contracts and missing-runner result**
 
 Create the new module with these exact public types:
 
@@ -149,7 +149,7 @@ class ControlledCollectorDispatchResult:
 
 Implement `dispatch_controlled_collector` so an absent exact controlled key returns `result="runner_unavailable"`, no artifact/candidate, and reason `controlled_runner_unavailable`.
 
-- [ ] **Step 4: Route controlled profiles before native adapter lookup**
+- [x] **Step 4: Route controlled profiles before native adapter lookup**
 
 Add an optional keyword parameter:
 
@@ -168,7 +168,7 @@ Add empty/default values for these trace fields in both normal and blocked resul
 "controlled_runner_contract_violation_count": controlled_runner_contract_violation_count,
 ```
 
-- [ ] **Step 5: Run the single test and existing controlled-block tests**
+- [x] **Step 5: Run the single test and existing controlled-block tests**
 
 Run:
 
@@ -181,7 +181,7 @@ python3 -m unittest \
 
 Expected: 3 tests pass; denied sources still stop before runner lookup and the newly allowed source reports runner unavailable.
 
-- [ ] **Step 6: Record checkpoint**
+- [x] **Step 6: Record checkpoint**
 
 Run `git status --short` in the default OpenClaw workspace and confirm only the known dirty state plus the new shadow module/test edits are present. Do not stage or commit.
 
@@ -190,15 +190,15 @@ Run `git status --short` in the default OpenClaw workspace and confirm only the 
 ### Task 2: Valid Fake-Runner Acceptance
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py:287-343`
-- Test: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py:208,4460`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py:287-343`
+- Test: `<openclaw-default-workspace>/scripts/test_openclaw_intelligence_pipeline.py:208,4460`
 
 **Interfaces:**
 - Consumes: Task 1 `ControlledCollectorRequest`, `ControlledCollectorEnvelope`, and dispatch result.
 - Produces: accepted hash-only artifact and candidate normalized to the existing Live Collector contract.
 
-- [ ] **Step 1: Add a reusable fake runner and failing success-path test**
+- [x] **Step 1: Add a reusable fake runner and failing success-path test**
 
 ```python
 class FakeControlledCollectorRunner:
@@ -228,11 +228,11 @@ self.assertEqual(evidence["raw_artifacts"][0]["payload"]["execution_contract"], 
 self.assertEqual(evidence["candidates"][0]["evidence"]["runner_id"], "fake_wechat_runner")
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Expected: FAIL because Task 1 only implements missing-runner dispatch.
 
-- [ ] **Step 3: Build bounded request and normalize valid output**
+- [x] **Step 3: Build bounded request and normalize valid output**
 
 Implement budget parsing with defaults and bounds from the design. Invoke the exact-key runner. Validate the minimal success shape, then copy accepted dictionaries before stamping:
 
@@ -247,11 +247,11 @@ candidate["evidence"]["runner_id"] = envelope.runner_id
 
 Do not mutate the fake runner's envelope in place.
 
-- [ ] **Step 4: Run the success-path test and Live Artifact Fidelity on its output**
+- [x] **Step 4: Run the success-path test and Live Artifact Fidelity on its output**
 
 Expected: the collector and fidelity both pass, with one artifact hash, no body leak, one candidate, and no source-health issue.
 
-- [ ] **Step 5: Record checkpoint**
+- [x] **Step 5: Record checkpoint**
 
 Run the new test plus all `builder_podcast`, `manual_seed`, and YouTube live adapter tests to prove the native path did not change. Do not commit OpenClaw code.
 
@@ -260,34 +260,34 @@ Run the new test plus all `builder_podcast`, `manual_seed`, and YouTube live ada
 ### Task 3: Adversarial Envelope Validation
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
-- Test: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py:4460`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
+- Test: `<openclaw-default-workspace>/scripts/test_openclaw_intelligence_pipeline.py:4460`
 
 **Interfaces:**
 - Consumes: Task 2 accepted envelope path.
 - Produces: `controlled_runner_contract_violation` with non-sensitive `violation_codes` and no copied runner payload.
 
-- [ ] **Step 1: Add controlled-key mismatch test, run RED, implement, run GREEN**
+- [x] **Step 1: Add controlled-key mismatch test, run RED, implement, run GREEN**
 
 Use envelope `controlled_key="video:bilibili"` for a `wechat_discovery` request. Expect violation code `controlled_key_mismatch`, zero artifacts/candidates, and runner output absent from evidence.
 
-- [ ] **Step 2: Add source-ID mismatch test, run RED, implement, run GREEN**
+- [x] **Step 2: Add source-ID mismatch test, run RED, implement, run GREEN**
 
 Set artifact, candidate, or fetch-result `source_id` to another source. Expect `source_id_mismatch` and complete envelope rejection.
 
-- [ ] **Step 3: Add raw-body leakage test, run RED, implement, run GREEN**
+- [x] **Step 3: Add raw-body leakage test, run RED, implement, run GREEN**
 
 Put a sentinel secret in `raw_artifact["payload"]["transcript"]`. Assert `raw_payload_forbidden` and confirm the sentinel is absent from `json.dumps(evidence)`.
 
-- [ ] **Step 4: Add forbidden side-effect test, run RED, implement, run GREEN**
+- [x] **Step 4: Add forbidden side-effect test, run RED, implement, run GREEN**
 
 Set each of `subprocess_used`, `browser_used`, `cache_written`, `file_written`, `channel_sent`, `published`, and `production_switched` to true using subtests. Expect `forbidden_side_effect_reported` for every case.
 
-- [ ] **Step 5: Add response budget test, run RED, implement, run GREEN**
+- [x] **Step 5: Add response budget test, run RED, implement, run GREEN**
 
 Set policy `controlledRunnerMaxResponseBytes=1024` and envelope `observed_response_bytes=1025`. Expect `response_budget_exceeded` and no accepted output.
 
-- [ ] **Step 6: Complete shape validation**
+- [x] **Step 6: Complete shape validation**
 
 Add and verify these exact codes without returning rejected payloads:
 
@@ -301,7 +301,7 @@ network_not_allowed
 
 Use a deterministic `_unique` order so audit output is stable.
 
-- [ ] **Step 7: Run all adversarial tests together**
+- [x] **Step 7: Run all adversarial tests together**
 
 Expected: every malicious envelope is blocked, no sentinel data leaks, and the valid fake runner still passes.
 
@@ -310,15 +310,15 @@ Expected: every malicious envelope is blocked, no sentinel data leaks, and the v
 ### Task 4: Runner Exception Isolation and Mixed-Path Continuity
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py:287-343`
-- Test: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py:4460`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/controlled_collector_runner.py`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/live_collector_evidence.py:287-343`
+- Test: `<openclaw-default-workspace>/scripts/test_openclaw_intelligence_pipeline.py:4460`
 
 **Interfaces:**
 - Consumes: injected runner registry and existing native adapter registry.
 - Produces: isolated `controlled_runner_error:<ExceptionType>` plus continued processing of later profiles.
 
-- [ ] **Step 1: Write a failing mixed-source test**
+- [x] **Step 1: Write a failing mixed-source test**
 
 Use a raising `wechat_discovery` fake runner followed by a valid RSS profile and fake transport. Set `maxSources=2` and `minCandidates=1`. Assert:
 
@@ -331,15 +331,15 @@ self.assertEqual(evidence["trace"]["controlled_runner_failure_count"], 1)
 self.assertEqual(transport.call_count, 1)
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Expected: runner exception escapes or is not classified.
 
-- [ ] **Step 3: Catch runner exceptions inside the controlled dispatcher**
+- [x] **Step 3: Catch runner exceptions inside the controlled dispatcher**
 
 Return no artifact/candidate and a sanitized fetch result. Include only the exception class, never the exception message or runner payload.
 
-- [ ] **Step 4: Run the mixed-source test and existing native exception test**
+- [x] **Step 4: Run the mixed-source test and existing native exception test**
 
 Expected: both pass; one source failure never aborts the canary.
 
@@ -348,15 +348,15 @@ Expected: both pass; one source failure never aborts the canary.
 ### Task 5: Health Evidence and Decision-Only Healing
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/live_artifact_fidelity.py:187-237`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/healing_controller.py:1-102`
-- Test: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/live_artifact_fidelity.py:187-237`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/healing_controller.py:1-102`
+- Test: `<openclaw-default-workspace>/scripts/test_openclaw_intelligence_pipeline.py`
 
 **Interfaces:**
 - Consumes: controlled-runner fetch reasons from Tasks 1-4.
 - Produces: three new source-health counters and non-executing healing decisions.
 
-- [ ] **Step 1: Add failing fidelity classification tests**
+- [x] **Step 1: Add failing fidelity classification tests**
 
 Verify exact mappings:
 
@@ -368,7 +368,7 @@ Verify exact mappings:
 
 Each class must increment its own summary counter and must not increment `network_failure` or `unsupported_adapter`.
 
-- [ ] **Step 2: Implement the health classes and recommended actions**
+- [x] **Step 2: Implement the health classes and recommended actions**
 
 Use:
 
@@ -378,7 +378,7 @@ controlled_runner_failure -> repair_controlled_runner
 controlled_runner_contract_violation -> keep_controlled_runner_disabled
 ```
 
-- [ ] **Step 3: Add failing Healing Controller test**
+- [x] **Step 3: Add failing Healing Controller test**
 
 Build a flow state containing all four controlled health counters, including existing `controlled_execution_blocked`. Expect decision-only actions:
 
@@ -392,11 +392,11 @@ alert_operator_review
 
 Assert `execute=false` on every decision and all action flags remain false.
 
-- [ ] **Step 4: Implement Healing signal plumbing and decisions**
+- [x] **Step 4: Implement Healing signal plumbing and decisions**
 
 Add all controlled counters to `_signals()["source_health"]`. Do not add execution code, retry loops, registry mutation, source disabling, or alert sending.
 
-- [ ] **Step 5: Run fidelity and healing tests**
+- [x] **Step 5: Run fidelity and healing tests**
 
 Expected: new tests pass and existing source-health decisions remain unchanged.
 
@@ -405,19 +405,19 @@ Expected: new tests pass and existing source-health decisions remain unchanged.
 ### Task 6: Public Exports, Dual-Instance Verification, Review, and Seal
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/__init__.py`
-- Synchronize: the five changed pipeline files and test file into `/Users/REDACTED/.openclaw-work/workspace/`
-- Modify: `/Users/REDACTED/Documents/每日科技信息/CHANGELOG.md`
-- Modify: `/Users/REDACTED/Documents/每日科技信息/docs/openclaw-intelligence-pipeline-architecture.md`
-- Modify: `/Users/REDACTED/Documents/每日科技信息/docs/openclaw-collector-pipeline.md`
-- Modify: `/Users/REDACTED/Documents/每日科技信息/package.json`
-- Modify: `/Users/REDACTED/REDACTED-WORKDIR/工作/OpenClaw建设思路/定时资讯采集&网页推送/2026-07-08-OpenClaw-Intelligence-Pipeline架构固化记录.md`
+- Modify: `<openclaw-default-workspace>/scripts/openclaw_intelligence_pipeline/__init__.py`
+- Synchronize: the five changed pipeline files and test file into `<openclaw-work-workspace>/`
+- Modify: `<public-docs-repo>/CHANGELOG.md`
+- Modify: `<public-docs-repo>/docs/openclaw-intelligence-pipeline-architecture.md`
+- Modify: `<public-docs-repo>/docs/openclaw-collector-pipeline.md`
+- Modify: `<public-docs-repo>/package.json`
+- Modify: `<obsidian-architecture-note>`
 
 **Interfaces:**
 - Consumes: all completed runner contracts and evidence.
 - Produces: synchronized `v1.2.63` shadow milestone with review and audit evidence.
 
-- [ ] **Step 1: Export public contracts**
+- [x] **Step 1: Export public contracts**
 
 Export these names from `__init__.py`:
 
@@ -430,7 +430,7 @@ ControlledExecutionBudget
 dispatch_controlled_collector
 ```
 
-- [ ] **Step 2: Run complete default-instance verification**
+- [x] **Step 2: Run complete default-instance verification**
 
 ```bash
 python3 -m unittest scripts/test_openclaw_intelligence_pipeline.py
@@ -439,7 +439,7 @@ python3 -m compileall -q scripts/openclaw_intelligence_pipeline scripts/test_ope
 
 Expected: all tests pass and compile exits 0.
 
-- [ ] **Step 3: Run scoped CodeRabbit review**
+- [x] **Step 3: Run scoped CodeRabbit review**
 
 Verify CLI/auth, then run:
 
@@ -449,7 +449,7 @@ coderabbit review --agent -t uncommitted --dir scripts
 
 Wait up to the required review window. Fix every valid issue using red-green tests, rerun the full suite, and repeat review until CodeRabbit raises 0 issues. Do not substitute a manual review if CodeRabbit fails or rate-limits; wait and retry as previously agreed.
 
-- [ ] **Step 4: Mechanically synchronize reviewed files**
+- [x] **Step 4: Mechanically synchronize reviewed files**
 
 Copy only:
 
@@ -464,15 +464,15 @@ test_openclaw_intelligence_pipeline.py
 
 Do not copy caches, runtime state, manifests, V10 files, or unrelated dirty files.
 
-- [ ] **Step 5: Verify the work instance and file equality**
+- [x] **Step 5: Verify the work instance and file equality**
 
-Run the same complete tests and compile command in `/Users/REDACTED/.openclaw-work/workspace`. Use `shasum` to prove each synchronized file matches its default-instance counterpart.
+Run the same complete tests and compile command in `<openclaw-work-workspace>`. Use `shasum` to prove each synchronized file matches its default-instance counterpart.
 
-- [ ] **Step 6: Update milestone documentation**
+- [x] **Step 6: Update milestone documentation**
 
 Bump the public package from `1.2.62` to `1.2.63`. Record interface behavior, adversarial tests, health/healing classes, CodeRabbit result, both-instance test counts, and explicit no-production boundaries in public docs and Obsidian.
 
-- [ ] **Step 7: Verify and commit public documentation**
+- [x] **Step 7: Verify and commit public documentation**
 
 ```bash
 npm run check
@@ -485,6 +485,6 @@ git push
 
 Expected: public checks pass, only intended files are committed, push succeeds, and the public repository is clean.
 
-- [ ] **Step 8: Final production-safety assertion**
+- [x] **Step 8: Final production-safety assertion**
 
 Confirm from evidence that no real controlled runner was registered, no subprocess/browser/cache/file/channel/publish/production-switch side effect ran, V10 remains active, and formal production cutover remains disabled.

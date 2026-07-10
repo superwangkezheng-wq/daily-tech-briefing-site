@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.63 - 2026-07-10
+
+- Added the `ControlledCollectorRunner` shadow seam for controlled source keys. Allowed controlled sources now use an injected exact-key runner registry and never fall through to native adapter dispatch.
+- Added bounded controlled-runner requests, a POSIX main-thread deadline, runner exception isolation, hash-only result normalization, and centralized contract validation before any runner output can enter the existing artifact/candidate path.
+- Added adversarial rejection for invalid envelope types or structures, key/source mismatches, missing runner IDs or artifact hashes, missing candidate title/URL, raw-body leakage anywhere in an envelope, declared side effects, response-budget overflow, and disallowed network use.
+- Added distinct source-health and decision-only Healing classes for unavailable runners, runner failures, and runner contract violations; no retry, registration, disable, alert, or side effect is executed.
+- Hardened QA Gate after CodeRabbit review: structural-fragment detection trims trailing whitespace, ordinary English `actually`/`wait` prose no longer triggers reasoning-leak false positives, and each draft now uses its own `model_used` profile with the batch profile only as a legacy fallback.
+- Re-ran default/work 186-test suites, compile checks, synchronized-file hashes, and final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+- Kept all real controlled runners, production writes, publishing, traffic switching, V10 cutover, subprocess/browser/cache/file/channel capabilities, and legacy shutdown disabled.
+
 ## 1.2.62 - 2026-07-10
 
 - Added the native read-only `builder_podcast` live adapter for the follow-builders `feed-podcasts.json` aggregate feed.

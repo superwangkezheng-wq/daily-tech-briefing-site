@@ -563,6 +563,10 @@ The Collector Execution Policy seam now runs before live adapter dispatch. It al
 
 The Builder Podcast adapter consumes the same follow-builders aggregate-feed pattern as Builder Feed. Its stable interface is a feed-level `SourceProfile`; rotating episode program names stay inside candidate evidence. An optional `podcastName` profile field narrows a feed deliberately, but profile names are never treated as an implicit filter. Raw transcript text is never retained: artifacts contain only the body hash and episode count, while candidate evidence contains podcast name and transcript availability. The 2026-07-10 default/work real read-only canaries each produced 1 artifact and 1 candidate from `AI & I by Every`, passed Live Artifact Fidelity with all source-health counters at zero, and executed no file write, channel send, cache write, subprocess, browser, publish, or production switch. CodeRabbit raised 0 issues.
 
+Controlled sources now have a separate `ControlledCollectorRunner` seam. Collector Execution Policy still decides whether a controlled key may proceed; an allowed key then requires an exact injected runner registration and never reaches the native adapter registry. The runner receives only a bounded request, returns an untrusted envelope, and its output is centrally checked for identity, hash, title/URL, response-budget, network authorization, raw-body leakage, and declared side effects. Invalid output is discarded without echoing it. Missing runners, runner errors, and contract violations have their own source-health classes and decision-only Healing plans. The current runner seam is shadow-only: no real WeChat or Bilibili runner is registered. A POSIX main-thread deadline enforces the declared runner timeout in this phase; a future real runner still requires a separately approved capability-constrained executor.
+
+The summary-quality matrix now resolves QA policy per draft from `SynthesisDraft.model_used`, falling back to the batch profile only for legacy drafts without a model identity. QA structural checks trim trailing whitespace before testing for incomplete endings, and the reasoning-leak detector no longer flags ordinary prose using `actually` or `wait` unless it resembles first-person deliberation.
+
 ## First Read-Only Production Evaluation
 
 The first real read-only production evaluation used the 2026-07-09 V10 production logs:
@@ -716,6 +720,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1T | Add the Manual Seed live adapter for manifest-backed WeChat seed articles and close adjacent CodeRabbit hardening issues. | None |
 | 1U | Add Collector Execution Policy default-deny seam for WeChat discovery/mirror, builder podcast, and Bilibili controlled adapters. | None |
 | 1V | Extract Builder Podcast as a native read-only aggregate-feed adapter with feed/program identity separation and transcript-safe evidence. | None |
+| 1W | Add Controlled Collector Runner shadow seam with exact registration, deadline, untrusted-envelope validation, and decision-only health remediation. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |
