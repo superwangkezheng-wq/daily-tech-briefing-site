@@ -352,6 +352,10 @@ QA matrix hardening: QA now selects each draft's `model_used` profile before app
 
 QA 矩阵加固：QA 现在先按每条 draft 的 `model_used` 选择 profile，再执行路由限制和污染检查；只有草稿没有模型身份时才使用批次 fallback。尾部空白不能再隐藏截断字段，普通英文里的 `actually`/`wait` 也不再被误判为推理泄漏。
 
+Capability-Constrained Executor closure: the controlled-collector seam now has a separate Phase A offline execution foundation, but it is not wired to any source. A caller supplies only a UTF-8 bounded input and exact profile ID; the immutable profile owns the fixed command, image identity, two-variable environment, and resource limits. The Docker adapter performs inspect-first image identity verification and then uses the verified image ID with `--pull never`, `--network none`, a read-only root, tmpfs-only `/tmp`, dropped capabilities, no-new-privileges, non-root user, no host mounts, and bounded CPU/memory/PIDs/input/output/deadline. Local `FROM scratch` probes proved success, network denial, root-write denial, timeout cleanup with no container residue, and output-overflow blocking without raw receipt leakage. This remains shadow-only: no real runner, egress/proxy, browser, subprocess collector, cache/file/channel write, publisher, or production switch is enabled. Default/work each passed 197 tests and compile checks; final scoped CodeRabbit review raised 0 issues.
+
+Capability-Constrained Executor 封板：受控采集器获得了独立的 Phase A 离线执行基础，但尚未接入任何源。调用方只能传入 UTF-8 限额输入和精确 profile ID；固定命令、镜像身份、两变量环境与资源上限都由不可变 profile 持有。Docker adapter 先 inspect 校验镜像身份，随后以已校验的 image ID（而非可变 tag）执行，并强制 `--pull never`、`--network none`、只读根、仅 `/tmp` tmpfs、降权、no-new-privileges、非 root、零 host mount 和 CPU/内存/PID/输入/输出/时限上限。本地 `FROM scratch` probe 实证了成功路径、网络拒绝、根目录写入拒绝、超时后无容器残留，以及输出超限且回执不泄漏原文。此能力仍只在 shadow：没有真实 runner、egress/proxy、浏览器、采集子进程、cache/file/channel 写入、publisher 或生产切换。default/work 各通过 197 项测试和 compile；最终 scoped CodeRabbit 为 0 issues。
+
 ## 4. Dependency Matrix / 依赖清单
 
 This project has two layers of dependencies:

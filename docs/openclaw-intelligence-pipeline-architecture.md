@@ -650,6 +650,23 @@ The Qualified Candidate Replay consumes only quality-gate-approved candidates. W
 
 The final CodeRabbit review for this slice raised 0 issues after fixes for slot-cap enforcement, no-reference V10 policy gaps, replay blocker semantics, live-synthesis model-call evidence, and HTTP send-shadow network rechecks.
 
+## Capability-Constrained Executor
+
+The controlled-runner seam is now backed by an independently tested, but still unconnected, capability executor. It is deliberately a prerequisite rather than a new collector: no `ControlledCollectorRunner` registration consumes it, and no source, browser, process, cache, file, channel, publisher, or production entrypoint changed.
+
+```text
+CapabilityExecutionRequest (UTF-8 bounded bytes, profile ID only)
+  -> immutable CapabilityProfile registry
+    -> Docker image identity gate
+      -> DockerCapabilityExecutor
+        -> local scratch probe (--network none)
+          -> hash-only CapabilityExecutionReceipt
+```
+
+The executor owns every Docker argument. After fixed image-ID inspection it runs that immutable ID rather than a mutable tag, with `--pull never`, `--network none`, `--read-only`, a noexec tmpfs `/tmp`, `--cap-drop ALL`, `no-new-privileges`, numeric non-root user, explicit two-variable container environment, no host mounts, and bounded CPU, memory, PID, stdin, stdout/stderr, and wall-clock budgets. Its host process uses an argument array rather than a shell; timeout or output overflow force-removes the generated container and any cleanup uncertainty blocks the receipt.
+
+The local `FROM scratch` Go probe supplies adversarial evidence rather than trust by assertion: normal execution succeeds, TCP dialing fails, a root write fails, a long-running probe is removed after timeout, and an output flood is stopped without its marker entering a serialized receipt. Docker 29.2.1 and Go 1.26.1 were used for the local verification. Both OpenClaw instances passed 197 tests and compile checks; the final scoped CodeRabbit review raised 0 issues. This is Phase A only: direct Internet access, a policy proxy, and real controlled-source execution remain out of scope and disabled.
+
 ## Source Governance Matrix
 
 Every source should be expressed as data before it is collected:
@@ -721,6 +738,7 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 | 1U | Add Collector Execution Policy default-deny seam for WeChat discovery/mirror, builder podcast, and Bilibili controlled adapters. | None |
 | 1V | Extract Builder Podcast as a native read-only aggregate-feed adapter with feed/program identity separation and transcript-safe evidence. | None |
 | 1W | Add Controlled Collector Runner shadow seam with exact registration, deadline, untrusted-envelope validation, and decision-only health remediation. | None |
+| 1X | Add the offline capability-constrained executor and real local adversarial probe, without registering any production source. | None |
 | 2 | Extract RSS/HTML, WeChat, Video, Builder, Aggregator, and ManualSeed adapters behind the seam. | Medium |
 | 3 | Replace the V10 ranking, slot allocation, coverage, and fallback path with the selection policy engine after parity evidence exists. | Medium |
 | 4 | Replace the V10 summary and impact generation path with the synthesis and QA gates after parity evidence exists. | Low, preserves fail-closed output quality |

@@ -1,6 +1,6 @@
 # Capability-Constrained Executor Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Build a shadow-only Docker executor that runs only registered local offline probes under enforced zero-network, read-only, resource-bounded constraints and returns hash-only receipts.
 
@@ -43,7 +43,7 @@
 **Interfaces:**
 - Produces `CapabilityResourceLimits`, `CapabilityProfile`, `CapabilityExecutionRequest`, `CapabilityExecutionReceipt`, `CapabilityExecutor`, and `validate_capability_request`.
 
-- [ ] **Step 1: Write the failing unknown-profile test**
+- [x] **Step 1: Write the failing unknown-profile test**
 
 ```python
 receipt = validate_capability_request(
@@ -54,7 +54,7 @@ self.assertEqual(receipt.reason, "capability_profile_unknown")
 self.assertFalse(receipt.container_started)
 ```
 
-- [ ] **Step 2: Run the test to verify RED**
+- [x] **Step 2: Run the test to verify RED**
 
 ```bash
 python3 -m unittest scripts.test_openclaw_intelligence_pipeline.IntelligencePipelineTests.test_capability_request_rejects_unknown_profile
@@ -62,7 +62,7 @@ python3 -m unittest scripts.test_openclaw_intelligence_pipeline.IntelligencePipe
 
 Expected: import failure because `capability_executor` does not exist.
 
-- [ ] **Step 3: Add minimal immutable contracts**
+- [x] **Step 3: Add minimal immutable contracts**
 
 ```python
 @dataclass(frozen=True)
@@ -106,11 +106,11 @@ class CapabilityExecutionReceipt:
 
 Return a `blocked` receipt for an absent profile before any runtime call.
 
-- [ ] **Step 4: Add oversized-input test, run RED, implement, run GREEN**
+- [x] **Step 4: Add oversized-input test, run RED, implement, run GREEN**
 
 Use a profile with `input_bytes=4` and request `b"12345"`. Expect `capability_input_too_large`, `container_started=false`, and no input echoed in serialized receipt.
 
-- [ ] **Step 5: Run the Task 1 tests**
+- [x] **Step 5: Run the Task 1 tests**
 
 Expected: both tests pass; no Docker command has been introduced yet.
 
@@ -126,7 +126,7 @@ Expected: both tests pass; no Docker command has been introduced yet.
 - Consumes a validated `CapabilityProfile` and a `DockerCommandRunner` test seam.
 - Produces `DockerCapabilityExecutor.execute(request) -> CapabilityExecutionReceipt`.
 
-- [ ] **Step 1: Write failing argument-builder test**
+- [x] **Step 1: Write failing argument-builder test**
 
 Inject a recording command runner and assert its `docker run` argument list contains:
 
@@ -137,11 +137,11 @@ Inject a recording command runner and assert its `docker run` argument list cont
 
 Assert it contains no `--mount`, `-v`, `--privileged`, `--network=host`, `--cap-add`, `--env-file`, `sh`, or `-c`.
 
-- [ ] **Step 2: Run the test to verify RED**
+- [x] **Step 2: Run the test to verify RED**
 
 Expected: import failure because `docker_capability_executor` does not exist.
 
-- [ ] **Step 3: Implement inspect-first execution seam**
+- [x] **Step 3: Implement inspect-first execution seam**
 
 Define:
 
@@ -153,11 +153,11 @@ class DockerCommandRunner(Protocol):
 
 The executor first runs fixed `docker image inspect --format {{.Id}} <image_ref>`. A mismatch returns `capability_image_identity_mismatch` before constructing `docker run`. The real runner uses `subprocess` with an argument array and no shell.
 
-- [ ] **Step 4: Add image-mismatch test, run RED, implement, run GREEN**
+- [x] **Step 4: Add image-mismatch test, run RED, implement, run GREEN**
 
 Return `sha256:wrong` from inspection for a profile expecting `sha256:expected`. Assert `capability_image_identity_mismatch`, `container_started=false`, and no `docker run` call.
 
-- [ ] **Step 5: Run Task 2 tests**
+- [x] **Step 5: Run Task 2 tests**
 
 Expected: profile validation, image identity, and argument restrictions pass entirely through fakes.
 
@@ -173,7 +173,7 @@ Expected: profile validation, image identity, and argument restrictions pass ent
 **Interfaces:**
 - Produces a test-only local image and exact inspected image ID injected into `CapabilityProfile`.
 
-- [ ] **Step 1: Write the failing Docker integration test**
+- [x] **Step 1: Write the failing Docker integration test**
 
 The test must build a temporary local context with:
 
@@ -194,11 +194,11 @@ self.assertTrue(receipt.trace["read_only_rootfs"])
 self.assertEqual(receipt.trace["host_mount_count"], 0)
 ```
 
-- [ ] **Step 2: Run the test to verify RED**
+- [x] **Step 2: Run the test to verify RED**
 
 Expected: probe assets or real Docker executor behavior are missing.
 
-- [ ] **Step 3: Add static Go probe and Dockerfile**
+- [x] **Step 3: Add static Go probe and Dockerfile**
 
 `main.go` reads fixed mode from argv and bounded stdin. `success` emits a fixed marker and exits 0. `Dockerfile` is exactly:
 
@@ -208,11 +208,11 @@ COPY capability-probe /capability-probe
 ENTRYPOINT ["/capability-probe"]
 ```
 
-- [ ] **Step 4: Implement real Docker command runner**
+- [x] **Step 4: Implement real Docker command runner**
 
 Capture output with a bounded reader, hash it, and discard bytes before receipt creation. Use a generated safe container name, `--rm`, and a `finally` cleanup path that runs `docker rm -f <name>` if the command times out or output exceeds the cap.
 
-- [ ] **Step 5: Run success integration test and remove local image**
+- [x] **Step 5: Run success integration test and remove local image**
 
 Expected: receipt passes and test cleanup removes the temporary local tag/image. No raw output appears in test assertions or receipts.
 
@@ -229,23 +229,23 @@ Expected: receipt passes and test cleanup removes the temporary local tag/image.
 - Consumes fixed probe modes `network`, `readonly`, `sleep`, and `output`.
 - Produces fail-closed receipts with no raw runtime output.
 
-- [ ] **Step 1: Add network-denial test, run RED, implement, run GREEN**
+- [x] **Step 1: Add network-denial test, run RED, implement, run GREEN**
 
 Probe mode `network` attempts a TCP dial and exits non-zero when the dial is denied. Assert `capability_command_failed`, `network_none=true`, and no raw network marker in the receipt.
 
-- [ ] **Step 2: Add read-only-root test, run RED, implement, run GREEN**
+- [x] **Step 2: Add read-only-root test, run RED, implement, run GREEN**
 
 Probe mode `readonly` attempts to create `/forbidden-probe-write`. Assert non-zero command failure and `read_only_rootfs=true`.
 
-- [ ] **Step 3: Add timeout test, run RED, implement, run GREEN**
+- [x] **Step 3: Add timeout test, run RED, implement, run GREEN**
 
 Probe mode `sleep` exceeds a one-second profile timeout. Assert `capability_timeout`, elapsed time remains bounded, and `docker ps -a --filter name=<generated-name>` confirms no leftover container.
 
-- [ ] **Step 4: Add output-limit test, run RED, implement, run GREEN**
+- [x] **Step 4: Add output-limit test, run RED, implement, run GREEN**
 
 Probe mode `output` writes a unique marker beyond an 64-byte output limit. Assert `capability_output_limit_exceeded` and marker absence from serialized receipt.
 
-- [ ] **Step 5: Run all executor integration tests**
+- [x] **Step 5: Run all executor integration tests**
 
 Expected: successful probe plus all four adversarial modes pass their assertions; all local images are removed in cleanup.
 
@@ -265,7 +265,7 @@ Expected: successful probe plus all four adversarial modes pass their assertions
 **Interfaces:**
 - Exports `CapabilityExecutionReceipt`, `CapabilityExecutionRequest`, `CapabilityExecutor`, `CapabilityProfile`, `CapabilityResourceLimits`, and `DockerCapabilityExecutor`.
 
-- [ ] **Step 1: Run complete default verification**
+- [x] **Step 1: Run complete default verification**
 
 ```bash
 python3 -m unittest scripts/test_openclaw_intelligence_pipeline.py
@@ -274,7 +274,7 @@ python3 -m compileall -q scripts/openclaw_intelligence_pipeline scripts/test_ope
 
 Expected: all tests pass, including real local Docker integration tests.
 
-- [ ] **Step 2: Run CodeRabbit review and resolve valid issues**
+- [x] **Step 2: Run CodeRabbit review and resolve valid issues**
 
 ```bash
 coderabbit review --agent -t uncommitted --dir scripts
@@ -282,15 +282,15 @@ coderabbit review --agent -t uncommitted --dir scripts
 
 Wait for review completion. Fix every valid issue with red-green tests and repeat until CodeRabbit raises 0 issues. Do not use manual review as a substitute for a failed or rate-limited CodeRabbit invocation.
 
-- [ ] **Step 3: Synchronize reviewed files and verify work instance**
+- [x] **Step 3: Synchronize reviewed files and verify work instance**
 
 Copy only executor modules, probe assets, `__init__.py`, and test file. Run the same complete suite and compile check in `<openclaw-work-workspace>`. Compare hashes for every synchronized file.
 
-- [ ] **Step 4: Update documentation and version**
+- [x] **Step 4: Update documentation and version**
 
 Bump the public package from `1.2.63` to `1.2.64`. Record Docker version, local scratch image evidence, no-network/read-only/limits tests, CodeRabbit result, both-instance counts, and the explicit fact that no real controlled runner was registered.
 
-- [ ] **Step 5: Verify and push public documentation**
+- [x] **Step 5: Verify and push public documentation**
 
 ```bash
 npm run check
@@ -300,6 +300,13 @@ git commit -m "docs: record capability constrained executor"
 git push
 ```
 
-- [ ] **Step 6: Final production-safety assertion**
+- [x] **Step 6: Final production-safety assertion**
 
 Confirm no real WeChat/Bilibili runner, proxy, Internet-capable container, publisher, production write, traffic switch, V10 cutover, or legacy shutdown was enabled.
+
+## Implementation Closure
+
+- Completed on 2026-07-10 as public release `1.2.64`.
+- Local Docker 29.2.1 and Go 1.26.1 built and exercised the scratch probe. Default/work each passed 197 tests and compile checks; synchronized executor files and tests have matching SHA-256 hashes.
+- The final scoped CodeRabbit review raised 0 issues.
+- Phase A remains strictly offline and shadow-only. No real controlled runner, proxy, egress, publisher, production write, traffic switch, V10 cutover, or legacy shutdown was enabled.

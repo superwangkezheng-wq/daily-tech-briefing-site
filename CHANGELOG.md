@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.64 - 2026-07-10
+
+- Added the shadow-only capability-constrained executor: an immutable profile registry validates UTF-8 bounded input, exact profile lookup, fixed commands, fixed environment, and resource limits before Docker is invoked.
+- Added Docker image identity gating and a no-shell runtime adapter. It inspects the local image first, then runs the verified immutable image ID with `--pull never`, `--network none`, read-only root, tmpfs-only `/tmp`, dropped capabilities, no-new-privileges, non-root user, no host mounts, and explicit CPU, memory, PID, input, output, and deadline limits.
+- Added local static Go `FROM scratch` adversarial probes. Real Docker verification proved successful offline execution, network-dial denial, root-filesystem write denial, timeout cleanup with no remaining container, and output-limit enforcement without raw output in receipts.
+- Added hash-only execution receipts and fail-closed reasons for invalid input, profile/image mismatch, unavailable runtime, command failure, timeout, output overflow, and cleanup failure. No probe is registered to `ControlledCollectorRunner`.
+- Re-ran default/work 197-test suites, compile checks, and synchronized-file hashes. Final scoped CodeRabbit review raised 0 issues.
+- Kept real controlled runners, proxy/egress, publishing, production writes, traffic switching, V10 cutover, and legacy shutdown disabled.
+
 ## 1.2.63 - 2026-07-10
 
 - Added the `ControlledCollectorRunner` shadow seam for controlled source keys. Allowed controlled sources now use an injected exact-key runner registry and never fall through to native adapter dispatch.
