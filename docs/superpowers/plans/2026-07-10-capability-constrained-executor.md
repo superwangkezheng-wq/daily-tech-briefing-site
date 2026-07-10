@@ -307,6 +307,6 @@ Confirm no real WeChat/Bilibili runner, proxy, Internet-capable container, publi
 ## Implementation Closure
 
 - Completed on 2026-07-10 as public release `1.2.64`.
-- Local Docker 29.2.1 and Go 1.26.1 built and exercised the scratch probe. Default/work each passed 197 tests and compile checks; synchronized executor files and tests have matching SHA-256 hashes.
+- Local Docker 29.2.1 and Go 1.26.1 built and exercised the scratch probe. Default/work each passed 198 tests and compile checks; synchronized executor files and tests have matching SHA-256 hashes.
 - The final scoped CodeRabbit review raised 0 issues.
 - Phase A remains strictly offline and shadow-only. No real controlled runner, proxy, egress, publisher, production write, traffic switch, V10 cutover, or legacy shutdown was enabled.

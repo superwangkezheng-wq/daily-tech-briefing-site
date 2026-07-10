@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.65 - 2026-07-10
+
+- Closed two valid CodeRabbit audit items in the AI HOT provider: a corrupt or truncated cache now repairs itself after the next successful response instead of disabling cache writes, and the intentional `warn` exit-zero policy is documented as a source-level degradation that must not fail the daily-news batch.
+- Added a regression test for corrupt-cache replacement and re-ran default/work 198-test suites, compile checks, synchronized-file hashes, and the final scoped CodeRabbit review. CodeRabbit raised 0 issues.
+- Preserved Phase A boundaries: the capability executor remains offline and shadow-only, with no real controlled runner, proxy/egress, publisher, production write, traffic switch, V10 cutover, or legacy shutdown.
+
 ## 1.2.64 - 2026-07-10
 
 - Added the shadow-only capability-constrained executor: an immutable profile registry validates UTF-8 bounded input, exact profile lookup, fixed commands, fixed environment, and resource limits before Docker is invoked.
