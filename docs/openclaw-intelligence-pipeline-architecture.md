@@ -667,6 +667,24 @@ The executor owns every Docker argument. After fixed image-ID inspection it runs
 
 The local `FROM scratch` Go probe supplies adversarial evidence rather than trust by assertion: normal execution succeeds, TCP dialing fails, a root write fails, a long-running probe is removed after timeout, and an output flood is stopped without its marker entering a serialized receipt. Docker 29.2.1 and Go 1.26.1 were used for the local verification. Both OpenClaw instances passed 198 tests and compile checks; the final scoped CodeRabbit review raised 0 issues. This is Phase A only: direct Internet access, a policy proxy, and real controlled-source execution remain out of scope and disabled.
 
+## Controlled Egress Policy Proxy: Phase B Shadow Prototype
+
+Phase B is a completed local, fixture-only proof of a controlled-egress boundary, not a production collector capability. The Docker topology is deliberately asymmetric and both bridges are internal:
+
+```text
+worker (worker-internal only)
+  -> proxy (worker-internal + proxy-out)
+    -> fixture (proxy-out only)
+```
+
+The worker has no route to the fixture or the Internet except through the proxy; the fixture cannot reach the worker. The prototype opens no host port and permits no host mount, device, privileged mode, custom DNS, `--add-host`, or shell execution. The proxy resolves only the policy authority, validates the expected private fixture IP, and pins the dial to that result. It enforces bounded lease/request and distinct-authority budgets, approved request headers/body/redirect behavior, bounded response headers/body, and hash-only decision receipts/evidence.
+
+Adversarial runtime evidence covers direct bypass, replay/budget exhaustion, denied authority, denied redirect, oversized response, and cleanup. The vetted package boundary exports only `EgressAuthority`, `EgressLease`, `EgressPolicyProfile`, `EgressRequest`, `ProxyDecisionReceipt`, and `DockerEgressShadowRuntime`; internal helpers remain private.
+
+The first CodeRabbit pass found five valid hardening issues: finite proxy/fixture HTTP timeouts, aliased `testing` audit coverage, non-root scratch images, and permitted fixture `HEAD` semantics. Each received a failing regression and minimal repair; the final CodeRabbit review raised 0 findings. An explicit 14-file manifest synchronized both OpenClaw instances with 14/14 matching SHA-256 values. Each passed 251 Python tests, Go tests, compilation, no-network builds, formatting/diff checks, and labelled Docker-resource residue audits.
+
+This Phase B artifact does not enable real sources, Internet egress, credentials, publishing or channel sends, production writes, V10 cutover, legacy shutdown, or a traffic switch. It is not production approval; a separate design and evidence gate is required before any real egress profile is considered.
+
 ## Source Governance Matrix
 
 Every source should be expressed as data before it is collected:

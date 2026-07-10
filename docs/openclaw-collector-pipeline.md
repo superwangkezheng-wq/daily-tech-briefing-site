@@ -132,6 +132,20 @@ SourceProfile
 
 这个 shadow flow 不是发布器。它读取 V10 源 manifest，生成确定性的 probe/raw/candidate/event/selection/synthesis/QA 输出，同时保持 `network_enabled=false`、`publish_enabled=false`、`DeliverySnapshot.approved=false`。
 
+### 3.2 Controlled Egress Boundary Shadow / 受控出站边界影子原型
+
+Phase B adds a local fixture-only boundary proof underneath the future controlled-runner path; it does not connect any collector, source profile, publisher, or V10 route. Both Docker bridges are internal: worker only joins `worker-internal`; proxy joins `worker-internal` and `proxy-out`; fixture only joins `proxy-out`. The worker cannot directly reach the fixture or Internet, and the fixture cannot reach the worker.
+
+The proxy accepts only policy/lease-authorized requests, resolves and pins the expected fixture IP itself, applies request/response/redirect limits, and emits hash-only receipts. Direct bypass, replay, denied authority, denied redirect, and oversized responses are adversarially verified. There are no host ports, mounts, devices, privileged mode, custom DNS, `--add-host`, or shell execution. Public API is limited to `EgressAuthority`, `EgressLease`, `EgressPolicyProfile`, `EgressRequest`, `ProxyDecisionReceipt`, and `DockerEgressShadowRuntime`.
+
+CodeRabbit's five valid initial hardening findings were fixed with regressions; final review findings were 0. The explicit 14-file Phase B manifest matched SHA-256 on both OpenClaw instances, where 251 Python tests plus Go tests, compilation, no-network builds, formatting/diff checks, and Docker residue audits passed. This remains non-production: it enables no real source, Internet egress, credential, channel send, production write, V10 cutover, legacy shutdown, or traffic switch.
+
+Phase B 在未来受控 runner 路径下方提供了一个仅本地 fixture 的边界证明；它没有接入任何 collector、source profile、publisher 或 V10 路由。两个 Docker bridge 都是 internal：worker 只加入 `worker-internal`；proxy 加入 `worker-internal` 与 `proxy-out`；fixture 只加入 `proxy-out`。worker 不能直连 fixture 或 Internet，fixture 也不能访问 worker。
+
+proxy 只接受 policy/lease 已授权请求，自己解析并 pin 预期 fixture IP，执行请求/响应/redirect 限额，并仅输出 hash-only receipt。已对 direct bypass、replay、拒绝 authority、拒绝 redirect、超大响应做对抗验证。没有 host port、mount、device、privileged、custom DNS、`--add-host` 或 shell。公共 API 仅有 `EgressAuthority`、`EgressLease`、`EgressPolicyProfile`、`EgressRequest`、`ProxyDecisionReceipt`、`DockerEgressShadowRuntime`。
+
+CodeRabbit 首轮五项有效硬化意见均以回归测试修复，最终 review 为 0 findings。显式 14 文件 Phase B manifest 在两个 OpenClaw 实例 SHA-256 完全一致；两侧均通过 251 个 Python 测试、Go 测试、编译、no-network build、格式/差异检查和 Docker 残留审计。它仍不是生产能力：没有启用真实源、Internet egress、凭据、渠道发送、生产写入、V10 cutover、旧系统停机或流量切换。
+
 Current audited shadow metrics:
 
 | Metric | Value |

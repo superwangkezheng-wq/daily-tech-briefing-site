@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.66 - 2026-07-11
+
+- Recorded the completed Phase B controlled-egress policy-proxy as a local, fixture-only shadow prototype. Its two Docker bridges are both internal: the worker is attached only to `worker-internal`, the proxy is dual-homed on `worker-internal` and `proxy-out`, and the fixture is attached only to `proxy-out`. There are no host ports, mounts, devices, privileged mode, custom DNS, `--add-host`, or shell execution.
+- The proxy enforces policy/lease-bounded authority access, proxy-owned expected-IP DNS resolution and pinning, request/response/redirect caps, and hash-only receipts/evidence. Direct bypass, replay, denied authority, redirect denial, and oversized-response adversarial cases are covered.
+- Public package API exposes only six vetted Phase B contracts: `EgressAuthority`, `EgressLease`, `EgressPolicyProfile`, `EgressRequest`, `ProxyDecisionReceipt`, and `DockerEgressShadowRuntime`.
+- CodeRabbit's first review identified five valid hardening issues (finite HTTP timeouts, aliased-testing audit coverage, non-root scratch images, and fixture `HEAD` behavior); all were fixed test-first. The final CodeRabbit review raised 0 findings. Both OpenClaw instances synchronized an explicit 14-file manifest with 14/14 matching SHA-256 values and passed 251 Python tests, Go tests, compilation, no-network builds, formatting/diff checks, and labelled Docker-resource audits.
+- This is not production approval: no real source, Internet egress, credential, publisher/channel send, production write, V10 cutover, legacy shutdown, or traffic switch was enabled.
+
 ## 1.2.65 - 2026-07-10
 
 - Closed two valid CodeRabbit audit items in the AI HOT provider: a corrupt or truncated cache now repairs itself after the next successful response instead of disabling cache writes, and the intentional `warn` exit-zero policy is documented as a source-level degradation that must not fail the daily-news batch.

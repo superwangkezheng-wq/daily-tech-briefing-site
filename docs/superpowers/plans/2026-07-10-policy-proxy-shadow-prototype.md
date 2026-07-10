@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Work first in `/Users/REDACTED/.openclaw/workspace`, then synchronize only reviewed Phase B files to `/Users/REDACTED/.openclaw-work/workspace`.
+- Work first in the default OpenClaw workspace, then synchronize only reviewed Phase B files to the separate work-instance workspace.
 - Do not modify `ControlledCollectorRunner` dispatch, a V10 manifest, schedule, publisher, production entrypoint, traffic policy, legacy shutdown, browser, `yt-dlp`, cache, file, or channel action.
 - Build every image locally; do not pull an image or contact an Internet host, real source, or production endpoint.
 - The worker joins only `oc-egress-worker-int-$nonce`, a `bridge --internal` network. It never joins default bridge, proxy-out, host network, or a published port.
@@ -39,8 +39,8 @@
 ### Task 1: Immutable Egress Policy and DNS Safety
 
 **Files:**
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_policy.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`
+- Create: `scripts/openclaw_intelligence_pipeline/egress_policy.py` in the default OpenClaw workspace.
+- Modify: `scripts/test_openclaw_intelligence_pipeline.py` in the default OpenClaw workspace.
 
 **Interfaces:**
 - Produces `EgressAuthority`, `EgressResourceLimits`, `EgressPolicyProfile`, `EgressLease`, `EgressRequest`, `ProxyDecisionReceipt`, `validate_egress_profile`, and `authorize_egress_request`.
@@ -174,8 +174,8 @@ Expected: exit code `0`.
 ### Task 2: Hash-Only Receipt and HTTPS Boundary
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_policy.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`
+- Modify: `scripts/openclaw_intelligence_pipeline/egress_policy.py` in the default OpenClaw workspace.
+- Modify: `scripts/test_openclaw_intelligence_pipeline.py` in the default OpenClaw workspace.
 
 **Interfaces:**
 - Produces `ProxyDecisionReceipt` with no raw authority, path, header, token, IP, or payload.
@@ -266,14 +266,11 @@ Run Task 1 and Task 2 tests. Expected: all pass.
 ### Task 3: Static Fixture, Worker, and Proxy Images
 
 **Files:**
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_fixture/main.go`
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_fixture/Dockerfile`
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_worker/main.go`
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_worker/Dockerfile`
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_proxy/main.go`
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_proxy/Dockerfile`
-- Create: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_shadow_runtime.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`
+- Create: `scripts/openclaw_intelligence_pipeline/egress_fixture/main.go` and `Dockerfile` in the default OpenClaw workspace.
+- Create: `scripts/openclaw_intelligence_pipeline/egress_worker/main.go` and `Dockerfile` in the default OpenClaw workspace.
+- Create: `scripts/openclaw_intelligence_pipeline/egress_proxy/main.go` and `Dockerfile` in the default OpenClaw workspace.
+- Create: `scripts/openclaw_intelligence_pipeline/egress_shadow_runtime.py` in the default OpenClaw workspace.
+- Modify: `scripts/test_openclaw_intelligence_pipeline.py` in the default OpenClaw workspace.
 
 **Interfaces:**
 - Fixture serves only `GET /ok`, `GET /redirect-denied`, and `GET /oversize` on `:8081`.
@@ -338,8 +335,8 @@ Expected: both commands exit `0`.
 ### Task 4: Dual-Network Runtime and Direct-Bypass Proof
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_shadow_runtime.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`
+- Modify: `scripts/openclaw_intelligence_pipeline/egress_shadow_runtime.py` in the default OpenClaw workspace.
+- Modify: `scripts/test_openclaw_intelligence_pipeline.py` in the default OpenClaw workspace.
 
 **Interfaces:**
 - Produces `DockerEgressShadowRuntime`, `EgressShadowRequest`, and `EgressShadowResult`.
@@ -401,10 +398,8 @@ Assert both outputs are empty after every `run()`, including direct failure. Run
 ### Task 5: Adversarial Proxy Enforcement
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_shadow_runtime.py`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_proxy/main.go`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/egress_fixture/main.go`
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/test_openclaw_intelligence_pipeline.py`
+- Modify: `scripts/openclaw_intelligence_pipeline/egress_shadow_runtime.py`, `egress_proxy/main.go`, and `egress_fixture/main.go` in the default OpenClaw workspace.
+- Modify: `scripts/test_openclaw_intelligence_pipeline.py` in the default OpenClaw workspace.
 
 **Interfaces:**
 - Worker failures remain classified in `EgressShadowResult`; proxy decisions remain `ProxyDecisionReceipt` without raw data.
@@ -477,8 +472,8 @@ Expected: every egress test passes and no egress-labelled container, network, or
 ### Task 6: Exports, Both Instances, CodeRabbit, and Release Records
 
 **Files:**
-- Modify: `/Users/REDACTED/.openclaw/workspace/scripts/openclaw_intelligence_pipeline/__init__.py`
-- Synchronize: Task 1-5 source/assets and `scripts/test_openclaw_intelligence_pipeline.py` into `/Users/REDACTED/.openclaw-work/workspace`.
+- Modify: `scripts/openclaw_intelligence_pipeline/__init__.py` in the default OpenClaw workspace.
+- Synchronize: Task 1-5 source/assets and `scripts/test_openclaw_intelligence_pipeline.py` into the work-instance workspace.
 - Modify: `CHANGELOG.md`, `docs/openclaw-intelligence-pipeline-architecture.md`, `docs/openclaw-collector-pipeline.md`, `package.json`, and the Obsidian architecture record.
 
 **Interfaces:**
@@ -516,7 +511,7 @@ For each valid issue, add a failing regression test, apply the minimum fix, run 
 
 - [ ] **Step 4: Synchronize and verify the work instance**
 
-Copy only the listed Phase B files. Run Step 2 in `/Users/REDACTED/.openclaw-work/workspace` and compare SHA-256 hashes for every synchronized file.
+Copy only the listed Phase B files. Run Step 2 in the work-instance workspace and compare SHA-256 hashes for every synchronized file.
 
 - [ ] **Step 5: Document and push**
 
@@ -539,3 +534,13 @@ docker network ls --filter label=openclaw.phase=egress-shadow --format '{{.Name}
 ```
 
 Expected: runtime references occur only in its isolated modules and export; Docker output is empty. Confirm no real source profile, controlled-runner registration, proxy Internet call, credential, publisher, production write, traffic switch, V10 cutover, or legacy shutdown was enabled.
+
+#### Completion Record (2026-07-11)
+
+- [x] Export test was written first; the public package now exports exactly `EgressAuthority`, `EgressLease`, `EgressPolicyProfile`, `EgressRequest`, `ProxyDecisionReceipt`, and `DockerEgressShadowRuntime`.
+- [x] Both workspaces passed the final verification: 251 Python tests, proxy/worker/fixture Go tests, compilation, local no-network image builds, `gofmt`, scoped diff checks, and empty labelled Docker container/network/image audits.
+- [x] Only the explicit 14-file Phase B manifest was synchronized; all 14/14 SHA-256 values match between the default and work instances.
+- [x] CodeRabbit's first review produced five valid findings. They were fixed test-first: finite proxy/fixture HTTP limits, aliased-`testing` privacy audit coverage, numeric non-root scratch users, and policy-permitted fixture `HEAD` behavior. Final CodeRabbit review findings: 0.
+- [x] Public records were bumped from `1.2.65` to `1.2.66` and synchronized after the final review.
+
+The final topology differs deliberately from the early draft in Task 4: **both** `worker-internal` and `proxy-out` are Docker internal bridges. Worker attaches only to `worker-internal`; proxy is dual-homed; fixture attaches only to `proxy-out`. This local fixture-only proof does not enable real sources, Internet egress, credentials, publishing/channel sends, production writes, V10 cutover, legacy shutdown, or a traffic switch. It is not production approval.
