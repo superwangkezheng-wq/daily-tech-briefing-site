@@ -2,7 +2,7 @@
 
 Date: 2026-07-10
 
-Status: Design approved; written specification pending user review
+Status: Approved for implementation
 
 ## Context
 
