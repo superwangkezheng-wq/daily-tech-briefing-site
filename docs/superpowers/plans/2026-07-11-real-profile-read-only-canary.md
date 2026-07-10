@@ -222,6 +222,7 @@ Use the same `FROM scratch` / `USER 65532:65532` pattern. Run `GO111MODULE=off g
 - Produces `RealProfileCanaryRequest(profile_id, allow_real_network=False)`, `RealProfileCanaryResult`, and `DockerRealProfileCanaryRuntime.run(request)`.
 - `allow_real_network=False` runs topology/preflight only and must not call an external authority.
 - `allow_real_network=True` is the sole route to the one authorized canary fetch.
+- The module CLI is exactly `PYTHONPATH=scripts python3 -m openclaw_intelligence_pipeline.real_profile_runtime --profile-id openai-news-rss-v1 --allow-real-network --v10-reference-markdown latest-safe --json`; `latest-safe` is resolved only beneath the fixed V10 archive root by the runtime. The CLI rejects every other profile ID, a missing explicit flag, a symlink/path escape, or an arbitrary reference path.
 
 - [ ] **Step 1: Write the no-network preflight test**
 
@@ -364,7 +365,17 @@ For every valid finding: add a failing regression, make the minimal fix, repeat 
 
 - [ ] **Step 4: Authorized one-request canary**
 
-Run the exact CLI added by Task 4 with `profile_id=openai-news-rss-v1` and `allow_real_network=True`. Before it runs, inspect Docker labels and assert the public profile, zero credentials, no publisher/model/V10 invocation, and lease/request budget of one. After it runs, validate proxy/worker receipts, RSS candidate, quality, fidelity, V10 comparator, no raw leak, and empty Docker residue. A failure records `blocked`; it must not retry automatically or widen policy.
+Run exactly:
+
+```bash
+PYTHONPATH=scripts python3 -m openclaw_intelligence_pipeline.real_profile_runtime \
+  --profile-id openai-news-rss-v1 \
+  --allow-real-network \
+  --v10-reference-markdown latest-safe \
+  --json
+```
+
+Before it runs, inspect Docker labels and assert the public profile, zero credentials, no publisher/model/V10 invocation, and lease/request budget of one. After it runs, validate proxy/worker receipts, RSS candidate, quality, fidelity, V10 comparator, no raw leak, and empty Docker residue. A failure records `blocked`; it must not retry automatically or widen policy.
 
 - [ ] **Step 5: Release records only after passing evidence**
 
