@@ -80,6 +80,13 @@ The collection layer intentionally comes before the website layer. This reposito
 
 ### 3.1 Upstream Intelligence Pipeline Shadow Contract / 上游新采集骨架影子合同
 
+> Status correction (2026-07-11): this section describes a shadow contract,
+> not a production replacement. The complete layer-by-layer audit and the
+> production completion program are in
+> [`openclaw-intelligence-pipeline-production-audit-2026-07-11.md`](openclaw-intelligence-pipeline-production-audit-2026-07-11.md).
+> Real-source collection, publication, website refresh, and V10 cutover remain
+> blocked until that program's explicit release gates are satisfied.
+
 The upstream OpenClaw Intelligence Pipeline is being rebuilt as a read-only shadow flow before it replaces the V10 collector. The current shadow chain is:
 
 ```text
@@ -145,6 +152,42 @@ Phase B 在未来受控 runner 路径下方提供了一个仅本地 fixture 的�
 proxy 只接受 policy/lease 已授权请求，自己解析并 pin 预期 fixture IP，执行请求/响应/redirect 限额，并仅输出 hash-only receipt。已对 direct bypass、replay、拒绝 authority、拒绝 redirect、超大响应做对抗验证。没有 host port、mount、device、privileged、custom DNS、`--add-host` 或 shell。公共 API 仅有 `EgressAuthority`、`EgressLease`、`EgressPolicyProfile`、`EgressRequest`、`ProxyDecisionReceipt`、`DockerEgressShadowRuntime`。
 
 CodeRabbit 首轮五项有效硬化意见均以回归测试修复，最终 review 为 0 findings。显式 14 文件 Phase B manifest 在两个 OpenClaw 实例 SHA-256 完全一致；两侧均通过 251 个 Python 测试、Go 测试、编译、no-network build、格式/差异检查和 Docker 残留审计。它仍不是生产能力：没有启用真实源、Internet egress、凭据、渠道发送、生产写入、V10 cutover、旧系统停机或流量切换。
+
+### 3.3 Phase C Real-Profile Canary Verification / Phase C 真实画像 canary 验证
+
+Phase C now adds one fixed, read-only `openai-news-rss-v1` profile. Its runtime
+is still release-gated: absent a three-record approval artifact it refuses
+`allow_real_network` before Docker or external egress. The only safe default is
+the local topology preflight.
+
+The Phase C evidence path is continuous and fail-closed:
+
+```text
+fixed profile + one-use lease
+  -> isolated worker/proxy Docker run
+  -> hash-only controlled-runner envelope
+  -> artifact fidelity + candidate quality + privacy + bounded-cost gates
+  -> metadata-only V10 observation gate
+  -> read-only canary evidence
+```
+
+The V10 observation parses a supplied reference only in memory and never
+invokes V10. A missing or invalid reference blocks the evidence. When V10 did
+not select the same item, it records `not_comparable` rather than inventing
+content parity; publishing, traffic shift, and cutover stay false in every
+outcome.
+
+Default and work instances each passed 311 Python tests with 14 explicit
+skips, synchronized Phase C hashes, and passed their scratch Docker preflights
+concurrently on the shared daemon. Run resources have both a Phase label and a
+unique run label, so concurrent cleanups cannot confuse another live canary for
+residue. Final CodeRabbit review completed with zero findings.
+
+This is a verified canary capability, not production authorization. The
+[2026-07-11 production audit](openclaw-intelligence-pipeline-production-audit-2026-07-11.md)
+still blocks real-source approval because the original eleven-layer design has
+not yet become one continuous real collection, QA, publishing, website
+verification, and healing path.
 
 Current audited shadow metrics:
 

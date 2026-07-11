@@ -16,7 +16,7 @@
 - DNS is proxy-owned; it chooses one global address deterministically and pins it for the TLS dial with SNI `openai.com`. No ambient second lookup is allowed.
 - Every receipt/report is metadata/hash-only. Candidate content may flow only through the existing candidate contract; no body/header/IP/lease/URL query/container ID/host path/upstream error text may enter a receipt, log or assertion.
 - No model call, cache/file write, publisher/channel send, production write, V10 invocation/change, legacy shutdown, traffic shift or production cutover. Every corresponding trace flag is false.
-- Do not stage or commit OpenClaw workspace source files. Synchronize only the explicit Phase C manifest to `/Users/REDACTED/.openclaw-work/workspace` after review. Public documentation may be committed separately.
+- Do not stage or commit OpenClaw workspace source files. Synchronize only the explicit Phase C manifest to the configured work-instance workspace after review. Public documentation may be committed separately.
 - CodeRabbit is required before the one authorized real request. If it cannot run, pause before the real request; do not replace it with a manual review.
 
 ## File Structure
@@ -334,8 +334,8 @@ Test blank/malformed Markdown, source mismatch, link mismatch, absent date and s
 ### Task 7: Full Verification, CodeRabbit, One Real Canary and Records
 
 **Files:**
-- Create: `/Users/REDACTED/.openclaw/workspace/.superpowers/sdd/phase-c-manifest.txt`
-- Create: `/Users/REDACTED/.openclaw/workspace/.superpowers/sdd/phase-c-verification.md`
+- Create: `<default-workspace>/.superpowers/sdd/phase-c-manifest.txt`
+- Create: `<default-workspace>/.superpowers/sdd/phase-c-verification.md`
 - Modify: `CHANGELOG.md`, `package.json`, `docs/openclaw-intelligence-pipeline-architecture.md`, `docs/openclaw-collector-pipeline.md`, and the Obsidian architecture record only after final evidence.
 
 - [ ] **Step 1: Full local checks in default instance**

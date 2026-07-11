@@ -685,6 +685,35 @@ The first CodeRabbit pass found five valid hardening issues: finite proxy/fixtur
 
 This Phase B artifact does not enable real sources, Internet egress, credentials, publishing or channel sends, production writes, V10 cutover, legacy shutdown, or a traffic switch. It is not production approval; a separate design and evidence gate is required before any real egress profile is considered.
 
+## Real-Profile Canary: Phase C Verification (v1.2.67)
+
+Phase C adds the only approved candidate for a future real-source read-only
+evaluation: `openai-news-rss-v1`, fixed to OpenAI News RSS. A missing release
+artifact causes the runtime to block before it invokes Docker or egress. The
+artifact must carry hashes for adversarial simulation, the architecture audit,
+and CodeRabbit review; it is intentionally absent while the production audit
+remains unapproved.
+
+The worker and proxy run in isolated scratch containers. The worker is
+internal-only; the proxy alone has an egress bridge. One-use lease material is
+passed through a 0600 temporary environment file rather than host argv, then
+deleted. Every run owns a unique label alongside the Phase label, allowing
+default and work to evaluate concurrently on the same Docker daemon without
+cross-run cleanup failures.
+
+The evidence chain validates the controlled envelope, artifact fidelity,
+candidate quality, privacy, bounded response/request cost, and a metadata-only
+V10 observation. V10 reference failure blocks the chain; non-selected items
+remain explicitly non-comparable. No outcome enables publishing, cache/file
+write, channel send, model call, V10 invocation, traffic shift, or production
+cutover.
+
+Both OpenClaw instances passed 311 Python tests (14 explicit skips), scratch
+Docker preflight adversarial tests, Go suites, hash comparison, and a final
+CodeRabbit review with zero findings. This verifies the capability, but does
+not authorize an actual real request because the system-level architecture
+audit is still blocked.
+
 ## Source Governance Matrix
 
 Every source should be expressed as data before it is collected:
