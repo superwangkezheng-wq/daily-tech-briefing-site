@@ -800,3 +800,18 @@ The publishing layer can validate freshness, parseability, cache health, feedbac
 - Does model output pass the QA gate before persistence and publication?
 - Are source health, production health, and publishing health separate signals?
 - Does each new module increase locality and leverage, rather than becoming a pass-through?
+### Phase C real canary result (v1.2.68)
+
+The fixed OpenAI RSS canary completed with one bounded RawArtifact and one
+Candidate. Fidelity, quality, privacy, cost, and metadata-only V10 observation
+gates passed. The V10 result was `not_comparable`; V10 was not invoked.
+
+Real-environment validation corrected a proxy readiness gap, increased only
+this profile's bounded response cap to 1 MiB for the approximately 631 KiB
+official feed, added TLS-pinned handling for the host TUN's `198.18/15`
+synthetic DNS result, and accepted canonical same-authority `/index/` links.
+The one-use authorization was consumed and Docker residue was zero.
+
+This result does not authorize recurring collection, synthesis, publishing,
+website writes, traffic switching, or V10 retirement. The production
+architecture audit remains not approved.
