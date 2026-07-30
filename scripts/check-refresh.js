@@ -1,5 +1,5 @@
 const { SITE_CONFIG, REFRESH_SLOTS } = require("../src/config");
-const { buildSiteCache } = require("../src/site-index");
+const { buildContentCache } = require("../src/content-index");
 const { appendOpsLog, updateOpsStatus, todayString } = require("../src/ops-store");
 const { sendFeishuMessage } = require("../src/feishu");
 const { spawn } = require("node:child_process");
@@ -46,7 +46,16 @@ async function main() {
 
   let found = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const result = await buildSiteCache();
+    const content = await buildContentCache();
+    if (!content.daily.ok) throw new Error(`Daily cache build failed: ${content.daily.error}`);
+    const result = content.daily.value;
+    if (!content.weekly.ok || content.weekly.value.errors.length > 0) {
+      await appendOpsLog("refresh", "周度洞察扫描异常（日报继续）", [
+        content.weekly.ok
+          ? `拒收：${content.weekly.value.errors.map((item) => `${item.source_file}: ${item.error}`).join("；")}`
+          : `错误：${content.weekly.error}`,
+      ]);
+    }
     const matched = result.snapshots.find(
       (item) => item.date === targetDate && item.slotLabel === slot.label,
     );

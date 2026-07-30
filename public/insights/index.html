@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#fbf6ee" />
+    <title>周度技术战略洞察 · 科技情报站</title>
+    <link rel="stylesheet" href="/site.css" />
+    <link rel="stylesheet" href="/weekly-insights.css" />
+  </head>
+  <body class="weekly-page weekly-index-page">
+    <a class="skip-link" href="#weekly-main">跳到正文</a>
+    <header class="weekly-topbar">
+      <a class="weekly-brand" href="/"><strong>科技情报站</strong><span>HYBRID BRIEFING DESK</span></a>
+      <nav aria-label="栏目导航"><a href="/">每日简报</a><a href="/insights/" aria-current="page">周度洞察</a></nav>
+    </header>
+    <main id="weekly-main" class="weekly-index-shell">
+      <header class="weekly-index-hero">
+        <div>
+          <p class="eyebrow">WEEKLY STRATEGIC INTELLIGENCE</p>
+          <h1>让信号形成判断，<br />让判断保留证据边界。</h1>
+        </div>
+        <div class="weekly-index-hero__copy">
+          <p>周度洞察只呈现已经批准的快照，从事实、证据和机制联系进入产业影响与趋势判断；期级战略建议始终是可选项。</p>
+          <dl><div><dt>范围</dt><dd>每期 0–4 条</dd></div><div><dt>交付</dt><dd>网页 + Word</dd></div><div><dt>默认</dt><dd>内部预览</dd></div></dl>
+        </div>
+      </header>
+      <section class="weekly-index-toolbar" aria-labelledby="archive-title">
+        <div><p class="eyebrow">ISSUE ARCHIVE</p><h2 id="archive-title">洞察期刊</h2></div>
+        <p id="weekly-count" aria-live="polite">正在读取…</p>
+      </section>
+      <section class="insight-card-grid" id="insight-card-grid" aria-live="polite"></section>
+    </main>
+    <template id="insight-card-template">
+      <article class="insight-card">
+        <div class="insight-card__top"><span class="insight-card__period"></span><span class="insight-card__status"></span></div>
+        <h2></h2><p class="insight-card__dek"></p>
+        <div class="insight-card__anchors"></div>
+        <footer><span class="insight-card__receipt"></span><a href="#">阅读本期 <i aria-hidden="true">→</i></a></footer>
+      </article>
+    </template>
+    <script src="/weekly-insights.js" defer></script>
+  </body>
+</html>
