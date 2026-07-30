@@ -12,6 +12,7 @@
     "check:plists": "find launchd -name '*.plist' -print0 | xargs -0 plutil -lint",
     "audit:privacy": "node scripts/audit-public-package.js",
     "audit:schedule": "node scripts/test-schedule-contract.js",
+    "test:parser": "node scripts/test-report-parser-contract.js",
     "smoke": "node scripts/smoke-public-package.js",
     "dev": "node server.js",
     "start": "node server.js",

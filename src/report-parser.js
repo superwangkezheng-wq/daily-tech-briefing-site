@@ -98,14 +98,24 @@ function parseItems(sectionText) {
   });
 }
 
-function parseSection(content, heading) {
-  const sectionStart = content.indexOf(heading);
-  if (sectionStart === -1) {
-    return [];
-  }
-  const remaining = content.slice(sectionStart + heading.length);
-  const nextDivider = remaining.search(/\n##\s+|\n---/);
-  const sectionBody = nextDivider === -1 ? remaining : remaining.slice(0, nextDivider);
+function normalizeSectionHeading(value) {
+  return String(value || "")
+    .replace(/^[^\p{L}\p{N}]+/u, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseSection(content, headingLabel) {
+  const target = normalizeSectionHeading(headingLabel);
+  const headings = [...content.matchAll(/^##\s+(.+?)\s*$/gm)];
+  const sectionIndex = headings.findIndex((match) => normalizeSectionHeading(match[1]) === target);
+  if (sectionIndex === -1) return [];
+
+  const sectionStart = headings[sectionIndex].index + headings[sectionIndex][0].length;
+  const sectionEnd = headings[sectionIndex + 1]?.index ?? content.length;
+  const remaining = content.slice(sectionStart, sectionEnd);
+  const divider = remaining.search(/\n---(?:\n|$)/);
+  const sectionBody = divider === -1 ? remaining : remaining.slice(0, divider);
   return parseItems(sectionBody);
 }
 
@@ -125,9 +135,9 @@ function loadEnrichment(reportPath) {
 function parseReportFile(filePath) {
   const content = readUtf8(filePath);
   const meta = parseMeta(content, filePath);
-  const techNews = parseSection(content, "## 📰 主新闻");
-  const aiCreators = parseSection(content, "## 👤 AI 资讯博主");
-  const videoItems = parseSection(content, "## 🎬 视频 / 播客");
+  const techNews = parseSection(content, "主新闻");
+  const aiCreators = parseSection(content, "AI 资讯博主");
+  const videoItems = parseSection(content, "视频 / 播客");
   const enrichment = loadEnrichment(filePath);
 
   return {

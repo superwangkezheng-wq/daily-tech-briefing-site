@@ -1,54 +1,63 @@
-const editorialState = {
+const state = {
   config: null,
   snapshots: [],
-  snapshotDetails: new Map(),
+  details: new Map(),
   activeSnapshotId: "",
-  activeSnapshot: null,
+  activeDetail: null,
+  category: "all",
+  query: "",
   page: 1,
-  drawerOpen: false,
+  activeDrawer: null,
+  drawerTrigger: null,
   lastTrackedVisitKey: "",
 };
 
-const editorialFrontendVersion = "1.1.3";
+const CATEGORY_LABELS = {
+  all: "今日总览",
+  model: "模型与算法",
+  product: "产品与工具",
+  industry: "产业与商业",
+  research: "研究与论文",
+  opinion: "观点与动态",
+};
+
+const SLOT_LABELS = { morning: "早报", afternoon: "午报", evening: "晚报" };
 const SLOT_ORDER = ["morning", "afternoon", "evening"];
+const CJK_RE = /[\u3400-\u9fff]/g;
+const LATIN_RE = /[A-Za-z]/g;
 
-const CJK_CHAR_RE = /[\u3400-\u9fff]/g;
-const LATIN_CHAR_RE = /[A-Za-z]/g;
-const INLINE_LABEL_RE = /^(摘要|产业影响)\s*[：:]\s*/;
-
-const editorialElements = {
-  appVersion: document.getElementById("app-version"),
-  topbarMeta: document.getElementById("topbar-meta"),
-  heroKicker: document.getElementById("hero-kicker"),
-  heroSlot: document.getElementById("hero-slot"),
-  heroTitle: document.getElementById("hero-title"),
-  heroSummary: document.getElementById("hero-summary"),
-  heroMetaDate: document.getElementById("hero-meta-date"),
-  heroMetaRole: document.getElementById("hero-meta-role"),
-  heroMetaCount: document.getElementById("hero-meta-count"),
-  heroSideStatus: document.getElementById("hero-side-status"),
-  heroSideVersion: document.getElementById("hero-side-version"),
-  heroSideGenerated: document.getElementById("hero-side-generated"),
-  heroSideCount: document.getElementById("hero-side-count"),
-  heroSideDate: document.getElementById("hero-side-date"),
-  snapshotToggle: document.getElementById("snapshot-toggle"),
-  slotSwitcher: document.getElementById("slot-switcher"),
-  snapshotStrip: document.getElementById("snapshot-strip"),
-  snapshotPanel: document.getElementById("snapshot-panel"),
-  quickTitle: document.getElementById("quick-title"),
-  quickCopy: document.getElementById("quick-copy"),
-  quickGrid: document.getElementById("quick-grid"),
-  entryStream: document.getElementById("entry-stream"),
-  pageIndicator: document.getElementById("page-indicator"),
-  totalIndicator: document.getElementById("total-indicator"),
+const elements = {
+  searchWrap: document.getElementById("search-wrap"),
+  searchInput: document.getElementById("search-input"),
+  desktopEditions: document.getElementById("edition-bar-desktop"),
+  mobileEditions: document.getElementById("edition-bar-mobile"),
+  archiveToggle: document.getElementById("archive-toggle"),
+  archivePanel: document.getElementById("archive-panel"),
+  thirtyList: document.getElementById("thirty-list"),
+  pulseViewport: document.getElementById("pulse-viewport"),
+  pulseRow: document.getElementById("pulse-row"),
+  pulseToggle: document.getElementById("pulse-toggle"),
+  streamLabel: document.getElementById("stream-label"),
+  streamCount: document.getElementById("stream-count"),
+  cardGrid: document.getElementById("card-grid"),
   pagination: document.getElementById("pagination"),
+  cardTemplate: document.getElementById("story-card-template"),
+  sidebarEdition: document.getElementById("sidebar-edition"),
+  sidebarCount: document.getElementById("sidebar-count"),
+  sidebarScore: document.getElementById("sidebar-score"),
+  sidebarDate: document.getElementById("sidebar-date"),
+  overlay: document.getElementById("drawer-overlay"),
+  feedbackDrawer: document.getElementById("feedback-drawer"),
+  agentDrawer: document.getElementById("agent-drawer"),
   feedbackForm: document.getElementById("feedback-form"),
+  feedbackSuccess: document.getElementById("feedback-success"),
+  feedbackError: document.getElementById("feedback-error"),
   feedbackStatus: document.getElementById("feedback-status"),
+  feedbackSubmit: document.getElementById("feedback-submit"),
   visitorName: document.getElementById("visitor-name"),
   visitorContact: document.getElementById("visitor-contact"),
   feedbackContent: document.getElementById("feedback-content"),
-  quickCardTemplate: document.getElementById("quick-card-template"),
-  entryTemplate: document.getElementById("entry-template"),
+  copyStatus: document.getElementById("copy-status"),
 };
 
 function countMatches(text, pattern) {
@@ -57,150 +66,90 @@ function countMatches(text, pattern) {
 
 function isMostlyEnglish(text) {
   const value = String(text || "");
-  const latinCount = countMatches(value, LATIN_CHAR_RE);
-  const cjkCount = countMatches(value, CJK_CHAR_RE);
-  return latinCount >= 16 && latinCount > cjkCount * 1.2;
+  const latin = countMatches(value, LATIN_RE);
+  const cjk = countMatches(value, CJK_RE);
+  return latin >= 16 && latin > cjk * 1.2;
 }
 
 function normalizeDisplayTitle(text) {
   const original = String(text || "").trim();
   if (!original || !isMostlyEnglish(original)) return original;
-
-  const cleaned = original
-    .replace(/([\u3400-\u9fff][^()]{0,40}?)\s*\(([A-Za-z][^)]{0,80})\)/g, (_, __, english) => english.trim())
-    .replace(/([A-Za-z][^()]{0,80}?)\s*\(([\u3400-\u9fff][^)]{0,40})\)/g, (_, english) => english.trim())
-    .replace(/\s{2,}/g, " ")
-    .replace(/\s+([,.;:!?])/g, "$1")
-    .trim();
-
-  return cleaned || original;
+  return (
+    original
+      .replace(/([\u3400-\u9fff][^()]{0,40}?)\s*\(([A-Za-z][^)]{0,80})\)/g, (_, __, english) => english.trim())
+      .replace(/([A-Za-z][^()]{0,80}?)\s*\(([\u3400-\u9fff][^)]{0,40})\)/g, (_, english) => english.trim())
+      .replace(/\s{2,}/g, " ")
+      .trim() || original
+  );
 }
 
-function splitSentenceUnits(text) {
-  const normalized = String(text || "").replace(/\r\n?/g, "\n").trim();
-  if (!normalized) return [];
-
-  const paragraphs = normalized
-    .split(/\n+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-
-  if (paragraphs.length > 1) return paragraphs;
-
-  const units = [];
-  let buffer = "";
-  for (let index = 0; index < normalized.length; index += 1) {
-    const char = normalized[index];
-    const next = normalized[index + 1] || "";
-    const afterNext = normalized[index + 2] || "";
-    buffer += char;
-
-    const hitCjkBoundary = /[。！？；!?]/.test(char) && (!next || /\s/.test(next));
-    const hitEnglishBoundary = char === "." && next === " " && /[A-Z\u3400-\u9fff]/.test(afterNext);
-    if (hitCjkBoundary || hitEnglishBoundary) {
-      const unit = buffer.trim();
-      if (unit) units.push(unit);
-      buffer = "";
-    }
-  }
-
-  const tail = buffer.trim();
-  if (tail) units.push(tail);
-  return units.length ? units : [normalized];
+function classifyCategory(item, sectionKey) {
+  if (sectionKey === "videoItems" || sectionKey === "aiCreators") return "opinion";
+  const haystack = `${item.title || ""} ${item.summary || ""} ${item.impact || ""}`.toLowerCase();
+  const patterns = {
+    model: /(模型|算法|推理|训练|agent|llm|参数|注意力|token|神经网络|芯片|算力|rag|多模态)/gi,
+    product: /(发布|推出|上线|产品|工具|平台|设备|系统|版本|开源|api|应用|插件|station|桌面超算|runtime)/gi,
+    industry: /(融资|交易|营收|商业|市场|监管|政策|采购|客户|生态|供应链|数据中心|aidc|电力成本|合作|租赁|出售|投资|协议|企业|公司)/gi,
+    research: /(论文|研究团队|研究者|arxiv|paper|benchmark|评测基准|实验室|学术|可解释性|workspace|j-space)/gi,
+  };
+  const scores = Object.entries(patterns).map(([category, pattern]) => [category, countMatches(haystack, pattern)]);
+  scores.sort((a, b) => b[1] - a[1]);
+  return scores[0][1] > 0 ? scores[0][0] : "opinion";
 }
 
-function classifyLanguage(text) {
-  const value = String(text || "").trim();
-  const cjkCount = countMatches(value, CJK_CHAR_RE);
-  const latinCount = countMatches(value, LATIN_CHAR_RE);
-  const firstCjkIndex = value.search(/[\u3400-\u9fff]/);
-  const firstLatinIndex = value.search(/[A-Za-z]/);
-  const hasChinesePunctuation = /[，。；：“”‘’《》、（）]/.test(value);
-
-  if (!cjkCount && !latinCount) return "neutral";
-  if (!latinCount) return "zh";
-  if (!cjkCount) return "en";
-  if (hasChinesePunctuation && cjkCount >= 8) return "zh";
-  if (cjkCount >= 8 && firstCjkIndex !== -1 && (firstLatinIndex === -1 || firstCjkIndex < firstLatinIndex)) return "zh";
-  if (latinCount >= 12 && firstLatinIndex !== -1 && (firstCjkIndex === -1 || firstLatinIndex < firstCjkIndex)) return "en";
-  if (cjkCount >= latinCount * 1.15) return "zh";
-  if (latinCount >= cjkCount * 1.15) return "en";
-  return cjkCount >= latinCount ? "zh" : "en";
+function getItems(detail) {
+  const sections = (detail && detail.sections) || {};
+  const sources = [
+    ["techNews", Array.isArray(sections.techNews) ? sections.techNews : []],
+    ["videoItems", Array.isArray(sections.videoItems) ? sections.videoItems : []],
+    ["aiCreators", Array.isArray(sections.aiCreators) ? sections.aiCreators : []],
+  ];
+  let globalRank = 0;
+  return sources.flatMap(([sectionKey, list]) =>
+    list
+      .filter((item) => item && (item.title || item.summary || item.impact))
+      .map((item) => {
+        globalRank += 1;
+        return {
+          rank: globalRank,
+          originalRank: Number(item.rank) || globalRank,
+          title: item.title || "未命名条目",
+          displayTitle: normalizeDisplayTitle(item.title || "未命名条目"),
+          source: item.source || "未知来源",
+          link: item.link || "#",
+          summary: item.summary || "暂无摘要。",
+          impact: item.impact || "暂无产业影响分析。",
+          score:
+            item.score != null && item.score !== "" && Number.isFinite(Number(item.score))
+              ? Number(item.score)
+              : null,
+          background: item.background || "",
+          sectionKey,
+          category: classifyCategory(item, sectionKey),
+        };
+      }),
+  );
 }
 
-function joinLanguageUnits(units, language) {
-  if (!units.length) return "";
-  return units.join(language === "en" ? " " : "");
+function activeMeta() {
+  return state.snapshots.find((snapshot) => snapshot.id === state.activeSnapshotId) || {};
 }
 
-function buildBilingualSegments(text) {
-  const normalized = String(text || "").replace(/\r\n?/g, "\n").trim();
-  const stripped = normalized.replace(INLINE_LABEL_RE, "").trim();
-  if (!stripped) return [];
-
-  const units = splitSentenceUnits(stripped);
-  const zhUnits = [];
-  const enUnits = [];
-  const neutralUnits = [];
-
-  units.forEach((unit) => {
-    const language = classifyLanguage(unit);
-    if (language === "zh") {
-      zhUnits.push(unit);
-    } else if (language === "en") {
-      enUnits.push(unit);
-    } else {
-      neutralUnits.push(unit);
-    }
-  });
-
-  if (zhUnits.length && enUnits.length) {
-    if (neutralUnits.length) {
-      if (zhUnits.length >= enUnits.length) zhUnits.push(...neutralUnits);
-      else enUnits.push(...neutralUnits);
-    }
-
-    return [
-      { language: "zh", text: joinLanguageUnits(zhUnits, "zh") },
-      { language: "en", text: joinLanguageUnits(enUnits, "en") },
-    ].filter((item) => item.text);
-  }
-
-  return [{ language: classifyLanguage(stripped), text: stripped }];
+function activeItems() {
+  return getItems(state.activeDetail);
 }
 
-function primaryCopy(text) {
-  const segments = buildBilingualSegments(text);
-  if (!segments.length) return "暂无内容。";
-  const zh = segments.find((segment) => segment.language === "zh");
-  return (zh || segments[0]).text;
-}
-
-function renderBilingualCopy(element, text) {
-  if (!element) return;
-  const segments = buildBilingualSegments(text);
-  element.innerHTML = "";
-
-  if (!segments.length) {
-    element.textContent = "--";
-    return;
-  }
-
-  if (segments.length === 1) {
-    element.textContent = segments[0].text;
-    return;
-  }
-
-  segments.forEach((segment) => {
-    const span = document.createElement("span");
-    span.className = `editorial-copy-segment editorial-copy-segment--${segment.language}`;
-    span.textContent = segment.text;
-    element.appendChild(span);
+function visibleItems() {
+  const query = state.query.trim().toLocaleLowerCase("zh-CN");
+  return activeItems().filter((item) => {
+    if (state.category !== "all" && item.category !== state.category) return false;
+    if (!query) return true;
+    return `${item.title} ${item.source} ${item.summary} ${item.impact}`.toLocaleLowerCase("zh-CN").includes(query);
   });
 }
 
-function editorialPageSize() {
-  const configured = Number(editorialState.config && editorialState.config.pageSize);
+function pageSize() {
+  const configured = Number(state.config && state.config.pageSize);
   return Number.isFinite(configured) && configured > 0 ? configured : 6;
 }
 
@@ -213,434 +162,403 @@ async function fetchJson(url, options) {
   return response.json();
 }
 
-function formatGenerated(meta) {
-  const label = String((meta && meta.generatedAtLabel) || "").trim();
-  if (label) return label;
-  const generatedAt = String((meta && meta.generatedAt) || "").trim();
-  return generatedAt ? `生成于 ${generatedAt}` : "--";
-}
-
-function generatedValue(meta) {
-  return formatGenerated(meta).replace(/^生成于\s*/, "");
-}
-
-function itemCount(meta, detail) {
-  const detailItems = getItems(detail);
-  if (detailItems.length) return detailItems.length;
-  return Number(meta && meta.counts && meta.counts.techNews) || 0;
-}
-
-function getItems(detail) {
-  const sections = (detail && detail.sections) || {};
-  const techNews = Array.isArray(sections.techNews) ? sections.techNews : [];
-  const videoItems = Array.isArray(sections.videoItems) ? sections.videoItems : [];
-  const aiCreators = Array.isArray(sections.aiCreators) ? sections.aiCreators : [];
-  const items = techNews.length ? techNews : [...videoItems, ...aiCreators];
-  return items
-    .filter((item) => item && (item.title || item.summary || item.impact))
-    .map((item, index) => ({
-      rank: Number(item.rank) || index + 1,
-      title: item.title || "未命名条目",
-      displayTitle: normalizeDisplayTitle(item.title || "未命名条目"),
-      source: item.source || "未知来源",
-      link: item.link || "#",
-      summary: item.summary || "暂无摘要。",
-      impact: item.impact || "暂无产业影响分析。",
-      score: item.score != null ? Number(item.score) : null,
-      background: item.background || "",
-    }));
-}
-
-function activeMeta() {
-  return editorialState.snapshots.find((snapshot) => snapshot.id === editorialState.activeSnapshotId) || null;
-}
-
-function activeData() {
-  const meta = activeMeta() || {};
-  const detail = editorialState.activeSnapshot || {};
-  const items = getItems(detail);
-  return { meta, detail, items };
-}
-
-function buildHeroSummary(meta, detail, items) {
-  const lead = items[0];
-  if (lead && lead.summary) return lead.summary;
-  return buildSummary(meta, detail, items);
-}
-
-function buildSummary(meta, detail, items) {
-  if (meta.summaryNote) return meta.summaryNote;
-  if (detail.heroNote) return detail.heroNote;
-  if (items[0]) return `本版首条为“${items[0].displayTitle || items[0].title}”，页面提供摘要、产业影响和原文入口。`;
-  return "当前版本暂无可展示条目，请稍后再试或切换其他版本。";
-}
-
-function groupSnapshots() {
-  return editorialState.snapshots.reduce((groups, snapshot) => {
-    const existing = groups.find((group) => group.date === snapshot.date);
-    if (existing) {
-      existing.items.push(snapshot);
-    } else {
-      groups.push({ date: snapshot.date, items: [snapshot] });
-    }
-    return groups;
-  }, []);
+function snapshotLabel(snapshot) {
+  return SLOT_LABELS[snapshot.slotKey] || snapshot.shortSlotLabel || snapshot.slotLabel || "日报";
 }
 
 function latestSnapshotForSlot(slotKey) {
-  return editorialState.snapshots.find((snapshot) => snapshot.slotKey === slotKey) || null;
+  return state.snapshots.find((snapshot) => snapshot.slotKey === slotKey) || null;
 }
 
-function setLink(linkElement, url) {
-  if (!linkElement) return;
-  const safeUrl = String(url || "").trim();
-  linkElement.href = safeUrl || "#";
-  if (safeUrl && safeUrl !== "#") {
-    linkElement.removeAttribute("aria-disabled");
-    linkElement.setAttribute("target", "_blank");
-    linkElement.setAttribute("rel", "noreferrer");
-  } else {
-    linkElement.setAttribute("aria-disabled", "true");
-    linkElement.removeAttribute("target");
-    linkElement.removeAttribute("rel");
+function formatDate(date) {
+  return String(date || "--").replace(/-/g, "/");
+}
+
+function excerpt(text, max = 70) {
+  const value = String(text || "").replace(/\s+/g, " ").trim();
+  return value.length > max ? `${value.slice(0, max).trim()}…` : value;
+}
+
+function setExternalLink(anchor, link) {
+  const safeLink = String(link || "").trim();
+  anchor.href = safeLink || "#";
+  if (!safeLink || safeLink === "#") {
+    anchor.setAttribute("aria-disabled", "true");
+    anchor.removeAttribute("target");
+    anchor.removeAttribute("rel");
   }
 }
 
-function scrollWindowTo(target, offset = 24) {
-  if (!target) return;
-  const top = target.getBoundingClientRect().top + window.scrollY - offset;
-  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+function renderEditions() {
+  [elements.desktopEditions, elements.mobileEditions].forEach((container) => {
+    container.innerHTML = "";
+    SLOT_ORDER.forEach((slotKey) => {
+      const snapshot = latestSnapshotForSlot(slotKey);
+      if (!snapshot) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "edition-pill";
+      button.textContent = snapshotLabel(snapshot);
+      button.setAttribute("aria-pressed", snapshot.id === state.activeSnapshotId ? "true" : "false");
+      button.addEventListener("click", () => loadSnapshot(snapshot.id));
+      container.appendChild(button);
+    });
+  });
 }
 
-function scrollStripToActive(container, activeNode) {
-  if (!container || !activeNode) return;
-  const targetLeft = activeNode.offsetLeft - (container.clientWidth - activeNode.clientWidth) / 2;
-  container.scrollTo({ left: Math.max(0, targetLeft), behavior: "smooth" });
-}
-
-function syncDrawer() {
-  if (!editorialElements.snapshotToggle || !editorialElements.snapshotPanel) return;
-  editorialElements.snapshotToggle.setAttribute("aria-expanded", editorialState.drawerOpen ? "true" : "false");
-  editorialElements.snapshotToggle.textContent = editorialState.drawerOpen ? "收起全部快照" : "展开全部快照";
-  editorialElements.snapshotPanel.hidden = !editorialState.drawerOpen;
-}
-
-function makeSnapshotCard(snapshot, activeSnapshotId) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = `snapshot-card${snapshot.id === activeSnapshotId ? " active" : ""}`;
-
-  const title = document.createElement("strong");
-  title.textContent = snapshot.displayTitle || `${snapshot.date} ${snapshot.slotLabel}`;
-  const generated = document.createElement("span");
-  generated.textContent = formatGenerated(snapshot);
-  const count = document.createElement("em");
-  count.textContent = `${itemCount(snapshot, null)} 条资讯`;
-
-  button.append(title, generated, count);
-  button.addEventListener("click", () => loadSnapshot(snapshot.id));
-  return button;
-}
-
-function renderSwitchboard(meta) {
-  editorialElements.slotSwitcher.innerHTML = "";
-  SLOT_ORDER.forEach((slotKey) => {
-    const snapshot = latestSnapshotForSlot(slotKey);
-    if (!snapshot) return;
+function renderArchive() {
+  elements.archivePanel.innerHTML = "";
+  state.snapshots.forEach((snapshot) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = snapshot.slotLabel;
-    button.dataset.active = meta.slotKey === slotKey ? "true" : "false";
+    button.className = "archive-button";
+    button.textContent = `${formatDate(snapshot.date)} · ${snapshotLabel(snapshot)} · ${snapshot.counts?.techNews || 0} 条`;
+    if (snapshot.id === state.activeSnapshotId) button.setAttribute("aria-current", "true");
     button.addEventListener("click", () => loadSnapshot(snapshot.id));
-    editorialElements.slotSwitcher.appendChild(button);
+    elements.archivePanel.appendChild(button);
   });
-
-  editorialElements.snapshotStrip.innerHTML = "";
-  editorialState.snapshots.forEach((snapshot) => {
-    editorialElements.snapshotStrip.appendChild(makeSnapshotCard(snapshot, meta.id));
-  });
-
-  editorialElements.snapshotPanel.innerHTML = "";
-  groupSnapshots().forEach((group) => {
-    const section = document.createElement("section");
-    section.className = "snapshot-group";
-
-    const head = document.createElement("p");
-    head.className = "eyebrow";
-    head.textContent = group.date;
-    section.appendChild(head);
-
-    const strip = document.createElement("div");
-    strip.className = "snapshot-strip";
-    group.items.forEach((snapshot) => {
-      strip.appendChild(makeSnapshotCard(snapshot, meta.id));
-    });
-    section.appendChild(strip);
-    editorialElements.snapshotPanel.appendChild(section);
-  });
-
-  const activeCard = editorialElements.snapshotStrip.querySelector(".snapshot-card.active");
-  scrollStripToActive(editorialElements.snapshotStrip, activeCard);
+  document.getElementById("nav-count-archive").textContent = String(state.snapshots.length);
 }
 
-function renderHero(meta, detail, items) {
-  const lead = items[0];
-  const displayTitle = meta.displayTitle || `${meta.date || "--"} ${meta.slotLabel || ""}`.trim();
-
-  if (editorialElements.appVersion && editorialState.config && editorialState.config.appVersion) {
-    editorialElements.appVersion.textContent = `v${editorialFrontendVersion}`;
-  }
-
-  editorialElements.topbarMeta.textContent = `${displayTitle} · ${generatedValue(meta)}`;
-  editorialElements.heroKicker.textContent = `今日首条 · ${String(meta.date || "--").replace(/-/g, "/")}`;
-  editorialElements.heroSlot.textContent = lead ? lead.source : "重点新闻";
-  editorialElements.heroTitle.textContent = lead ? lead.displayTitle || lead.title : "当前版本暂无可展示条目";
-  renderBilingualCopy(editorialElements.heroSummary, buildHeroSummary(meta, detail, items));
-  editorialElements.heroMetaDate.textContent = displayTitle;
-  editorialElements.heroMetaRole.textContent = "首条内容";
-  editorialElements.heroMetaCount.textContent = `${itemCount(meta, detail)} 条资讯`;
-  editorialElements.heroSideStatus.textContent = meta.statusLabel || generatedValue(meta);
-  editorialElements.heroSideVersion.textContent = meta.shortSlotLabel || meta.slotLabel || "--";
-  editorialElements.heroSideGenerated.textContent = generatedValue(meta);
-  editorialElements.heroSideCount.textContent = `${itemCount(meta, detail)} 条资讯`;
-  editorialElements.heroSideDate.textContent = meta.date || "--";
+function renderCategoryControls(items) {
+  const counts = Object.fromEntries(Object.keys(CATEGORY_LABELS).map((key) => [key, 0]));
+  counts.all = items.length;
+  items.forEach((item) => {
+    counts[item.category] += 1;
+  });
+  document.querySelectorAll("[data-category]").forEach((control) => {
+    const category = control.dataset.category;
+    control.setAttribute("aria-pressed", category === state.category ? "true" : "false");
+  });
+  Object.entries(counts).forEach(([category, count]) => {
+    const output = document.getElementById(`nav-count-${category}`);
+    if (output) output.textContent = String(count);
+  });
 }
 
-function renderQuickPicks(meta, items) {
-  editorialElements.quickTitle.textContent = `${meta.shortSlotLabel || meta.slotLabel || "本版"}重点条目`;
-  editorialElements.quickCopy.textContent = items.length
-    ? `本版精选 ${items.length} 条资讯，优先把值得判断的结构性变化放在第一屏。`
-    : buildSummary(meta, editorialState.activeSnapshot, items);
+function renderSidebar(items) {
+  const meta = activeMeta();
+  const scores = items.map((item) => item.score).filter((score) => score != null);
+  elements.sidebarEdition.textContent = snapshotLabel(meta);
+  elements.sidebarCount.textContent = `${items.length} 条`;
+  elements.sidebarScore.textContent = scores.length ? Math.max(...scores).toFixed(1) : "--";
+  elements.sidebarDate.textContent = formatDate(meta.date);
+}
 
-  editorialElements.quickGrid.innerHTML = "";
-
+function renderThirty(items) {
+  elements.thirtyList.innerHTML = "";
   items.slice(0, 3).forEach((item, index) => {
-    const node = editorialElements.quickCardTemplate.content.firstElementChild.cloneNode(true);
-    node.style.animationDelay = `${40 + index * 50}ms`;
-    node.querySelector(".quick-source").textContent = item.source;
-    node.querySelector(".quick-rank").textContent = String(item.rank).padStart(2, "0");
-    node.querySelector(".quick-title-text").textContent = item.displayTitle || item.title;
-    node.querySelector(".quick-summary").textContent = `摘要：${primaryCopy(item.summary)}`;
-    node.querySelector(".quick-impact").textContent = `产业影响：${primaryCopy(item.impact)}`;
-    setLink(node.querySelector(".quick-link"), item.link);
-    node.querySelector(".quick-jump").addEventListener("click", () => jumpToRank(item.rank));
-    editorialElements.quickGrid.appendChild(node);
+    const li = document.createElement("li");
+    li.className = "thirty-item";
+    const rank = document.createElement("span");
+    rank.className = "thirty-rank";
+    rank.textContent = String(index + 1);
+    const copy = document.createElement("div");
+    const title = document.createElement("h2");
+    title.className = "thirty-title";
+    title.textContent = item.displayTitle;
+    const summary = document.createElement("p");
+    summary.className = "thirty-summary";
+    summary.textContent = excerpt(item.summary, 82);
+    copy.append(title, summary);
+    li.append(rank, copy);
+    elements.thirtyList.appendChild(li);
   });
-
-  if (!editorialElements.quickGrid.children.length) {
-    const empty = document.createElement("p");
-    empty.className = "empty-state";
-    empty.textContent = "当前版本暂无重点条目。";
-    editorialElements.quickGrid.appendChild(empty);
+  if (!elements.thirtyList.children.length) {
+    const li = document.createElement("li");
+    li.className = "thirty-item";
+    li.textContent = "当前筛选暂无信号。";
+    elements.thirtyList.appendChild(li);
   }
 }
 
-function renderEntries(items) {
-  const totalPages = Math.max(1, Math.ceil(items.length / editorialPageSize()));
-  editorialState.page = Math.min(editorialState.page, totalPages);
-  editorialElements.pageIndicator.textContent = `当前页 ${editorialState.page} / ${totalPages}`;
-  editorialElements.totalIndicator.textContent = `共 ${items.length} 条`;
+function renderPulse(items) {
+  elements.pulseRow.innerHTML = "";
+  items.slice(0, 5).forEach((item, index) => {
+    const article = document.createElement("article");
+    article.className = "pulse-item";
+    const line = document.createElement("div");
+    line.className = "pulse-line";
+    const rank = document.createElement("span");
+    rank.className = "pulse-rank";
+    rank.textContent = String(index + 1);
+    const title = document.createElement("h3");
+    title.className = "pulse-title";
+    title.textContent = item.displayTitle;
+    const source = document.createElement("span");
+    source.className = "pulse-source";
+    source.textContent = item.source;
+    line.append(rank, title);
+    article.append(line, source);
+    elements.pulseRow.appendChild(article);
+  });
+}
 
-  const start = (editorialState.page - 1) * editorialPageSize();
-  const pageItems = items.slice(start, start + editorialPageSize());
-  editorialElements.entryStream.innerHTML = "";
+function renderCard(item) {
+  const card = elements.cardTemplate.content.firstElementChild.cloneNode(true);
+  card.dataset.category = item.category;
+  card.querySelector(".story-category").textContent = CATEGORY_LABELS[item.category];
+  const score = card.querySelector(".story-score");
+  if (item.score != null) {
+    score.hidden = false;
+    score.textContent = item.score.toFixed(1);
+  }
+  card.querySelector(".story-title").textContent = item.displayTitle;
+  card.querySelector(".story-source").textContent = item.source;
+  card.querySelector(".story-rank").textContent = `#${String(item.rank).padStart(2, "0")}`;
+  card.querySelector(".story-summary").textContent = item.summary;
+  card.querySelector(".story-impact").textContent = item.impact;
+  const backgroundWrap = card.querySelector(".story-background-wrap");
+  if (item.background) {
+    backgroundWrap.hidden = false;
+    card.querySelector(".story-background").textContent = item.background;
+  }
+  setExternalLink(card.querySelector(".story-link"), item.link);
+  const toggle = card.querySelector(".story-toggle");
+  const details = card.querySelector(".story-details");
+  toggle.addEventListener("click", () => {
+    const expanded = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+    toggle.textContent = expanded ? "展开详情" : "收起详情";
+    details.hidden = expanded;
+  });
+  return card;
+}
 
+function renderCards(items) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize()));
+  state.page = Math.min(state.page, totalPages);
+  const start = (state.page - 1) * pageSize();
+  const pageItems = items.slice(start, start + pageSize());
+  elements.cardGrid.innerHTML = "";
+  pageItems.forEach((item) => elements.cardGrid.appendChild(renderCard(item)));
   if (!pageItems.length) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
-    empty.textContent = items.length ? "当前页没有更多条目。" : "当前版本暂无可展示条目。";
-    editorialElements.entryStream.appendChild(empty);
+    empty.textContent = state.query ? "没有找到匹配的情报，请换个关键词。" : "当前分类暂无情报。";
+    elements.cardGrid.appendChild(empty);
   }
-
-  pageItems.forEach((item, index) => {
-    const node = editorialElements.entryTemplate.content.firstElementChild.cloneNode(true);
-    node.id = `entry-${item.rank}`;
-    node.style.animationDelay = `${40 + index * 45}ms`;
-    node.querySelector(".entry-rank").textContent = String(item.rank).padStart(2, "0");
-    node.querySelector(".entry-source").textContent = item.source;
-    node.querySelector(".entry-title").textContent = item.displayTitle || item.title;
-    renderBilingualCopy(node.querySelector(".entry-summary-copy"), item.summary);
-    renderBilingualCopy(node.querySelector(".entry-impact-copy"), item.impact);
-    setLink(node.querySelector(".entry-link"), item.link);
-
-    // Score badge
-    const scoreBadge = node.querySelector(".entry-score");
-    if (scoreBadge && item.score != null) {
-      scoreBadge.textContent = String(item.score);
-      scoreBadge.style.display = "inline-flex";
-      if (item.score >= 8) scoreBadge.dataset.level = "high";
-      else if (item.score >= 6) scoreBadge.dataset.level = "medium";
-      else scoreBadge.dataset.level = "low";
-    }
-
-    // Background expand section
-    const bgDetails = node.querySelector(".entry-background");
-    if (bgDetails) {
-      if (item.background) {
-        bgDetails.hidden = false;
-        bgDetails.querySelector(".entry-background-content").textContent = item.background;
-      } else {
-        bgDetails.hidden = true;
-      }
-    }
-
-    editorialElements.entryStream.appendChild(node);
-  });
-
   renderPagination(totalPages);
 }
 
 function renderPagination(totalPages) {
-  editorialElements.pagination.innerHTML = "";
-  const shell = document.createElement("div");
-  shell.className = "pagination";
-
-  const makeButton = (label, page, disabled = false, current = false) => {
+  elements.pagination.innerHTML = "";
+  if (totalPages <= 1) return;
+  const addButton = (label, page, options = {}) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "page-dot";
+    button.className = "page-button";
     button.textContent = label;
-    button.disabled = disabled;
-    if (current) button.dataset.current = "true";
-    if (!disabled) {
-      button.addEventListener("click", () => {
-        editorialState.page = page;
-        renderEditorial();
-        scrollWindowTo(document.getElementById("dispatch-list"), 84);
-      });
-    }
-    return button;
+    button.disabled = Boolean(options.disabled);
+    if (options.current) button.setAttribute("aria-current", "page");
+    button.addEventListener("click", () => {
+      state.page = page;
+      render();
+      document.getElementById("stream-label").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    elements.pagination.appendChild(button);
   };
-
-  shell.appendChild(makeButton("上一页", Math.max(1, editorialState.page - 1), editorialState.page === 1));
-  for (let page = 1; page <= totalPages; page += 1) {
-    shell.appendChild(makeButton(String(page), page, false, page === editorialState.page));
-  }
-  shell.appendChild(
-    makeButton("下一页", Math.min(totalPages, editorialState.page + 1), editorialState.page === totalPages),
-  );
-
-  editorialElements.pagination.appendChild(shell);
+  addButton("上一页", Math.max(1, state.page - 1), { disabled: state.page === 1 });
+  for (let page = 1; page <= totalPages; page += 1) addButton(String(page), page, { current: page === state.page });
+  addButton("下一页", Math.min(totalPages, state.page + 1), { disabled: state.page === totalPages });
 }
 
-function jumpToRank(rank) {
-  const { items } = activeData();
-  const itemIndex = items.findIndex((item) => item.rank === rank);
-  if (itemIndex === -1) return;
-  editorialState.page = Math.floor(itemIndex / editorialPageSize()) + 1;
-  renderEditorial();
-  requestAnimationFrame(() => {
-    scrollWindowTo(document.getElementById(`entry-${rank}`), 92);
-  });
-}
-
-function renderEditorial() {
-  const { meta, detail, items } = activeData();
-  syncDrawer();
-  renderHero(meta, detail, items);
-  renderSwitchboard(meta);
-  renderQuickPicks(meta, items);
-  renderEntries(items);
+function render() {
+  const allItems = activeItems();
+  const filtered = visibleItems();
+  renderEditions();
+  renderArchive();
+  renderCategoryControls(allItems);
+  renderSidebar(allItems);
+  renderThirty(filtered);
+  renderPulse(filtered);
+  elements.streamLabel.textContent = state.query ? `搜索：${state.query}` : CATEGORY_LABELS[state.category];
+  elements.streamCount.textContent = `${filtered.length} 条`;
+  renderCards(filtered);
 }
 
 async function loadSnapshot(snapshotId, options = {}) {
-  editorialState.activeSnapshotId = snapshotId;
-  editorialState.page = 1;
-  if (window.innerWidth <= 920) editorialState.drawerOpen = false;
-
-  if (!editorialState.snapshotDetails.has(snapshotId)) {
+  state.activeSnapshotId = snapshotId;
+  state.page = 1;
+  if (!state.details.has(snapshotId)) {
     const detail = await fetchJson(`/api/snapshots/${encodeURIComponent(snapshotId)}`);
-    editorialState.snapshotDetails.set(snapshotId, detail);
+    state.details.set(snapshotId, detail);
   }
-
-  editorialState.activeSnapshot = editorialState.snapshotDetails.get(snapshotId);
-  renderEditorial();
-
-  if (options.scrollToTop !== false) {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
+  state.activeDetail = state.details.get(snapshotId);
+  render();
+  if (options.scroll !== false) window.scrollTo({ top: 0, behavior: "smooth" });
   const meta = activeMeta();
-  await trackVisit("home", snapshotId, meta ? meta.displayTitle : "");
+  trackVisit("home", snapshotId, meta.displayTitle || meta.title || "");
 }
 
 async function trackVisit(route, snapshotId, title) {
-  const visitKey = [route, snapshotId || "", title || ""].join("|");
-  if (editorialState.lastTrackedVisitKey === visitKey) return;
-  editorialState.lastTrackedVisitKey = visitKey;
-
+  const key = [route, snapshotId, title].join("|");
+  if (state.lastTrackedVisitKey === key) return;
+  state.lastTrackedVisitKey = key;
   try {
     await fetchJson("/api/visit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ route, snapshotId, title }),
     });
-  } catch (error) {
-    // Ignore access logging failures.
+  } catch {
+    // Access logging must not interrupt reading.
   }
 }
 
-function renderFatal(message) {
-  editorialElements.topbarMeta.textContent = "Live issue · unavailable";
-  editorialElements.heroKicker.textContent = "Lead Dispatch · unavailable";
-  editorialElements.heroSlot.textContent = "暂无内容";
-  editorialElements.heroTitle.textContent = "暂未读取到日报内容";
-  editorialElements.heroSummary.textContent = message;
-  editorialElements.quickTitle.textContent = "重点条目暂不可用";
-  editorialElements.quickCopy.textContent = message;
-  editorialElements.entryStream.innerHTML = `<p class="empty-state">${message}</p>`;
-  editorialElements.pagination.innerHTML = "";
+function setCategory(category) {
+  if (!CATEGORY_LABELS[category]) return;
+  state.category = category;
+  state.page = 1;
+  render();
+}
+
+function openDrawer(drawer, trigger) {
+  if (!drawer) return;
+  closeDrawer(false);
+  state.activeDrawer = drawer;
+  state.drawerTrigger = trigger || document.activeElement;
+  elements.overlay.hidden = false;
+  drawer.dataset.open = "true";
+  drawer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  drawer.querySelector("button, input, textarea")?.focus();
+}
+
+function closeDrawer(restoreFocus = true) {
+  if (!state.activeDrawer) return;
+  state.activeDrawer.removeAttribute("data-open");
+  state.activeDrawer.setAttribute("aria-hidden", "true");
+  elements.overlay.hidden = true;
+  document.body.style.overflow = "";
+  const trigger = state.drawerTrigger;
+  state.activeDrawer = null;
+  state.drawerTrigger = null;
+  if (restoreFocus) trigger?.focus();
 }
 
 async function submitFeedback(event) {
   event.preventDefault();
-  if (!editorialElements.feedbackStatus || !editorialElements.feedbackContent) return;
-
-  editorialElements.feedbackStatus.textContent = "正在提交…";
+  const content = elements.feedbackContent.value.trim();
+  elements.feedbackError.textContent = content.length < 4 ? "请至少输入 4 个字符" : "";
+  if (content.length < 4) {
+    elements.feedbackContent.focus();
+    return;
+  }
+  elements.feedbackSubmit.disabled = true;
+  elements.feedbackStatus.textContent = "正在提交…";
   const meta = activeMeta();
-
   try {
     await fetchJson("/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        visitorName: editorialElements.visitorName ? editorialElements.visitorName.value.trim() : "",
-        contact: editorialElements.visitorContact ? editorialElements.visitorContact.value.trim() : "",
-        content: editorialElements.feedbackContent.value.trim(),
-        reportDate: meta ? meta.date : "",
-        reportTitle: meta ? meta.displayTitle || meta.title : "",
-        snapshotId: editorialState.activeSnapshotId,
+        visitorName: elements.visitorName.value.trim(),
+        contact: elements.visitorContact.value.trim(),
+        content,
+        reportDate: meta.date || "",
+        reportTitle: meta.displayTitle || meta.title || "",
+        snapshotId: state.activeSnapshotId,
       }),
     });
-
-    editorialElements.feedbackContent.value = "";
-    editorialElements.feedbackStatus.textContent = "反馈已提交，感谢你的建议。";
+    elements.feedbackForm.hidden = true;
+    elements.feedbackSuccess.hidden = false;
+    elements.feedbackStatus.textContent = "";
   } catch (error) {
-    editorialElements.feedbackStatus.textContent = error.message;
+    elements.feedbackSubmit.disabled = false;
+    elements.feedbackStatus.textContent = error.message;
   }
+}
+
+function renderFatal(message) {
+  elements.thirtyList.innerHTML = "";
+  elements.cardGrid.innerHTML = "";
+  const notice = document.createElement("p");
+  notice.className = "empty-state";
+  notice.textContent = message;
+  elements.cardGrid.appendChild(notice);
+  elements.streamLabel.textContent = "暂不可用";
+  elements.streamCount.textContent = "0 条";
 }
 
 async function bootstrap() {
-  editorialState.config = await fetchJson("/api/config");
+  state.config = await fetchJson("/api/config");
   const payload = await fetchJson("/api/snapshots");
-  editorialState.snapshots = Array.isArray(payload.snapshots) ? payload.snapshots : [];
-
-  if (!editorialState.snapshots.length) {
+  state.snapshots = Array.isArray(payload.snapshots) ? payload.snapshots : [];
+  if (!state.snapshots.length) {
     renderFatal("暂未发现可展示内容，请稍后刷新。");
     return;
   }
-
-  const latestId = (payload.latest && payload.latest.id) || editorialState.snapshots[0].id;
-  await loadSnapshot(latestId, { scrollToTop: false });
+  const latestId = (payload.latest && payload.latest.id) || state.snapshots[0].id;
+  await loadSnapshot(latestId, { scroll: false });
 }
 
-editorialElements.snapshotToggle?.addEventListener("click", () => {
-  editorialState.drawerOpen = !editorialState.drawerOpen;
-  syncDrawer();
+document.querySelectorAll("[data-category]").forEach((control) => {
+  control.addEventListener("click", () => setCategory(control.dataset.category));
 });
 
-editorialElements.feedbackForm?.addEventListener("submit", submitFeedback);
-
-bootstrap().catch((error) => {
-  renderFatal(error.message);
+elements.searchInput.addEventListener("input", (event) => {
+  state.query = event.target.value.trim();
+  state.page = 1;
+  render();
 });
+
+elements.archiveToggle.addEventListener("click", () => {
+  const expanded = elements.archiveToggle.getAttribute("aria-expanded") === "true";
+  elements.archiveToggle.setAttribute("aria-expanded", expanded ? "false" : "true");
+  elements.archivePanel.hidden = expanded;
+});
+
+elements.pulseToggle.addEventListener("click", () => {
+  const collapsed = elements.pulseViewport.dataset.collapsed === "true";
+  elements.pulseViewport.dataset.collapsed = collapsed ? "false" : "true";
+  elements.pulseToggle.setAttribute("aria-expanded", collapsed ? "true" : "false");
+  elements.pulseToggle.textContent = collapsed ? "收起" : "展开";
+});
+
+document.getElementById("btn-agent").addEventListener("click", (event) => openDrawer(elements.agentDrawer, event.currentTarget));
+document.getElementById("btn-feedback").addEventListener("click", (event) => openDrawer(elements.feedbackDrawer, event.currentTarget));
+document.querySelectorAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", () => closeDrawer()));
+elements.overlay.addEventListener("click", () => closeDrawer());
+elements.feedbackForm.addEventListener("submit", submitFeedback);
+elements.feedbackContent.addEventListener("input", () => {
+  elements.feedbackError.textContent = "";
+  elements.feedbackSubmit.disabled = false;
+});
+
+document.getElementById("copy-mcp-command").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText("npm run mcp:http");
+    elements.copyStatus.textContent = "已复制";
+  } catch {
+    elements.copyStatus.textContent = "请手动复制：npm run mcp:http";
+  }
+});
+
+document.querySelectorAll("[data-mobile-action]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-mobile-action]").forEach((item) => item.removeAttribute("aria-current"));
+    button.setAttribute("aria-current", "page");
+    const action = button.dataset.mobileAction;
+    if (action === "home") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (action === "editions") document.getElementById("edition-bar-mobile").scrollIntoView({ behavior: "smooth", block: "center" });
+    if (action === "search") {
+      const isOpen = elements.searchWrap.dataset.mobileOpen === "true";
+      elements.searchWrap.dataset.mobileOpen = isOpen ? "false" : "true";
+      if (!isOpen) elements.searchInput.focus();
+    }
+    if (action === "agent") openDrawer(elements.agentDrawer, button);
+    if (action === "feedback") openDrawer(elements.feedbackDrawer, button);
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  if (state.activeDrawer) closeDrawer();
+  else if (elements.searchWrap.dataset.mobileOpen === "true") {
+    elements.searchWrap.dataset.mobileOpen = "false";
+    document.querySelector('[data-mobile-action="search"]')?.focus();
+  }
+});
+
+bootstrap().catch((error) => renderFatal(error.message));
