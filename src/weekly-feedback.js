@@ -35,7 +35,7 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function parseBookmarkedSections(documentXml, expectedAnchors) {
+function parseBookmarkedSections(documentXml, expectedAnchors, bookmarkNames = {}) {
   const sections = {};
   const starts = [...documentXml.matchAll(/<w:bookmarkStart\b[^>]*\/>/g)].map((match) => ({
     index: match.index,
@@ -44,7 +44,8 @@ function parseBookmarkedSections(documentXml, expectedAnchors) {
     name: /\bw:name="([^"]+)"/.exec(match[0])?.[1],
   }));
   for (const anchor of expectedAnchors) {
-    const matches = starts.filter((start) => start.name === anchor);
+    const bookmarkName = bookmarkNames[anchor] || anchor;
+    const matches = starts.filter((start) => start.name === bookmarkName);
     if (matches.length !== 1 || !matches[0].id) throw new Error(`DOCX missing or duplicate section bookmark: ${anchor}`);
     const start = matches[0];
     const endPattern = new RegExp(`<w:bookmarkEnd\\b[^>]*\\bw:id="${escapeRegExp(start.id)}"[^>]*/>`);
@@ -61,9 +62,28 @@ function readDocxContract(buffer, expectedAnchors, options = {}) {
   const customXml = entries.get("docProps/custom.xml")?.toString("utf8");
   const documentXml = entries.get("word/document.xml")?.toString("utf8");
   if (!customXml || !documentXml) throw new Error("Invalid DOCX: required parts are missing");
+  const properties = parseCustomProperties(customXml);
+  let bookmarkNames = {};
+  if (properties.section_bookmarks) {
+    try {
+      bookmarkNames = JSON.parse(properties.section_bookmarks);
+    } catch (error) {
+      throw new Error("Invalid DOCX: section_bookmarks is not valid JSON");
+    }
+    if (!bookmarkNames || Array.isArray(bookmarkNames) || typeof bookmarkNames !== "object") {
+      throw new Error("Invalid DOCX: section_bookmarks must be an object");
+    }
+    const resolvedNames = expectedAnchors.map((anchor) => bookmarkNames[anchor]);
+    if (resolvedNames.some((name) => typeof name !== "string" || !/^[A-Za-z][A-Za-z0-9_]{0,39}$/.test(name))) {
+      throw new Error("Invalid DOCX: section_bookmarks does not cover every section");
+    }
+    if (new Set(resolvedNames).size !== resolvedNames.length) {
+      throw new Error("Invalid DOCX: section_bookmarks contains duplicate names");
+    }
+  }
   return {
-    properties: parseCustomProperties(customXml),
-    sections: parseBookmarkedSections(documentXml, expectedAnchors),
+    properties,
+    sections: parseBookmarkedSections(documentXml, expectedAnchors, bookmarkNames),
   };
 }
 

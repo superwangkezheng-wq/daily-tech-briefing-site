@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
 const { validateWeeklySnapshot } = require("./weekly-insight-contract");
-const { renderWeeklyHtml, renderWeeklyDocx } = require("./weekly-insight-renderer");
+const { renderWeeklyHtml, renderWeeklyDocx, wordBookmarkName } = require("./weekly-insight-renderer");
 const { readZipEntries } = require("./ooxml");
 
 function sha256(value) {
@@ -55,7 +55,7 @@ function verifyDocx(docx, snapshot) {
     if (!custom.includes(value)) throw new Error(`DOCX receipt mismatch: ${value}`);
   }
   for (const anchor of snapshot.section_anchors) {
-    if (!document.includes(`w:name="${anchor}"`)) throw new Error(`DOCX missing section anchor: ${anchor}`);
+    if (!document.includes(`w:name="${wordBookmarkName(anchor)}"`)) throw new Error(`DOCX missing section anchor: ${anchor}`);
   }
 }
 

@@ -6,7 +6,7 @@ const path = require("node:path");
 const { createWeeklySnapshot } = require("./helpers/weekly-fixture");
 const { publishWeeklySnapshot } = require("../src/weekly-insight-publisher");
 const { createZip, readZipEntries } = require("../src/ooxml");
-const { parseBookmarkedSections, saveWeeklyFeedback } = require("../src/weekly-feedback");
+const { parseBookmarkedSections, readDocxContract, saveWeeklyFeedback } = require("../src/weekly-feedback");
 
 test("binds an edited Word to the exact artifact and records section-level diffs", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-feedback-"));
@@ -41,6 +41,36 @@ test("binds an edited Word to the exact artifact and records section-level diffs
   const stored = JSON.parse(await fs.readFile(result.file_path, "utf8"));
   assert.equal(stored.source_run_id, snapshot.source_run_id);
   assert.equal(stored.comment, "补充能耗维度。");
+});
+
+test("round-trips feedback for long anchors through Word-safe bookmark names", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-feedback-long-anchor-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const base = createWeeklySnapshot();
+  const snapshot = createWeeklySnapshot({
+    content: {
+      sections: base.content.sections.map((section, index) => ({
+        ...section,
+        anchor: `thesis_same_long_prefix_for_collision_${index}_${"suffix".repeat(4)}`,
+      })),
+    },
+  });
+  const receipt = await publishWeeklySnapshot(snapshot, { publishRoot: path.join(root, "published") });
+  const docxPath = path.join(receipt.artifact_dir, `${snapshot.artifact_id}.docx`);
+  const docx = await fs.readFile(docxPath);
+  const parsed = readDocxContract(docx, receipt.section_anchors);
+
+  assert.deepEqual(Object.keys(parsed.sections), receipt.section_anchors);
+  const result = await saveWeeklyFeedback({
+    snapshot,
+    manifest: receipt,
+    originalDocxPath: docxPath,
+    feedbackDir: path.join(root, "feedback"),
+    sectionAnchor: receipt.section_anchors[0],
+    comment: "长锚点回传验证。",
+    editedDocx: docx,
+  });
+  assert.deepEqual(result.section_diffs, []);
 });
 
 test("rejects an edited Word copied from another artifact", async (t) => {
