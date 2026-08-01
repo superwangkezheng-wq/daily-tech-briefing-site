@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
-const { createWeeklySnapshot } = require("./helpers/weekly-fixture");
+const { createWeeklySnapshot, createWeeklyV2Snapshot } = require("./helpers/weekly-fixture");
 const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
 const { createServer, SITE_CONFIG } = require("../server");
 
@@ -20,7 +20,7 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   SITE_CONFIG.weeklyFeedbackDir = path.join(root, "feedback");
   SITE_CONFIG.weeklyPreviewToken = "gate5-preview-secret";
   await fs.mkdir(SITE_CONFIG.weeklySourceDir, { recursive: true });
-  const internal = createWeeklySnapshot({
+  const internal = createWeeklyV2Snapshot({
     content: { title: "内部预览：不得出现在公开 API" },
   });
   const publicSnapshot = createWeeklySnapshot({
@@ -65,6 +65,9 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
 
   const previewIndex = await fetch(`${base}/api/insights?preview_token=gate5-preview-secret`).then((res) => res.json());
   assert.equal(previewIndex.count, 2);
+  const internalIndexItem = previewIndex.insights.find((item) => item.artifact_id === internal.artifact_id);
+  assert.equal(internalIndexItem.content_schema_version, "weekly-insight-publication/v2");
+  assert.equal(internalIndexItem.selected_topics, 1);
   assert.equal((await fetch(`${base}/insights/${internal.artifact_id}`)).status, 404);
   const internalPage = await fetch(`${base}/insights/${internal.artifact_id}?preview_token=gate5-preview-secret`);
   assert.equal(internalPage.status, 200);
@@ -89,7 +92,10 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   const feedback = await fetch(`${base}/api/insights/${internal.artifact_id}/feedback?preview_token=gate5-preview-secret`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ sectionAnchor: "core_insight", comment: "请校准核心判断。" }),
+    body: JSON.stringify({
+      sectionAnchor: "thesis_agent_context_state_control_what_changed",
+      comment: "请校准事实段落。",
+    }),
   });
   assert.equal(feedback.status, 201);
   const feedbackBody = await feedback.json();

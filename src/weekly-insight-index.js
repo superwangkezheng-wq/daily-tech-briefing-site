@@ -14,6 +14,7 @@ function compareInsight(a, b) {
 
 function toIndexEntry(manifest) {
   return {
+    content_schema_version: manifest.content_schema_version || "weekly-insight-publication/v1",
     artifact_id: manifest.artifact_id,
     source_run_id: manifest.source_run_id,
     version: manifest.version,
@@ -25,6 +26,7 @@ function toIndexEntry(manifest) {
     dek: manifest.dek,
     status: manifest.status,
     selected_theses: manifest.selected_theses,
+    selected_topics: manifest.selected_topics,
     committed_at: manifest.committed_at,
   };
 }

@@ -21,6 +21,7 @@ async function readMatchingArtifact(artifactDir, snapshot) {
     const manifest = JSON.parse(await fsp.readFile(path.join(artifactDir, "manifest.json"), "utf8"));
     if (
       manifest.schema_version !== "weekly-insight-publication-manifest/v1" ||
+      (manifest.content_schema_version && manifest.content_schema_version !== snapshot.schema_version) ||
       manifest.artifact_id !== snapshot.artifact_id ||
       manifest.source_run_id !== snapshot.source_run_id ||
       manifest.version !== snapshot.version ||
@@ -105,6 +106,7 @@ async function publishWeeklySnapshot(input, options = {}) {
     verifyDocx(docx, snapshot);
     const manifest = {
       schema_version: "weekly-insight-publication-manifest/v1",
+      content_schema_version: snapshot.schema_version,
       artifact_id: snapshot.artifact_id,
       source_run_id: snapshot.source_run_id,
       version: snapshot.version,
@@ -117,6 +119,7 @@ async function publishWeeklySnapshot(input, options = {}) {
       dek: snapshot.content.dek,
       status: snapshot.content.status,
       selected_theses: snapshot.content.selected_theses,
+      selected_topics: snapshot.content.selected_topics,
       committed_at: new Date().toISOString(),
       files: {
         html: await fileReceipt(path.join(stageDir, "index.html")),

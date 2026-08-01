@@ -118,6 +118,7 @@ function toPublicWeeklyDetail(detail) {
     },
     content: detail.content,
     manifest: {
+      content_schema_version: detail.manifest.content_schema_version || detail.schema_version,
       artifact_id: detail.manifest.artifact_id,
       source_run_id: detail.manifest.source_run_id,
       version: detail.manifest.version,
@@ -127,6 +128,7 @@ function toPublicWeeklyDetail(detail) {
       title: detail.manifest.title,
       status: detail.manifest.status,
       selected_theses: detail.manifest.selected_theses,
+      selected_topics: detail.manifest.selected_topics,
     },
   };
 }
@@ -136,6 +138,7 @@ function toPublicWeeklyIndex(index) {
     generated_at: index.generated_at,
     count: index.count,
     insights: index.insights.map((item) => ({
+      content_schema_version: item.content_schema_version || "weekly-insight-publication/v1",
       artifact_id: item.artifact_id,
       source_run_id: item.source_run_id,
       version: item.version,
@@ -150,6 +153,7 @@ function toPublicWeeklyIndex(index) {
       dek: item.dek,
       status: item.status,
       selected_theses: item.selected_theses,
+      selected_topics: item.selected_topics,
       committed_at: item.committed_at,
     })),
   };
