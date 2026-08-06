@@ -145,7 +145,7 @@ function closeBookmarkInLastParagraph(body, bookmarkId) {
 function stylesXml(includeV4Styles = false) {
   const run = (extra = "", display = false) => `<w:rPr>${display ? DISPLAY_FONT_XML : BODY_FONT_XML}${CJK_LANGUAGE_XML}${extra}</w:rPr>`;
   const v4Styles = includeV4Styles
-    ? `<w:style w:type="paragraph" w:styleId="WeeklyTopicTitle"><w:name w:val="Weekly Topic Title"/><w:basedOn w:val="Normal"/><w:next w:val="WeeklyHeading1"/><w:qFormat/><w:pPr><w:spacing w:before="80" w:after="220"/><w:keepNext/><w:keepLines/><w:outlineLvl w:val="0"/></w:pPr>${run('<w:b/><w:sz w:val="42"/><w:szCs w:val="42"/><w:color w:val="24211D"/>', true)}</w:style><w:style w:type="paragraph" w:styleId="WeeklyHeading2"><w:name w:val="Weekly Heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:uiPriority w:val="10"/><w:pPr><w:spacing w:before="220" w:after="110"/><w:keepNext/><w:keepLines/><w:outlineLvl w:val="1"/></w:pPr>${run('<w:b/><w:sz w:val="26"/><w:szCs w:val="26"/><w:color w:val="24211D"/>', true)}</w:style>`
+    ? `<w:style w:type="paragraph" w:styleId="WeeklyTopicSequence"><w:name w:val="Weekly Topic Sequence"/><w:basedOn w:val="Normal"/><w:next w:val="WeeklyTopicTitle"/><w:pPr><w:spacing w:before="80" w:after="90"/><w:keepNext/></w:pPr>${run('<w:b/><w:sz w:val="22"/><w:szCs w:val="22"/><w:color w:val="9F4E2D"/>')}</w:style><w:style w:type="paragraph" w:styleId="WeeklyTopicTitle"><w:name w:val="Weekly Topic Title"/><w:basedOn w:val="Normal"/><w:next w:val="WeeklyHeading1"/><w:qFormat/><w:pPr><w:spacing w:before="80" w:after="220"/><w:keepNext/><w:keepLines/><w:outlineLvl w:val="0"/></w:pPr>${run('<w:b/><w:sz w:val="40"/><w:szCs w:val="40"/><w:color w:val="24211D"/>', true)}</w:style><w:style w:type="paragraph" w:styleId="WeeklyHeading2"><w:name w:val="Weekly Heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:uiPriority w:val="10"/><w:pPr><w:spacing w:before="220" w:after="110"/><w:keepNext/><w:keepLines/><w:outlineLvl w:val="1"/></w:pPr>${run('<w:b/><w:sz w:val="26"/><w:szCs w:val="26"/><w:color w:val="24211D"/>', true)}</w:style>`
     : "";
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -546,11 +546,14 @@ function v4MediaMarkup(media, assetById) {
   const source = sourceUrl
     ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(media.source_label)}</a>`
     : escapeHtml(media.source_label);
+  const rightsNote = media.asset_ref && media.usage_rights
+    ? `使用说明：${media.usage_rights}`
+    : "";
   const visual = src
     ? `<div class="insight-media__frame"><img src="${escapeHtml(src)}" alt="${escapeHtml(media.alt)}" loading="lazy" data-weekly-media><div class="insight-media__fallback" hidden>图像暂不可用 · ${escapeHtml(media.alt)}</div></div>`
     : `<div class="insight-media__frame insight-media__fallback">图像暂不可用 · ${escapeHtml(media.alt)}</div>`;
-  const caption = media.caption || source
-    ? `<figcaption>${media.caption ? `<strong>${escapeHtml(media.caption)}</strong>` : ""}${source ? `<span>${source}</span>` : ""}</figcaption>`
+  const caption = media.caption || source || rightsNote
+    ? `<figcaption>${media.caption ? `<strong>${escapeHtml(media.caption)}</strong>` : ""}${source ? `<span>${source}</span>` : ""}${rightsNote ? `<span class="v4-media-rights">${escapeHtml(rightsNote)}</span>` : ""}</figcaption>`
     : "";
   return `<figure class="insight-media v4-media">${visual}${caption}</figure>`;
 }
@@ -566,11 +569,38 @@ function v4TermLinesMarkup(facts, section, paragraphIndex) {
     .join("");
 }
 
+function v4TermNoteGroupsForSection(facts, section) {
+  if (!Array.isArray(facts.term_note_groups)) return [];
+  return facts.term_note_groups
+    .filter((group) => group.after_section_anchor === section.anchor)
+    .map((group) => ({
+      after_paragraph_index: group.after_paragraph_index,
+      reader_texts: group.reader_texts,
+    }));
+}
+
+function v4TermNotesMarkup(readerTexts) {
+  if (!readerTexts.length) return "";
+  return `<aside class="v4-term-notes" aria-label="术语备注">${readerTexts.map((readerText) => `<p class="v4-term-note"><em>${escapeHtml(readerText)}</em></p>`).join("")}</aside>`;
+}
+
 function v4FactSectionMarkup(facts, section, evidenceById, mediaById, assetById) {
-  const paragraphs = section.paragraphs.map((paragraph, index) => (
-    `<p>${escapeHtml(paragraph)}</p>${v4TermLinesMarkup(facts, section, index)}`
-  )).join("");
-  return `<section class="v4-fact-section" id="${escapeHtml(section.anchor)}" data-section-anchor="${escapeHtml(section.anchor)}"><header><h3>${escapeHtml(section.title)}</h3><button type="button" class="anchor-copy" data-copy-anchor="${escapeHtml(section.anchor)}" aria-label="复制本节链接">#</button></header><div class="v4-longform">${paragraphs}${pointList(section.items)}${v4MediaListMarkup(section.media_ids, mediaById, assetById)}${referenceLinks(section.evidence_ids, evidenceById)}</div></section>`;
+  const enhancedReaderProfile = Array.isArray(facts.term_note_groups);
+  const noteGroups = v4TermNoteGroupsForSection(facts, section);
+  const paragraphs = section.paragraphs.map((paragraph, paragraphIndex) => {
+    const notes = enhancedReaderProfile
+      ? noteGroups
+        .filter((group) => group.after_paragraph_index === paragraphIndex)
+        .map((group) => v4TermNotesMarkup(group.reader_texts))
+        .join("")
+      : v4TermLinesMarkup(facts, section, paragraphIndex);
+    return `<p>${escapeHtml(paragraph)}</p>${notes}`;
+  }).join("");
+  const sectionNumber = enhancedReaderProfile
+    ? `<span class="v4-fact-index" aria-hidden="true">${escapeHtml(section.sequence_label)}</span>`
+    : "";
+  const modifier = enhancedReaderProfile ? " v4-fact-section--numbered" : "";
+  return `<section class="v4-fact-section${modifier}" id="${escapeHtml(section.anchor)}" data-section-anchor="${escapeHtml(section.anchor)}"><header>${sectionNumber}<h3>${escapeHtml(section.title)}</h3><button type="button" class="anchor-copy" data-copy-anchor="${escapeHtml(section.anchor)}" aria-label="复制本节链接">#</button></header><div class="v4-longform">${paragraphs}${pointList(section.items)}${v4MediaListMarkup(section.media_ids, mediaById, assetById)}${referenceLinks(section.evidence_ids, evidenceById)}</div></section>`;
 }
 
 function v4FindingMarkup(finding, evidenceById) {
@@ -662,6 +692,11 @@ function v4TermParagraphXml(text) {
   return `<w:p><w:pPr><w:pStyle w:val="WeeklyEvidence"/><w:pBdr><w:top w:val="single" w:sz="4" w:space="6" w:color="D8CEC1"/><w:bottom w:val="single" w:sz="4" w:space="6" w:color="D8CEC1"/></w:pBdr><w:spacing w:before="90" w:after="90"/></w:pPr><w:r><w:rPr>${BODY_FONT_XML}${CJK_LANGUAGE_XML}<w:i/><w:color w:val="6C675F"/><w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr><w:t xml:space="preserve">${escapeXml(text)}</w:t></w:r></w:p>`;
 }
 
+function v4TermNotesParagraphXml(readerTexts) {
+  const runs = readerTexts.map((readerText, index) => `<w:r><w:rPr>${BODY_FONT_XML}${CJK_LANGUAGE_XML}<w:i/><w:color w:val="6C675F"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>${index ? "<w:br/>" : ""}<w:t xml:space="preserve">${escapeXml(readerText)}</w:t></w:r>`).join("");
+  return `<w:p><w:pPr><w:pStyle w:val="WeeklyEvidence"/><w:pBdr><w:top w:val="single" w:sz="4" w:space="6" w:color="D8CEC1"/><w:bottom w:val="single" w:sz="4" w:space="6" w:color="D8CEC1"/></w:pBdr><w:spacing w:before="80" w:after="80" w:line="280" w:lineRule="auto"/></w:pPr>${runs}</w:p>`;
+}
+
 function pushV4EvidenceNotesDocx(body, evidenceIds, evidenceById) {
   const references = evidenceIds
     .map((evidenceId) => evidenceById.get(evidenceId))
@@ -677,20 +712,31 @@ function pushV4MediaDocx(body, mediaIds, mediaById, assetById) {
     const asset = assetById.get(mediaId);
     if (asset) body.push(imageDrawingXml(media, asset));
     const source = [media.source_label, media.source_url].filter(Boolean).join("｜");
-    if (media.caption || source) {
-      body.push(paragraphXml(`${media.caption || ""}${media.caption && source ? "｜" : ""}${source ? `来源：${source}` : ""}`, "WeeklyEvidence"));
+    const rightsNote = media.asset_ref && media.usage_rights ? `使用说明：${media.usage_rights}` : "";
+    const readerNotes = [media.caption, source ? `来源：${source}` : "", rightsNote].filter(Boolean);
+    if (readerNotes.length) {
+      body.push(paragraphXml(readerNotes.join("｜"), "WeeklyEvidence"));
     }
   }
 }
 
 function pushV4FactSectionDocx(body, facts, section, sectionBookmarks, bookmarkId, evidenceById, mediaById, assetById) {
-  body.push(bookmarkedHeadingXml(section.title, sectionBookmarks[section.anchor], bookmarkId, "WeeklyHeading2"));
+  const enhancedReaderProfile = Array.isArray(facts.term_note_groups);
+  const heading = enhancedReaderProfile ? `${section.sequence_label}　${section.title}` : section.title;
+  body.push(bookmarkedHeadingXml(heading, sectionBookmarks[section.anchor], bookmarkId, "WeeklyHeading2"));
+  const noteGroups = enhancedReaderProfile ? v4TermNoteGroupsForSection(facts, section) : [];
   for (const [paragraphIndex, paragraph] of section.paragraphs.entries()) {
     body.push(paragraphXml(paragraph));
-    for (const term of facts.terms.filter((item) => (
-      item.after_section_anchor === section.anchor && item.after_paragraph_index === paragraphIndex
-    ))) {
-      body.push(v4TermParagraphXml(term.reader_text));
+    if (enhancedReaderProfile) {
+      for (const group of noteGroups.filter((item) => item.after_paragraph_index === paragraphIndex)) {
+        body.push(v4TermNotesParagraphXml(group.reader_texts));
+      }
+    } else {
+      for (const term of facts.terms.filter((item) => (
+        item.after_section_anchor === section.anchor && item.after_paragraph_index === paragraphIndex
+      ))) {
+        body.push(v4TermParagraphXml(term.reader_text));
+      }
     }
   }
   for (const item of section.items) body.push(paragraphXml(item, "WeeklyBullet", { bullet: true }));
@@ -745,7 +791,7 @@ function renderWeeklyV4Docx(snapshot, options = {}) {
   }
   let bookmarkId = 1;
   for (const topic of snapshot.content.topics) {
-    body.push(paragraphXml(topic.sequence_label, "WeeklyKicker"));
+    body.push(paragraphXml(topic.sequence_label, "WeeklyTopicSequence"));
     body.push(paragraphXml(topic.title, "WeeklyTopicTitle"));
     body.push(headingParagraphXml(topic.facts.title));
     for (const section of topic.facts.sections) {

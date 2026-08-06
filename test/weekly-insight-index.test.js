@@ -38,11 +38,18 @@ test("indexes approved snapshots but hides internal previews from public reads",
     fs.writeFile(path.join(sourceDir, "internal.json"), JSON.stringify(internal)),
     fs.writeFile(path.join(sourceDir, "public.json"), JSON.stringify(publicSnapshot)),
     fs.writeFile(path.join(sourceDir, "broken.json"), "{broken"),
+    fs.writeFile(path.join(sourceDir, "malformed-publication.json"), JSON.stringify({
+      schema_version: "weekly-insight-publication-v4",
+    })),
   ]);
 
   const result = await buildWeeklyInsightCache({ sourceDir, publishRoot });
   assert.equal(result.published.length, 2);
-  assert.equal(result.errors.length, 1);
+  assert.equal(result.errors.length, 2);
+  assert.deepEqual(result.errors.map((item) => item.source_file).sort(), [
+    "broken.json",
+    "malformed-publication.json",
+  ]);
 
   const publicIndex = await getWeeklyInsights({ publishRoot, includeUnpublished: false });
   assert.deepEqual(publicIndex.insights.map((item) => item.artifact_id), ["wsi-2026-w29"]);

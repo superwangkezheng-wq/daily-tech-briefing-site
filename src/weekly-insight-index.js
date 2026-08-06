@@ -7,6 +7,14 @@ const { publishWeeklySnapshot } = require("./weekly-insight-publisher");
 const { validateWeeklySnapshot } = require("./weekly-insight-contract");
 const { evaluateWeeklyRelease, loadWeeklyReleaseOverride } = require("./weekly-publication-schedule");
 
+const WEEKLY_SOURCE_AUXILIARY_FILES = new Set([
+  "bundle-manifest.json",
+  "projection-approval.json",
+  "publication-media-policy.json",
+  "visual_asset_plan.json",
+  "weekly-analysis-candidate.json",
+]);
+
 function compareInsight(a, b) {
   const aEnd = String(a.period?.end || "");
   const bEnd = String(b.period?.end || "");
@@ -55,8 +63,10 @@ async function buildWeeklyInsightCache(options = {}) {
   const errors = [];
   const deferred = [];
   for (const name of names) {
+    if (WEEKLY_SOURCE_AUXILIARY_FILES.has(name)) continue;
     try {
-      const input = await readJson(path.join(sourceDir, name));
+      const sourcePath = path.join(sourceDir, name);
+      const input = await readJson(sourcePath);
       const snapshot = validateWeeklySnapshot(input);
       const override = typeof options.resolveReleaseOverride === "function"
         ? await options.resolveReleaseOverride(snapshot)
@@ -77,6 +87,8 @@ async function buildWeeklyInsightCache(options = {}) {
       await publishWeeklySnapshot(input, {
         publishRoot,
         maxDocxBytes: options.maxDocxBytes ?? SITE_CONFIG.weeklyFeedbackMaxDocxBytes,
+        mediaBundleRoot: path.dirname(sourcePath),
+        sourcePath,
       });
     } catch (error) {
       errors.push({ source_file: name, error: error.message });

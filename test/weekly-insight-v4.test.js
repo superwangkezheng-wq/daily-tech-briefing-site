@@ -1,18 +1,22 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const { createZip, readZipEntries } = require("../src/ooxml");
-const { validateWeeklySnapshot } = require("../src/weekly-insight-contract");
+const { canonicalSha256, validateWeeklySnapshot } = require("../src/weekly-insight-contract");
 const { publishWeeklySnapshot, loadWeeklyMediaAssets } = require("../src/weekly-insight-publisher");
+const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
 const { saveWeeklyFeedback } = require("../src/weekly-feedback");
 const { createValidPng, createLargeOneBitPng } = require("./helpers/image-fixture");
+const { writeV41BundleManifest } = require("./helpers/weekly-bundle-fixture");
 const {
   createWeeklySnapshot,
   createWeeklyV2Snapshot,
   createWeeklyV3Snapshot,
   createWeeklyV4Snapshot,
+  createWeeklyV41Snapshot,
 } = require("./helpers/weekly-fixture");
 
 function replaceTopic(snapshot, topic) {
@@ -20,6 +24,15 @@ function replaceTopic(snapshot, topic) {
     topicCount: snapshot.content.selected_topics,
     content: { ...snapshot.content, topics: [topic, ...snapshot.content.topics.slice(1)] },
   });
+}
+
+async function readDirIfPresent(directory) {
+  try {
+    return await fs.readdir(directory);
+  } catch (error) {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  }
 }
 
 test("accepts v4 rich topics and preserves v1 through v3 compatibility", () => {
@@ -39,6 +52,636 @@ test("accepts v4 rich topics and preserves v1 through v3 compatibility", () => {
   assert.equal(validateWeeklySnapshot(createWeeklyV3Snapshot()).schema_version, "weekly-insight-publication/v3");
   assert.equal(validateWeeklySnapshot(createWeeklyV2Snapshot()).schema_version, "weekly-insight-publication/v2");
   assert.equal(validateWeeklySnapshot(createWeeklySnapshot()).schema_version, "weekly-insight-publication/v1");
+  assert.throws(
+    () => validateWeeklySnapshot(createWeeklyV4Snapshot({ version: "4.2" })),
+    /version|profile/i,
+  );
+});
+
+test("v4.1 consumes numbered reader sections and private sidecar media without leaking machine metadata", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-1-bundle-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const mediaRoot = path.join(root, "bundle");
+  const mediaDir = path.join(mediaRoot, "media");
+  await fs.mkdir(mediaDir, { recursive: true });
+  const comparisonPng = createValidPng(0);
+  const architecturePng = createValidPng(1);
+  await Promise.all([
+    fs.writeFile(path.join(mediaDir, "agentforger-csrf-comparison.png"), comparisonPng),
+    fs.writeFile(path.join(mediaDir, "agent-control-chain.png"), architecturePng),
+  ]);
+
+  const base = createWeeklyV41Snapshot();
+  const topic = base.content.topics[0];
+  const caseStudySection = topic.facts.sections[1];
+  const architectureSection = topic.facts.sections[3];
+  const sections = topic.facts.sections.map((section) => {
+    if (section.section_id === caseStudySection.section_id) {
+      return { ...section, media_ids: ["agentforger-comparison"] };
+    }
+    if (section.section_id === architectureSection.section_id) {
+      return { ...section, media_ids: ["agent-governance-stack"] };
+    }
+    return section;
+  });
+  const media = [
+    {
+      id: "agentforger-comparison",
+      kind: "image",
+      asset_ref: "media/agentforger-csrf-comparison.png",
+      asset_sha256: crypto.createHash("sha256").update(comparisonPng).digest("hex"),
+      mime_type: "image/png",
+      size_bytes: comparisonPng.length,
+      width: 1,
+      height: 1,
+      alt: "传统 CSRF 与 AgentForger 持续执行链对比",
+      caption: "Zenity 对比了单次状态变更与 Agent 创建、授权和调度链路。",
+      source_label: "example.com",
+      source_url: "https://example.com/weekly-v4",
+      usage_rights: "内部分析引用并保留出处",
+      target_section_id: caseStudySection.section_id,
+      evidence_ids: ["evidence-v4"],
+      rights_scope: "internal_only",
+      rights_basis: "第三方原图尚未取得公开转载许可。",
+      logic_type: "comparison",
+      logic_summary: "传统 CSRF 完成一次状态变更；AgentForger 继续创建并调度具备既有授权的 Agent。",
+    },
+    {
+      id: "agent-governance-stack",
+      kind: "architecture",
+      asset_ref: "media/agent-control-chain.png",
+      asset_sha256: crypto.createHash("sha256").update(architecturePng).digest("hex"),
+      mime_type: "image/png",
+      size_bytes: architecturePng.length,
+      width: 1,
+      height: 1,
+      alt: "企业 Agent 治理的四层控制面",
+      caption: "模型判断、人工确认、策略控制和执行隔离共同限制 Agent 的运行范围。",
+      source_label: "example.com",
+      source_url: "https://example.com/weekly-v4",
+      usage_rights: "本项目依据公开事实原创绘制",
+      target_section_id: architectureSection.section_id,
+      evidence_ids: ["evidence-v4"],
+      rights_scope: "public_allowed",
+      rights_basis: "原创关系图，可随内容发布并保留公开事实来源。",
+      logic_type: "stack",
+      logic_summary: "四层控制叠加约束身份、授权、工具、运行时间和操作结果。",
+    },
+  ];
+  const snapshot = createWeeklyV41Snapshot({ content: {
+    ...base.content,
+    topics: [{
+      ...topic,
+      facts: { ...topic.facts, sections },
+    }],
+    media,
+  } });
+  await writeV41BundleManifest(mediaRoot, snapshot);
+
+  const normalized = validateWeeklySnapshot(snapshot);
+  assert.equal(normalized.version, "4.1");
+  assert.deepEqual(normalized.content.topics[0].facts.sections.map((section) => section.sequence_label), ["①", "②", "③", "④", "⑤"]);
+  assert.equal(normalized.content.topics[0].facts.term_note_groups.length, 3);
+  assert.equal(normalized.content.topics[0].facts.terms.length, 5);
+  assert.deepEqual(normalized.content.topics[0].facts.term_note_groups[0].reader_texts, [
+    "CSRF：攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
+    "连接器：让 Agent 调用邮件、文件、数据库等外部系统的接口及授权配置。",
+  ]);
+  assert.equal(normalized.publication.release_eligible, false);
+
+  const receipt = await publishWeeklySnapshot(snapshot, {
+    publishRoot: path.join(root, "published"),
+    mediaBundleRoot: mediaRoot,
+  });
+  const html = await fs.readFile(path.join(receipt.artifact_dir, "index.html"), "utf8");
+  const entries = readZipEntries(await fs.readFile(path.join(receipt.artifact_dir, `${snapshot.artifact_id}.docx`)));
+  const word = entries.get("word/document.xml").toString("utf8");
+  const styles = entries.get("word/styles.xml").toString("utf8");
+  assert.equal((html.match(/class="v4-fact-index"/g) || []).length, 5);
+  assert.equal((html.match(/class="v4-term-notes"/g) || []).length, 3);
+  assert.match(html, /class="v4-fact-index"[^>]*>①<\/span>/);
+  assert.match(html, /class="v4-fact-index"[^>]*>⑤<\/span>/);
+  assert.match(word, />①　公开事件与发生条件<\/w:t>/);
+  assert.match(word, />⑤　证据边界与适用范围<\/w:t>/);
+  assert.match(word, /<w:pStyle w:val="WeeklyTopicSequence"\/>/);
+  assert.match(styles, /w:styleId="WeeklyTopicSequence"[\s\S]*?<w:sz w:val="22"\/>/);
+  const comparisonBase64 = comparisonPng.toString("base64");
+  const architectureBase64 = architecturePng.toString("base64");
+  assert.equal(html.split(comparisonBase64).length - 1, 1);
+  assert.equal(html.split(architectureBase64).length - 1, 1);
+  const embeddedMedia = [...entries.entries()]
+    .filter(([name]) => name.startsWith("word/media/"));
+  assert.equal(embeddedMedia.length, 2);
+  assert.deepEqual(embeddedMedia.map(([name, value]) => ({
+    name,
+    sha256: crypto.createHash("sha256").update(value).digest("hex"),
+  })), [
+    {
+      name: "word/media/1-agentforger-comparison.png",
+      sha256: crypto.createHash("sha256").update(comparisonPng).digest("hex"),
+    },
+    {
+      name: "word/media/2-agent-governance-stack.png",
+      sha256: crypto.createHash("sha256").update(architecturePng).digest("hex"),
+    },
+  ]);
+  const mechanismSection = topic.facts.sections[2];
+  const evidenceSection = topic.facts.sections[4];
+  assert.ok(html.indexOf(caseStudySection.anchor) < html.indexOf(comparisonBase64));
+  assert.ok(html.indexOf(comparisonBase64) < html.indexOf(mechanismSection.anchor));
+  assert.ok(html.indexOf(architectureSection.anchor) < html.indexOf(architectureBase64));
+  assert.ok(html.indexOf(architectureBase64) < html.indexOf(evidenceSection.anchor));
+  for (const rightsNote of [
+    "内部分析引用并保留出处",
+    "本项目依据公开事实原创绘制",
+  ]) {
+    assert.match(html, new RegExp(rightsNote));
+    assert.match(word, new RegExp(rightsNote));
+  }
+  for (const document of [html, word]) {
+    assert.doesNotMatch(document, /asset_ref|asset_sha256|rights_scope|rights_basis|internal_only|public_allowed|logic_type|logic_summary/);
+  }
+
+  const scanned = await buildWeeklyInsightCache({
+    sourceDir: mediaRoot,
+    publishRoot: path.join(root, "scanned"),
+  });
+  assert.deepEqual(scanned.errors, []);
+  assert.deepEqual(scanned.published.map((item) => item.artifact_id), [snapshot.artifact_id]);
+
+  const manifestPath = path.join(mediaRoot, "bundle-manifest.json");
+  const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+  manifest.content_sha256 = "0".repeat(64);
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+  const rejectedManifest = await buildWeeklyInsightCache({
+    sourceDir: mediaRoot,
+    publishRoot: path.join(root, "manifest-rejected"),
+  });
+  assert.deepEqual(rejectedManifest.published, []);
+  assert.equal(rejectedManifest.errors.length, 1);
+  assert.match(rejectedManifest.errors[0].error, /bundle manifest|content.*hash|identity/i);
+});
+
+test("v4.1 fails closed on sidecar traversal, symlinks, byte tampering, and internal-only public release", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-1-safety-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const mediaRoot = path.join(root, "bundle");
+  const mediaDir = path.join(mediaRoot, "media");
+  await fs.mkdir(mediaDir, { recursive: true });
+  const png = createValidPng();
+  await Promise.all([
+    fs.writeFile(path.join(mediaDir, "agentforger-csrf-comparison.png"), png),
+    fs.writeFile(path.join(mediaDir, "agent-control-chain.png"), png),
+  ]);
+
+  function bundledMedia(id, targetSection, assetRef = "media/agentforger-csrf-comparison.png", overrides = {}) {
+    return {
+      id,
+      kind: "image",
+      asset_ref: assetRef,
+      asset_sha256: crypto.createHash("sha256").update(png).digest("hex"),
+      mime_type: "image/png",
+      size_bytes: png.length,
+      width: 1,
+      height: 1,
+      alt: "Agent 事实关系图",
+      caption: "图示只呈现目标事实小节已经核对的关系。",
+      source_label: "example.com",
+      source_url: "https://example.com/weekly-v4",
+      usage_rights: "内部分析引用并保留出处",
+      target_section_id: targetSection.section_id,
+      evidence_ids: ["evidence-v4"],
+      rights_scope: "internal_only",
+      rights_basis: "第三方资料尚未取得公开转载许可。",
+      logic_type: "flow",
+      logic_summary: "事件按已核对的顺序推进。",
+      ...overrides,
+    };
+  }
+
+  function oneTopicSnapshot(mediaPatch = {}) {
+    const base = createWeeklyV41Snapshot();
+    const topic = base.content.topics[0];
+    const target = topic.facts.sections[0];
+    const architectureTarget = topic.facts.sections[3];
+    const media = { ...bundledMedia("fact-image", target), ...mediaPatch };
+    const architecture = bundledMedia(
+      "architecture-image",
+      architectureTarget,
+      "media/agent-control-chain.png",
+      {
+        kind: "architecture",
+        rights_scope: "public_allowed",
+        rights_basis: "测试原创关系图。",
+        logic_type: "stack",
+        logic_summary: "四层控制共同限定 Agent 的执行范围。",
+      },
+    );
+    return createWeeklyV41Snapshot({ content: {
+      ...base.content,
+      topics: [{
+        ...topic,
+        facts: {
+          ...topic.facts,
+          sections: topic.facts.sections.map((section, index) => {
+            if (index === 0) return { ...section, media_ids: [media.id] };
+            if (index === 3) return { ...section, media_ids: [architecture.id] };
+            return section;
+          }),
+        },
+      }],
+      media: [media, architecture],
+    } });
+  }
+
+  assert.throws(
+    () => validateWeeklySnapshot(oneTopicSnapshot({ asset_ref: "media/../outside.png" })),
+    /asset.ref|media/i,
+  );
+  assert.throws(
+    () => validateWeeklySnapshot(oneTopicSnapshot({ asset_ref: "media/nested/fact.png" })),
+    /asset.ref|media/i,
+  );
+  assert.throws(
+    () => validateWeeklySnapshot(oneTopicSnapshot({ mime_type: "image/jpeg" })),
+    /mime.type/i,
+  );
+
+  const missingRoot = path.join(root, "missing-root");
+  await assert.rejects(
+    publishWeeklySnapshot(oneTopicSnapshot(), { publishRoot: missingRoot }),
+    /bundle root/i,
+  );
+  assert.deepEqual(await readDirIfPresent(missingRoot), []);
+
+  const tampered = oneTopicSnapshot({ asset_sha256: "0".repeat(64) });
+  const tamperedRoot = path.join(root, "tampered");
+  await writeV41BundleManifest(mediaRoot, tampered);
+  await assert.rejects(
+    publishWeeklySnapshot(tampered, { publishRoot: tamperedRoot, mediaBundleRoot: mediaRoot }),
+    /hash|receipt|bundle manifest|bundled weekly media/i,
+  );
+  assert.deepEqual(await readDirIfPresent(tamperedRoot), []);
+
+  await fs.writeFile(path.join(root, "outside.png"), png);
+  await fs.symlink(path.join(root, "outside.png"), path.join(mediaDir, "linked.png"));
+  const symlinked = oneTopicSnapshot({ asset_ref: "media/linked.png" });
+  const symlinkRoot = path.join(root, "symlinked");
+  await writeV41BundleManifest(mediaRoot, symlinked);
+  await assert.rejects(
+    publishWeeklySnapshot(symlinked, { publishRoot: symlinkRoot, mediaBundleRoot: mediaRoot }),
+    /symbolic|bundled weekly media/i,
+  );
+  assert.deepEqual(await readDirIfPresent(symlinkRoot), []);
+
+  const bundleLink = path.join(root, "bundle-link");
+  await writeV41BundleManifest(mediaRoot, oneTopicSnapshot());
+  await fs.symlink(mediaRoot, bundleLink);
+  const symlinkBundleRoot = path.join(root, "symlink-bundle-root");
+  await assert.rejects(
+    publishWeeklySnapshot(oneTopicSnapshot(), {
+      publishRoot: symlinkBundleRoot,
+      mediaBundleRoot: bundleLink,
+    }),
+    /bundle root|symbolic/i,
+  );
+  assert.deepEqual(await readDirIfPresent(symlinkBundleRoot), []);
+
+  for (const [label, mediaPatch] of [
+    ["size", { size_bytes: png.length + 1 }],
+    ["width", { width: 2 }],
+    ["height", { height: 2 }],
+  ]) {
+    const publishRoot = path.join(root, `mismatch-${label}`);
+    const mismatchSnapshot = oneTopicSnapshot(mediaPatch);
+    await writeV41BundleManifest(mediaRoot, mismatchSnapshot);
+    await assert.rejects(
+      publishWeeklySnapshot(mismatchSnapshot, { publishRoot, mediaBundleRoot: mediaRoot }),
+      /metadata|size mismatch|receipt|bundle manifest|bundled weekly media/i,
+    );
+    assert.deepEqual(await readDirIfPresent(publishRoot), []);
+  }
+
+  await fs.mkdir(path.join(mediaDir, "directory.png"));
+  const directoryRoot = path.join(root, "directory-asset");
+  const directorySnapshot = oneTopicSnapshot({ asset_ref: "media/directory.png" });
+  await writeV41BundleManifest(mediaRoot, directorySnapshot);
+  await assert.rejects(
+    publishWeeklySnapshot(directorySnapshot, {
+      publishRoot: directoryRoot,
+      mediaBundleRoot: mediaRoot,
+    }),
+    /regular file|bundled weekly media/i,
+  );
+  assert.deepEqual(await readDirIfPresent(directoryRoot), []);
+
+  const completeBase = createWeeklyV41Snapshot({ topicCount: 3 });
+  const completeMedia = completeBase.content.topics.map((topic, index) => (
+    bundledMedia(`internal-fact-${index + 1}`, topic.facts.sections[0])
+  ));
+  const completeTopics = completeBase.content.topics.map((topic, index) => ({
+    ...topic,
+    facts: {
+      ...topic.facts,
+      sections: topic.facts.sections.map((section, sectionIndex) => sectionIndex === 0
+        ? { ...section, media_ids: [completeMedia[index].id] }
+        : section),
+    },
+  }));
+  const completePreview = createWeeklyV41Snapshot({
+    topicCount: 3,
+    publication: { release_eligible: false },
+    content: { ...completeBase.content, topics: completeTopics, media: completeMedia },
+  });
+  assert.equal(validateWeeklySnapshot(completePreview).publication.release_eligible, false);
+  assert.throws(
+    () => validateWeeklySnapshot(createWeeklyV41Snapshot({
+      topicCount: 3,
+      publication: {
+        public_enabled: true,
+        visibility: "public",
+        authorization_id: "cannot-publish-internal-media",
+        release_eligible: false,
+      },
+      content: { ...completeBase.content, topics: completeTopics, media: completeMedia },
+    })),
+    /release.eligible|internal|public/i,
+  );
+});
+
+test("v4.1 rejects duplicate bundle authorities and oversized manifest entries", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-1-manifest-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const bundleRoot = path.join(root, "bundle");
+  const mediaDir = path.join(bundleRoot, "media");
+  await fs.mkdir(mediaDir, { recursive: true });
+  const png = createValidPng();
+  await Promise.all([
+    fs.writeFile(path.join(mediaDir, "agentforger-csrf-comparison.png"), png),
+    fs.writeFile(path.join(mediaDir, "agent-control-chain.png"), png),
+  ]);
+  const base = createWeeklyV41Snapshot();
+  const topic = base.content.topics[0];
+  const target = topic.facts.sections[0];
+  const architectureTarget = topic.facts.sections[3];
+  const comparisonMedia = {
+    id: "fact-image",
+    kind: "image",
+    asset_ref: "media/agentforger-csrf-comparison.png",
+    asset_sha256: crypto.createHash("sha256").update(png).digest("hex"),
+    mime_type: "image/png",
+    size_bytes: png.length,
+    width: 1,
+    height: 1,
+    alt: "Agent 事实关系图",
+    caption: "图示只呈现目标事实小节已经核对的关系。",
+    source_label: "example.com",
+    source_url: "https://example.com/weekly-v4",
+    usage_rights: "内部分析引用并保留出处",
+    target_section_id: target.section_id,
+    evidence_ids: ["evidence-v4"],
+    rights_scope: "internal_only",
+    rights_basis: "第三方资料尚未取得公开转载许可。",
+    logic_type: "comparison",
+    logic_summary: "入口、授权与持续执行形成需要治理的控制链。",
+  };
+  const architectureMedia = {
+    ...comparisonMedia,
+    id: "architecture-image",
+    kind: "architecture",
+    asset_ref: "media/agent-control-chain.png",
+    target_section_id: architectureTarget.section_id,
+    rights_scope: "public_allowed",
+    rights_basis: "测试原创关系图。",
+    logic_type: "stack",
+  };
+  const snapshot = createWeeklyV41Snapshot({ content: {
+    ...base.content,
+    topics: [{
+      ...topic,
+      facts: {
+        ...topic.facts,
+        sections: topic.facts.sections.map((section, index) => {
+          if (index === 0) return { ...section, media_ids: [comparisonMedia.id] };
+          if (index === 3) return { ...section, media_ids: [architectureMedia.id] };
+          return section;
+        }),
+      },
+    }],
+    media: [comparisonMedia, architectureMedia],
+  } });
+
+  const manifest = await writeV41BundleManifest(bundleRoot, snapshot);
+  const duplicatePayload = Buffer.from("{}", "utf8");
+  await fs.writeFile(path.join(bundleRoot, "duplicate-candidate.json"), duplicatePayload);
+  manifest.entries.push({
+    path: "duplicate-candidate.json",
+    role: "analysis_candidate",
+    sha256: crypto.createHash("sha256").update(duplicatePayload).digest("hex"),
+    size_bytes: duplicatePayload.length,
+  });
+  manifest.bundle_entries_sha256 = canonicalSha256(manifest.entries);
+  await fs.writeFile(path.join(bundleRoot, "bundle-manifest.json"), JSON.stringify(manifest, null, 2));
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "duplicate-role"),
+      mediaBundleRoot: bundleRoot,
+    }),
+    /bundle manifest.*(?:duplicate|role|authority)/i,
+  );
+
+  await writeV41BundleManifest(bundleRoot, snapshot);
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "oversized-entry"),
+      mediaBundleRoot: bundleRoot,
+      bundleEntryMaxBytes: 8,
+    }),
+    /bundle manifest.*(?:large|size|bytes)/i,
+  );
+
+  await writeV41BundleManifest(bundleRoot, snapshot, { snapshotPath: "renamed-snapshot.json" });
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "renamed-snapshot"),
+      mediaBundleRoot: bundleRoot,
+    }),
+    /bundle manifest.*(?:identity|snapshot.*path|entry order)/i,
+  );
+
+  await writeV41BundleManifest(bundleRoot, snapshot);
+  const snapshotAlias = path.join(bundleRoot, "snapshot-alias.json");
+  await fs.symlink(path.join(bundleRoot, "weekly-insight-publication-v4.json"), snapshotAlias);
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "symlink-alias"),
+      mediaBundleRoot: bundleRoot,
+      sourcePath: snapshotAlias,
+    }),
+    /bundle manifest.*snapshot path/i,
+  );
+
+  const bundleDirectoryAlias = path.join(root, "bundle-directory-alias");
+  await fs.symlink(bundleRoot, bundleDirectoryAlias);
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "symlink-directory-alias"),
+      mediaBundleRoot: bundleRoot,
+      sourcePath: path.join(bundleDirectoryAlias, "weekly-insight-publication-v4.json"),
+    }),
+    /bundle manifest.*snapshot path/i,
+  );
+
+  const reordered = await writeV41BundleManifest(bundleRoot, snapshot);
+  const editableExportIndex = reordered.entries.findIndex((entry) => entry.role === "editable_export");
+  const editableSourceIndex = reordered.entries.findIndex((entry) => entry.role === "editable_source");
+  [reordered.entries[editableExportIndex], reordered.entries[editableSourceIndex]] = [
+    reordered.entries[editableSourceIndex],
+    reordered.entries[editableExportIndex],
+  ];
+  reordered.bundle_entries_sha256 = canonicalSha256(reordered.entries);
+  await fs.writeFile(
+    path.join(bundleRoot, "bundle-manifest.json"),
+    JSON.stringify(reordered, null, 2),
+  );
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "reordered-editable"),
+      mediaBundleRoot: bundleRoot,
+    }),
+    /bundle manifest.*(?:entry order|editable)/i,
+  );
+
+  const rejectEntryMutation = async (label, mutate) => {
+    const mutated = await writeV41BundleManifest(bundleRoot, snapshot);
+    await mutate(mutated.entries);
+    mutated.bundle_entries_sha256 = canonicalSha256(mutated.entries);
+    await fs.writeFile(
+      path.join(bundleRoot, "bundle-manifest.json"),
+      JSON.stringify(mutated, null, 2),
+    );
+    await assert.rejects(
+      publishWeeklySnapshot(snapshot, {
+        publishRoot: path.join(root, label),
+        mediaBundleRoot: bundleRoot,
+      }),
+      /bundle manifest.*(?:entry order|duplicate|role|authority)/i,
+    );
+  };
+  await rejectEntryMutation("missing-editable-source", async (entries) => {
+    entries.splice(entries.findIndex((entry) => entry.role === "editable_source"), 1);
+  });
+  await rejectEntryMutation("renamed-reader-media", async (entries) => {
+    const entry = entries.find((item) => item.role === "reader_media");
+    const renamedPath = "media/renamed-comparison.png";
+    await fs.copyFile(path.join(bundleRoot, entry.path), path.join(bundleRoot, renamedPath));
+    entry.path = renamedPath;
+  });
+  await rejectEntryMutation("renamed-editable-export", async (entries) => {
+    const entry = entries.find((item) => item.role === "editable_export");
+    const renamedPath = "media/renamed-fact.svg";
+    await fs.copyFile(path.join(bundleRoot, entry.path), path.join(bundleRoot, renamedPath));
+    entry.path = renamedPath;
+  });
+  await rejectEntryMutation("duplicate-editable-source", async (entries) => {
+    const entry = entries.find((item) => item.role === "editable_source");
+    const duplicatePath = "media/duplicate-fact.drawio";
+    await fs.copyFile(path.join(bundleRoot, entry.path), path.join(bundleRoot, duplicatePath));
+    entries.splice(entries.indexOf(entry) + 1, 0, { ...entry, path: duplicatePath });
+  });
+  await rejectEntryMutation("renamed-support-entry", async (entries) => {
+    const entry = entries.find((item) => item.role === "visual_plan");
+    const renamedPath = "renamed-visual-plan.json";
+    await fs.copyFile(path.join(bundleRoot, entry.path), path.join(bundleRoot, renamedPath));
+    entry.path = renamedPath;
+  });
+  await rejectEntryMutation("reordered-support-entries", async (entries) => {
+    [entries[entries.length - 2], entries[entries.length - 1]] = [
+      entries[entries.length - 1], entries[entries.length - 2],
+    ];
+  });
+
+  await writeV41BundleManifest(bundleRoot, snapshot);
+  await fs.writeFile(path.join(bundleRoot, "legacy-v3-snapshot.json"), "{}\n");
+  const coLocatedReceipt = await publishWeeklySnapshot(snapshot, {
+    publishRoot: path.join(root, "co-located-entry"),
+    mediaBundleRoot: bundleRoot,
+    sourcePath: path.join(bundleRoot, "weekly-insight-publication-v4.json"),
+  });
+  assert.equal(coLocatedReceipt.artifact_id, snapshot.artifact_id);
+});
+
+test("v4.1 rejects missing, duplicated, or mismatched media placement metadata", () => {
+  const base = createWeeklyV41Snapshot();
+  const topic = base.content.topics[0];
+  const target = topic.facts.sections[0];
+  const media = {
+    id: "fact-image",
+    kind: "image",
+    asset_ref: "media/fact.png",
+    asset_sha256: "0".repeat(64),
+    mime_type: "image/png",
+    size_bytes: 128,
+    width: 1,
+    height: 1,
+    alt: "Agent 事实关系图",
+    caption: "图示只呈现目标事实小节已经核对的关系。",
+    source_label: "example.com",
+    source_url: "https://example.com/weekly-v4",
+    usage_rights: "本项目依据公开事实原创绘制",
+    target_section_id: target.section_id,
+    evidence_ids: ["evidence-v4"],
+    rights_scope: "public_allowed",
+    rights_basis: "原创关系图，可随内容发布。",
+    logic_type: "flow",
+    logic_summary: "事件按已核对的顺序推进。",
+  };
+  function withMedia(mediaPatch = {}, topicPatch = topic) {
+    return createWeeklyV41Snapshot({ content: {
+      ...base.content,
+      topics: [topicPatch],
+      media: [{ ...media, ...mediaPatch }],
+    } });
+  }
+  assert.throws(
+    () => validateWeeklySnapshot(base),
+    /requires at least one.*image/i,
+  );
+  const placedTopic = {
+    ...topic,
+    facts: {
+      ...topic.facts,
+      sections: topic.facts.sections.map((section, index) => index === 0
+        ? { ...section, media_ids: [media.id] }
+        : section),
+    },
+  };
+  assert.equal(validateWeeklySnapshot(withMedia({}, placedTopic)).content.media.length, 1);
+  const duplicateTopic = {
+    ...placedTopic,
+    facts: {
+      ...placedTopic.facts,
+      sections: placedTopic.facts.sections.map((section, index) => index === 1
+        ? { ...section, media_ids: [media.id] }
+        : section),
+    },
+  };
+  assert.throws(
+    () => validateWeeklySnapshot(withMedia({}, duplicateTopic)),
+    /exactly one fact placement/i,
+  );
+  assert.throws(
+    () => validateWeeklySnapshot(withMedia({ target_section_id: topic.facts.sections[1].section_id }, placedTopic)),
+    /target section mismatch/i,
+  );
+  assert.throws(
+    () => validateWeeklySnapshot(withMedia({ evidence_ids: ["other-evidence"] }, placedTopic)),
+    /evidence must belong/i,
+  );
+  assert.throws(
+    () => validateWeeklySnapshot(withMedia({ source_url: "https://other.example.com/source" }, placedTopic)),
+    /source must match/i,
+  );
 });
 
 test("v4 enforces the complete issue and topic preview release matrix", () => {
@@ -320,7 +963,94 @@ test("v4 renders expanded topics, optional synthesis, long titles, and escaped r
   }
 });
 
-test("v4 HTML and DOCX share the four-layer order and exact term placement", async (t) => {
+test("v4.0 preserves unnumbered fact headings and each term's original paragraph placement", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-article-flow-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const base = createWeeklyV4Snapshot();
+  const firstTopic = base.content.topics[0];
+  const firstSection = firstTopic.facts.sections[0];
+  const addedSections = [
+    {
+      anchor: "thesis_v4_01_case_study",
+      section_id: "case_study_01",
+      role: "case_study",
+      kind: "case_study",
+      title: "公开案例",
+      paragraphs: ["公开案例补充可核查的利用条件与结果。"],
+      items: [],
+      evidence_ids: ["evidence-v4"],
+      media_ids: [],
+    },
+    {
+      anchor: "thesis_v4_01_historical_context",
+      section_id: "historical_context_01",
+      role: "historical_context",
+      kind: "historical_context",
+      title: "历史背景与边界",
+      paragraphs: ["历史材料只用于说明事件出现的时间条件。"],
+      items: [],
+      evidence_ids: ["evidence-v4"],
+      media_ids: [],
+    },
+  ];
+  const snapshot = createWeeklyV4Snapshot({ content: {
+    ...base.content,
+    topics: [{
+      ...firstTopic,
+      facts: {
+        ...firstTopic.facts,
+        sections: [{
+          ...firstSection,
+          paragraphs: [
+            "公开事件涉及 CSRF 类请求问题，时间与成立条件均可核对。",
+            firstSection.paragraphs[1],
+          ],
+        }, ...firstTopic.facts.sections.slice(1), ...addedSections],
+        terms: [{
+          term: "CSRF",
+          explanation: "攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
+          first_section_id: firstSection.section_id,
+          after_section_anchor: firstSection.anchor,
+          after_paragraph_index: 0,
+          reader_text: "CSRF：攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
+        }, ...firstTopic.facts.terms],
+      },
+    }],
+  } });
+  const receipt = await publishWeeklySnapshot(snapshot, { publishRoot: root });
+  const html = await fs.readFile(path.join(receipt.artifact_dir, "index.html"), "utf8");
+  const entries = readZipEntries(await fs.readFile(path.join(receipt.artifact_dir, `${snapshot.artifact_id}.docx`)));
+  const word = entries.get("word/document.xml").toString("utf8");
+
+  assert.equal((html.match(/class="v4-fact-index"/g) || []).length, 0);
+  assert.match(word, />公开事件与发生条件<\/w:t>/);
+  assert.match(word, />历史背景与边界<\/w:t>/);
+  assert.doesNotMatch(word, /　(?:公开事件与发生条件|历史背景与边界)<\/w:t>/);
+  assert.equal((html.match(/class="v4-term-line"/g) || []).length, 2);
+  assert.equal((html.match(/class="v4-term-notes"/g) || []).length, 0);
+  const orderedMarkers = [
+    "公开事件涉及 CSRF",
+    "CSRF：攻击者诱导",
+    firstSection.paragraphs[1],
+    "连接器：让 Agent",
+    "技术机制和控制关系",
+  ];
+  for (const document of [html, word]) {
+    const positions = orderedMarkers.map((marker) => {
+      const index = document.indexOf(marker);
+      assert.notEqual(index, -1, `missing marker: ${marker}`);
+      return index;
+    });
+    assert.deepEqual(positions, [...positions].sort((a, b) => a - b));
+  }
+  const csrfParagraphStart = word.lastIndexOf("<w:p>", word.indexOf("CSRF：攻击者诱导"));
+  const csrfParagraphEnd = word.indexOf("</w:p>", word.indexOf("CSRF：攻击者诱导"));
+  const connectorParagraphStart = word.lastIndexOf("<w:p>", word.indexOf("连接器：让 Agent"));
+  assert.ok(connectorParagraphStart > csrfParagraphEnd);
+  assert.doesNotMatch(word.slice(csrfParagraphStart, csrfParagraphEnd), /<w:br\/>/);
+});
+
+test("v4 HTML and DOCX share the four-layer order and section-bound term sequence", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-order-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const base = createWeeklyV4Snapshot({ topicCount: 3 });
@@ -535,7 +1265,7 @@ test("v4 hides media machine labels and atomically rolls back media failures", a
     }),
     /simulated v4 media failure/,
   );
-  assert.deepEqual(await fs.readdir(failedRoot), []);
+  assert.deepEqual(await readDirIfPresent(failedRoot), []);
 });
 
 test("v4 refuses to publish a Word that the feedback endpoint cannot accept", async (t) => {
@@ -577,7 +1307,7 @@ test("v4 refuses to publish a Word that the feedback endpoint cannot accept", as
     }),
     /DOCX|Word|feedback|8[ ,]?388[ ,]?608|too large|exceeds/i,
   );
-  assert.deepEqual(await fs.readdir(publishRoot), []);
+  assert.deepEqual(await readDirIfPresent(publishRoot), []);
 
   const cachedRoot = path.join(root, "cached");
   const firstReceipt = await publishWeeklySnapshot(snapshot, {

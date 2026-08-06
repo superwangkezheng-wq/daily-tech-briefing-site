@@ -58,9 +58,13 @@ const V4_TOPIC_FIELDS = new Set([
   "industry_impact", "strategic_recommendation",
 ]);
 const V4_FACTS_FIELDS = new Set(["title", "sections", "terms"]);
+const V41_FACTS_FIELDS = new Set([...V4_FACTS_FIELDS, "term_note_groups"]);
 const V4_TERM_FIELDS = new Set([
   "term", "explanation", "first_section_id", "after_section_anchor", "after_paragraph_index",
   "reader_text",
+]);
+const V41_TERM_NOTE_GROUP_FIELDS = new Set([
+  "first_section_id", "after_section_anchor", "after_paragraph_index", "reader_texts",
 ]);
 const V4_FINDINGS_FIELDS = new Set(["title", "items"]);
 const V4_FINDING_FIELDS = new Set([
@@ -75,6 +79,7 @@ const TERM_FIELDS = new Set(["term", "explanation"]);
 const ARTICLE_SECTION_FIELDS = new Set([
   "anchor", "section_id", "role", "kind", "title", "paragraphs", "items", "evidence_ids", "media_ids",
 ]);
+const V41_FACT_SECTION_FIELDS = new Set([...ARTICLE_SECTION_FIELDS, "sequence_label"]);
 const ANALYSIS_BLOCK_FIELDS = new Set([
   "anchor", "kind", "title", "headline", "paragraphs", "items", "evidence_ids", "media_ids",
 ]);
@@ -89,7 +94,13 @@ const MEDIA_FIELDS = new Set([
   "id", "kind", "src", "alt", "caption", "source_label", "source_url", "usage_rights",
   "logic_type", "logic_summary",
 ]);
+const V41_MEDIA_FIELDS = new Set([
+  "id", "kind", "asset_ref", "asset_sha256", "mime_type", "size_bytes", "width", "height",
+  "alt", "caption", "source_label", "source_url", "usage_rights", "target_section_id",
+  "evidence_ids", "rights_scope", "rights_basis", "logic_type", "logic_summary",
+]);
 const VISUAL_LOGIC_TYPES = new Set(["causal", "comparison", "dependency", "flow", "stack", "timeline"]);
+const V4_FACT_SEQUENCE_LABELS = Array.from("①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳");
 const APPROVAL_FIELDS = new Set(["status", "approval_id", "approved_at"]);
 const PUBLICATION_FIELDS = new Set(["public_enabled", "visibility", "authorization_id"]);
 const V4_PUBLICATION_FIELDS = new Set([...PUBLICATION_FIELDS, "release_eligible"]);
@@ -273,6 +284,71 @@ function validateV4Media(media, index) {
     throw new Error(`Invalid content.media[${index}].caption; expected a Chinese reader caption`);
   }
   return normalized;
+}
+
+function validateV41Media(media, index) {
+  const context = `content.media[${index}]`;
+  if (!media || typeof media !== "object" || Array.isArray(media)) throw new Error(`Invalid ${context}`);
+  rejectUnknownFields(media, V41_MEDIA_FIELDS, context);
+  const kind = requireString(media.kind, `${context}.kind`, { max: 40 });
+  if (!["image", "architecture", "benchmark"].includes(kind)) throw new Error(`Invalid ${context}.kind`);
+  const assetRef = requireString(media.asset_ref, `${context}.asset_ref`, { max: 500 });
+  const assetParts = assetRef.split("/");
+  if (
+    assetRef.includes("\\") ||
+    assetParts.length !== 2 ||
+    assetParts[0] !== "media" ||
+    assetParts.some((part) => !part || part === "." || part === "..") ||
+    !assetRef.toLowerCase().endsWith(".png")
+  ) {
+    throw new Error(`Invalid ${context}.asset_ref`);
+  }
+  const logicType = optionalString(media.logic_type, `${context}.logic_type`, 40);
+  const logicSummary = optionalString(media.logic_summary, `${context}.logic_summary`, 500);
+  if (logicType && !VISUAL_LOGIC_TYPES.has(logicType)) throw new Error(`Invalid ${context}.logic_type`);
+  if (kind === "architecture" && !(logicType && logicSummary)) {
+    throw new Error(`Architecture ${context} requires logic_type and logic_summary`);
+  }
+  const caption = requireString(media.caption, `${context}.caption`, { max: 1000 });
+  if (!/[\u3400-\u9fff]/u.test(caption)) {
+    throw new Error(`Invalid ${context}.caption; expected a Chinese reader caption`);
+  }
+  const evidenceIds = stringArray(media.evidence_ids, `${context}.evidence_ids`, 80);
+  if (!evidenceIds.length || new Set(evidenceIds).size !== evidenceIds.length) {
+    throw new Error(`Invalid ${context}.evidence_ids`);
+  }
+  const rightsScope = requireString(media.rights_scope, `${context}.rights_scope`, { max: 40 });
+  if (!new Set(["internal_only", "public_allowed"]).has(rightsScope)) {
+    throw new Error(`Invalid ${context}.rights_scope`);
+  }
+  for (const field of ["size_bytes", "width", "height"]) {
+    if (!Number.isSafeInteger(media[field]) || media[field] <= 0) throw new Error(`Invalid ${context}.${field}`);
+  }
+  if (media.mime_type !== "image/png") throw new Error(`Invalid ${context}.mime_type`);
+  return {
+    id: requireString(media.id, `${context}.id`, { max: 80 }),
+    kind,
+    asset_ref: assetRef,
+    asset_sha256: requireString(media.asset_sha256, `${context}.asset_sha256`, {
+      max: 64,
+      pattern: /^[a-f0-9]{64}$/,
+    }),
+    mime_type: "image/png",
+    size_bytes: media.size_bytes,
+    width: media.width,
+    height: media.height,
+    alt: requireString(media.alt, `${context}.alt`, { max: 300 }),
+    caption,
+    source_label: requireString(media.source_label, `${context}.source_label`, { max: 200 }),
+    source_url: normalizeHttpUrl(media.source_url, `${context}.source_url`),
+    usage_rights: requireString(media.usage_rights, `${context}.usage_rights`, { max: 200 }),
+    target_section_id: requireString(media.target_section_id, `${context}.target_section_id`, { max: 80 }),
+    evidence_ids: evidenceIds,
+    rights_scope: rightsScope,
+    rights_basis: requireString(media.rights_basis, `${context}.rights_basis`, { max: 500 }),
+    ...(logicType ? { logic_type: logicType } : {}),
+    ...(logicSummary ? { logic_summary: logicSummary } : {}),
+  };
 }
 
 function validateV1Content(content) {
@@ -605,17 +681,17 @@ function validateV3Content(content) {
   };
 }
 
-function validateV4FactSection(section, topicIndex, sectionIndex) {
+function validateV4FactSection(section, topicIndex, sectionIndex, enhancedReaderProfile) {
   const context = `content.topics[${topicIndex}].facts.sections[${sectionIndex}]`;
   if (!section || typeof section !== "object" || Array.isArray(section)) throw new Error(`Invalid ${context}`);
-  rejectUnknownFields(section, ARTICLE_SECTION_FIELDS, context);
+  rejectUnknownFields(section, enhancedReaderProfile ? V41_FACT_SECTION_FIELDS : ARTICLE_SECTION_FIELDS, context);
   const role = requireString(section.role, `${context}.role`, { max: 80 });
   if (!ARTICLE_ROLES.has(role) || section.kind !== role) {
     throw new Error(`Invalid ${context}.role or kind`);
   }
   const paragraphs = stringArray(section.paragraphs, `${context}.paragraphs`);
   if (!paragraphs.length) throw new Error(`Invalid ${context}.paragraphs`);
-  return {
+  const normalized = {
     anchor: anchorString(section.anchor, `${context}.anchor`),
     section_id: requireString(section.section_id, `${context}.section_id`, { max: 80 }),
     role,
@@ -626,6 +702,12 @@ function validateV4FactSection(section, topicIndex, sectionIndex) {
     evidence_ids: stringArray(section.evidence_ids, `${context}.evidence_ids`, 80),
     media_ids: stringArray(section.media_ids, `${context}.media_ids`, 80),
   };
+  if (enhancedReaderProfile) {
+    const expectedSequence = V4_FACT_SEQUENCE_LABELS[sectionIndex] || `${sectionIndex + 1}、`;
+    if (section.sequence_label !== expectedSequence) throw new Error(`Invalid ${context}.sequence_label`);
+    normalized.sequence_label = expectedSequence;
+  }
+  return normalized;
 }
 
 function validateV4Term(term, topicIndex, termIndex, sections) {
@@ -672,13 +754,61 @@ function validateV4Term(term, topicIndex, termIndex, sections) {
   };
 }
 
-function validateV4Facts(facts, topicIndex) {
+function validateV41TermNoteGroups(value, topicIndex, sections, terms) {
+  const context = `content.topics[${topicIndex}].facts.term_note_groups`;
+  const expectedGroups = [];
+  const expectedBySectionId = new Map();
+  for (const term of terms) {
+    let group = expectedBySectionId.get(term.first_section_id);
+    if (!group) {
+      group = {
+        first_section_id: term.first_section_id,
+        after_section_anchor: term.after_section_anchor,
+        after_paragraph_index: term.after_paragraph_index,
+        reader_texts: [],
+      };
+      expectedBySectionId.set(term.first_section_id, group);
+      expectedGroups.push(group);
+    }
+    group.after_paragraph_index = Math.max(group.after_paragraph_index, term.after_paragraph_index);
+    group.reader_texts.push(term.reader_text);
+  }
+  const groups = requiredArray(value, context).map((group, groupIndex) => {
+    const groupContext = `${context}[${groupIndex}]`;
+    if (!group || typeof group !== "object" || Array.isArray(group)) throw new Error(`Invalid ${groupContext}`);
+    rejectUnknownFields(group, V41_TERM_NOTE_GROUP_FIELDS, groupContext);
+    return {
+      first_section_id: requireString(group.first_section_id, `${groupContext}.first_section_id`, { max: 80 }),
+      after_section_anchor: anchorString(group.after_section_anchor, `${groupContext}.after_section_anchor`),
+      after_paragraph_index: group.after_paragraph_index,
+      reader_texts: stringArray(group.reader_texts, `${groupContext}.reader_texts`, 700),
+    };
+  });
+  if (JSON.stringify(groups) !== JSON.stringify(expectedGroups)) {
+    throw new Error(`Invalid ${context}; groups must exactly match the validated first-use term sequence`);
+  }
+  for (const group of groups) {
+    const target = sections.find((section) => section.section_id === group.first_section_id);
+    if (!target || group.after_section_anchor !== target.anchor) throw new Error(`Invalid ${context} section binding`);
+    if (!Number.isInteger(group.after_paragraph_index) || group.after_paragraph_index >= target.paragraphs.length) {
+      throw new Error(`Invalid ${context}.after_paragraph_index`);
+    }
+  }
+  return groups;
+}
+
+function validateV4Facts(facts, topicIndex, enhancedReaderProfile) {
   const context = `content.topics[${topicIndex}].facts`;
   if (!facts || typeof facts !== "object" || Array.isArray(facts)) throw new Error(`Invalid ${context}`);
-  rejectUnknownFields(facts, V4_FACTS_FIELDS, context);
+  rejectUnknownFields(facts, enhancedReaderProfile ? V41_FACTS_FIELDS : V4_FACTS_FIELDS, context);
   if (facts.title !== "事实与案例") throw new Error(`Invalid ${context}.title`);
   const sections = requiredArray(facts.sections, `${context}.sections`)
-    .map((section, sectionIndex) => validateV4FactSection(section, topicIndex, sectionIndex));
+    .map((section, sectionIndex) => validateV4FactSection(
+      section,
+      topicIndex,
+      sectionIndex,
+      enhancedReaderProfile,
+    ));
   if (sections.length < 3) throw new Error(`Invalid ${context}.sections; expected at least 3`);
   const roles = sections.map((section) => section.role);
   for (const requiredRole of ["what_changed", "how_it_works", "evidence_and_limits"]) {
@@ -691,7 +821,16 @@ function validateV4Facts(facts, topicIndex) {
     .map((term, termIndex) => validateV4Term(term, topicIndex, termIndex, sections));
   const termNames = terms.map((term) => term.term);
   if (new Set(termNames).size !== termNames.length) throw new Error(`Duplicate term in ${context}.terms`);
-  return { title: "事实与案例", sections, terms };
+  const normalized = { title: "事实与案例", sections, terms };
+  if (enhancedReaderProfile) {
+    normalized.term_note_groups = validateV41TermNoteGroups(
+      facts.term_note_groups,
+      topicIndex,
+      sections,
+      terms,
+    );
+  }
+  return normalized;
 }
 
 function validateV4Finding(finding, topicIndex, findingIndex) {
@@ -788,7 +927,7 @@ function validateV4AnalysisBlock(block, topicIndex, field, expectedKind, expecte
   return result;
 }
 
-function validateV4Topic(topic, index, topicCount) {
+function validateV4Topic(topic, index, topicCount, enhancedReaderProfile) {
   const context = `content.topics[${index}]`;
   if (!topic || typeof topic !== "object" || Array.isArray(topic)) throw new Error(`Invalid ${context}`);
   rejectUnknownFields(topic, V4_TOPIC_FIELDS, context);
@@ -802,7 +941,7 @@ function validateV4Topic(topic, index, topicCount) {
     thesis_id: requireString(topic.thesis_id, `${context}.thesis_id`, { max: 160 }),
     sequence_label: expectedSequence,
     title: requireString(topic.title, `${context}.title`, { max: 500 }),
-    facts: validateV4Facts(topic.facts, index),
+    facts: validateV4Facts(topic.facts, index, enhancedReaderProfile),
     findings: validateV4Findings(topic.findings, index),
     industry_impact: validateV4AnalysisBlock(
       topic.industry_impact,
@@ -821,9 +960,10 @@ function validateV4Topic(topic, index, topicCount) {
   };
 }
 
-function validateV4Content(content) {
+function validateV4Content(content, version) {
   if (!content || typeof content !== "object" || Array.isArray(content)) throw new Error("Invalid content");
   rejectUnknownFields(content, V4_CONTENT_FIELDS, "content");
+  const enhancedReaderProfile = version === "4.1";
   const selectedTopics = content.selected_topics;
   if (!Number.isInteger(selectedTopics) || selectedTopics < 0 || selectedTopics > 5) {
     throw new Error("Invalid content.selected_topics; expected 0..5");
@@ -840,7 +980,7 @@ function validateV4Content(content) {
     throw new Error("content.issue_kind and selected_topics are inconsistent for v4");
   }
   const topics = requiredArray(content.topics, "content.topics")
-    .map((topic, index) => validateV4Topic(topic, index, selectedTopics));
+    .map((topic, index) => validateV4Topic(topic, index, selectedTopics, enhancedReaderProfile));
   if (topics.length !== selectedTopics) throw new Error("content.selected_topics and topics length are inconsistent");
   const topicIds = topics.map((topic) => topic.topic_id);
   const thesisIds = topics.map((topic) => topic.thesis_id);
@@ -868,7 +1008,7 @@ function validateV4Content(content) {
 
   const evidence = requiredArray(content.evidence, "content.evidence").map(validateV4Evidence);
   const media = requiredArray(content.media, "content.media")
-    .map(validateV4Media);
+    .map(enhancedReaderProfile ? validateV41Media : validateV4Media);
   const evidenceIds = new Set(evidence.map((item) => item.id));
   const mediaIds = new Set(media.map((item) => item.id));
   if (evidenceIds.size !== evidence.length) throw new Error("Duplicate evidence id");
@@ -900,6 +1040,29 @@ function validateV4Content(content) {
   }
   for (const id of mediaIds) {
     if (!referencedMediaIds.has(id)) throw new Error(`Unreferenced v4 media id: ${id}`);
+  }
+  if (enhancedReaderProfile) {
+    const factSections = topics.flatMap((topic) => topic.facts.sections);
+    for (const topic of topics) {
+      if (!topic.facts.sections.some((section) => section.media_ids.length)) {
+        throw new Error(`Every v4.1 topic requires at least one evidence or mechanism image: ${topic.topic_id}`);
+      }
+    }
+    for (const mediaItem of media) {
+      const placements = factSections.filter((section) => section.media_ids.includes(mediaItem.id));
+      if (placements.length !== 1) throw new Error(`v4.1 media must have exactly one fact placement: ${mediaItem.id}`);
+      const [target] = placements;
+      if (target.section_id !== mediaItem.target_section_id) throw new Error(`v4.1 media target section mismatch: ${mediaItem.id}`);
+      if (!mediaItem.evidence_ids.every((id) => target.evidence_ids.includes(id))) {
+        throw new Error(`v4.1 media evidence must belong to its target fact section: ${mediaItem.id}`);
+      }
+      const mediaEvidenceUrls = mediaItem.evidence_ids
+        .map((id) => evidence.find((item) => item.id === id)?.source_url)
+        .filter(Boolean);
+      if (!mediaEvidenceUrls.includes(mediaItem.source_url)) {
+        throw new Error(`v4.1 media source must match its bound evidence: ${mediaItem.id}`);
+      }
+    }
   }
   if (selectedTopics === 0 && (evidence.length || media.length)) {
     throw new Error("empty_preview cannot contain evidence or media");
@@ -942,6 +1105,9 @@ function validateWeeklySnapshot(snapshot) {
   });
   const sourceRunId = requireString(snapshot.source_run_id, "source_run_id", { max: 160 });
   const version = requireString(snapshot.version, "version", { max: 40 });
+  if (isV4 && !["4.0", "4.1"].includes(version)) {
+    throw new Error(`Unsupported weekly insight v4 publication profile: ${version}`);
+  }
   const approvedHash = requireString(snapshot.approved_candidate_sha256, "approved_candidate_sha256", {
     pattern: /^[a-f0-9]{64}$/,
     max: 64,
@@ -970,7 +1136,7 @@ function validateWeeklySnapshot(snapshot) {
   }
 
   const content = isV4
-    ? validateV4Content(snapshot.content)
+    ? validateV4Content(snapshot.content, version)
     : snapshot.schema_version === "weekly-insight-publication/v3"
       ? validateV3Content(snapshot.content)
       : snapshot.schema_version === "weekly-insight-publication/v2"
@@ -981,7 +1147,9 @@ function validateWeeklySnapshot(snapshot) {
     if (typeof publicationInput.release_eligible !== "boolean") {
       throw new Error("Invalid publication.release_eligible for v4");
     }
-    releaseEligible = content.issue_kind === "complete_issue";
+    const hasInternalOnlyMedia = version === "4.1" &&
+      content.media.some((item) => item.rights_scope === "internal_only");
+    releaseEligible = content.issue_kind === "complete_issue" && !hasInternalOnlyMedia;
     if (publicationInput.release_eligible !== releaseEligible) {
       throw new Error("publication.release_eligible must match the v4 complete_issue release matrix");
     }

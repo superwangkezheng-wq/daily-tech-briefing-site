@@ -6,12 +6,44 @@ const net = require("node:net");
 const path = require("node:path");
 const zlib = require("node:zlib");
 const jpeg = require("jpeg-js");
-const { validateWeeklySnapshot } = require("./weekly-insight-contract");
+const { canonicalSha256, validateWeeklySnapshot } = require("./weekly-insight-contract");
 const { renderWeeklyHtml, renderWeeklyDocx, wordBookmarkName } = require("./weekly-insight-renderer");
 const { readZipEntries } = require("./ooxml");
 const { DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES } = require("./weekly-limits");
 
 const MAX_IMAGE_PIXELS = 40_000_000;
+const BUNDLE_MANIFEST_FIELDS = new Set([
+  "schema_version", "artifact_id", "approved_candidate_sha256", "content_sha256",
+  "snapshot_path", "public_enabled", "release_eligible", "bundle_entries_sha256", "entries",
+]);
+const BUNDLE_ENTRY_FIELDS = new Set(["path", "role", "sha256", "size_bytes"]);
+const BUNDLE_MEDIA_ENTRY_FIELDS = new Set([
+  ...BUNDLE_ENTRY_FIELDS, "mime_type", "width", "height", "rights_scope",
+]);
+const BUNDLE_ENTRY_ROLES = new Set([
+  "analysis_candidate", "candidate_approval", "media_policy", "reader_snapshot", "reader_media",
+  "editable_export", "editable_source", "visual_plan", "visual_qa_record", "editorial_qa_record",
+]);
+const BUNDLE_CORE_ENTRIES = [
+  ["weekly-analysis-candidate.json", "analysis_candidate"],
+  ["projection-approval.json", "candidate_approval"],
+  ["publication-media-policy.json", "media_policy"],
+];
+const BUNDLE_SUPPORT_ENTRIES = [
+  ["visual_asset_plan.json", "visual_plan"],
+  ["visual_asset_log.md", "visual_qa_record"],
+  ["editorial-review.md", "editorial_qa_record"],
+];
+const BUNDLE_SNAPSHOT_PATH = "weekly-insight-publication-v4.json";
+const BUNDLE_V1_ENTRIES = [
+  ...BUNDLE_CORE_ENTRIES,
+  [BUNDLE_SNAPSHOT_PATH, "reader_snapshot"],
+  ["media/agentforger-csrf-comparison.png", "reader_media"],
+  ["media/agent-control-chain.png", "reader_media"],
+  ["media/agent-control-chain.svg", "editable_export"],
+  ["media/agent-control-chain.drawio", "editable_source"],
+  ...BUNDLE_SUPPORT_ENTRIES,
+];
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -337,14 +369,250 @@ async function defaultLoadWeeklyMedia(media, options = {}) {
   return { buffer, ...sniffImage(buffer, response.headers.get("content-type") || "") };
 }
 
+function assertExactFields(value, allowed, context) {
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) throw new Error(`Invalid ${context}; unknown field: ${key}`);
+  }
+}
+
+function bundleString(value, context, pattern) {
+  if (typeof value !== "string" || !value || (pattern && !pattern.test(value))) {
+    throw new Error(`Invalid ${context}`);
+  }
+  return value;
+}
+
+function isSafeBundlePath(value) {
+  if (typeof value !== "string" || !value || value.includes("\\") || path.isAbsolute(value)) return false;
+  const parts = value.split("/");
+  return parts.every((part) => part && part !== "." && part !== "..");
+}
+
+async function resolveWeeklyBundleRoot(options = {}) {
+  if (!options.mediaBundleRoot) throw new Error("Weekly private bundle root is required");
+  const configuredRoot = path.resolve(options.mediaBundleRoot);
+  try {
+    const configuredRootStat = await fsp.lstat(configuredRoot);
+    if (!configuredRootStat.isDirectory() || configuredRootStat.isSymbolicLink()) {
+      throw new Error("not a real directory");
+    }
+    const root = await fsp.realpath(configuredRoot);
+    const rootStat = await fsp.lstat(root);
+    if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) throw new Error("not a real directory");
+    return root;
+  } catch (error) {
+    throw new Error("Weekly private bundle root is unavailable");
+  }
+}
+
+async function resolveWeeklyBundleEntry(root, relativePath) {
+  if (!isSafeBundlePath(relativePath)) throw new Error(`unsafe bundle entry path: ${relativePath}`);
+  let candidate = root;
+  for (const part of relativePath.split("/")) {
+    candidate = path.join(candidate, part);
+    const partStat = await fsp.lstat(candidate);
+    if (partStat.isSymbolicLink()) throw new Error(`symbolic links are not allowed: ${relativePath}`);
+  }
+  const resolved = await fsp.realpath(candidate);
+  if (resolved !== root && !resolved.startsWith(`${root}${path.sep}`)) {
+    throw new Error(`bundle entry escapes root: ${relativePath}`);
+  }
+  const stat = await fsp.lstat(resolved);
+  if (!stat.isFile() || stat.isSymbolicLink()) throw new Error(`bundle entry is not a regular file: ${relativePath}`);
+  return { resolved, stat };
+}
+
+async function validateWeeklyBundleManifest(snapshot, options = {}) {
+  if (snapshot.schema_version !== "weekly-insight-publication/v4" || snapshot.version !== "4.1") return null;
+  const root = await resolveWeeklyBundleRoot(options);
+  let manifest;
+  try {
+    const { resolved, stat } = await resolveWeeklyBundleEntry(root, "bundle-manifest.json");
+    if (stat.size > (options.bundleManifestMaxBytes || 2 * 1024 * 1024)) {
+      throw new Error("manifest is too large");
+    }
+    manifest = JSON.parse(await fsp.readFile(resolved, "utf8"));
+  } catch (error) {
+    throw new Error(`Invalid weekly bundle manifest: ${error.message}`);
+  }
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+    throw new Error("Invalid weekly bundle manifest");
+  }
+  assertExactFields(manifest, BUNDLE_MANIFEST_FIELDS, "weekly bundle manifest");
+  if (
+    manifest.schema_version !== "weekly-insight-private-bundle/v1" ||
+    manifest.artifact_id !== snapshot.artifact_id ||
+    manifest.approved_candidate_sha256 !== snapshot.approved_candidate_sha256 ||
+    manifest.content_sha256 !== snapshot.content_sha256 ||
+    manifest.public_enabled !== snapshot.publication.public_enabled ||
+    manifest.release_eligible !== snapshot.publication.release_eligible ||
+    manifest.snapshot_path !== BUNDLE_SNAPSHOT_PATH
+  ) {
+    throw new Error("Invalid weekly bundle manifest identity");
+  }
+  if (!Array.isArray(manifest.entries) || !manifest.entries.length) {
+    throw new Error("Invalid weekly bundle manifest entries");
+  }
+  if (
+    !/^[a-f0-9]{64}$/.test(String(manifest.bundle_entries_sha256 || "")) ||
+    canonicalSha256(manifest.entries) !== manifest.bundle_entries_sha256
+  ) {
+    throw new Error("Invalid weekly bundle manifest entries hash");
+  }
+
+  const entries = [];
+  const seenPaths = new Set();
+  const roleCounts = new Map();
+  const maxEntryBytes = options.bundleEntryMaxBytes || 16 * 1024 * 1024;
+  const maxTotalBytes = options.bundleTotalMaxBytes || 64 * 1024 * 1024;
+  if (!Number.isSafeInteger(maxEntryBytes) || maxEntryBytes <= 0) {
+    throw new Error("Invalid weekly bundle manifest entry size limit");
+  }
+  if (!Number.isSafeInteger(maxTotalBytes) || maxTotalBytes <= 0) {
+    throw new Error("Invalid weekly bundle manifest total size limit");
+  }
+  let totalBytes = 0;
+  for (const [index, entry] of manifest.entries.entries()) {
+    const context = `weekly bundle manifest entry ${index}`;
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new Error(`Invalid ${context}`);
+    const role = bundleString(entry.role, `${context}.role`);
+    if (!BUNDLE_ENTRY_ROLES.has(role)) throw new Error(`Invalid ${context}.role`);
+    roleCounts.set(role, (roleCounts.get(role) || 0) + 1);
+    assertExactFields(entry, role === "reader_media" ? BUNDLE_MEDIA_ENTRY_FIELDS : BUNDLE_ENTRY_FIELDS, context);
+    const relativePath = bundleString(entry.path, `${context}.path`);
+    if (!isSafeBundlePath(relativePath) || relativePath === "bundle-manifest.json" || seenPaths.has(relativePath)) {
+      throw new Error(`Invalid or duplicate ${context}.path`);
+    }
+    seenPaths.add(relativePath);
+    bundleString(entry.sha256, `${context}.sha256`, /^[a-f0-9]{64}$/);
+    if (!Number.isSafeInteger(entry.size_bytes) || entry.size_bytes < 0) throw new Error(`Invalid ${context}.size_bytes`);
+    if (role === "reader_media") {
+      if (entry.mime_type !== "image/png") throw new Error(`Invalid ${context}.mime_type`);
+      if (!Number.isSafeInteger(entry.width) || entry.width <= 0) throw new Error(`Invalid ${context}.width`);
+      if (!Number.isSafeInteger(entry.height) || entry.height <= 0) throw new Error(`Invalid ${context}.height`);
+      if (!new Set(["internal_only", "public_allowed"]).has(entry.rights_scope)) {
+        throw new Error(`Invalid ${context}.rights_scope`);
+      }
+    }
+    let file;
+    try {
+      file = await resolveWeeklyBundleEntry(root, relativePath);
+    } catch (error) {
+      throw new Error(`Invalid ${context}: ${error.message}`);
+    }
+    if (file.stat.size !== entry.size_bytes) throw new Error(`Invalid ${context}; byte size mismatch`);
+    if (file.stat.size > maxEntryBytes) throw new Error(`Invalid ${context}; entry is too large`);
+    totalBytes += file.stat.size;
+    if (totalBytes > maxTotalBytes) throw new Error("Invalid weekly bundle manifest; bundle is too large");
+    const payload = await fsp.readFile(file.resolved);
+    if (payload.length !== entry.size_bytes || sha256(payload) !== entry.sha256) {
+      throw new Error(`Invalid ${context}; file receipt mismatch`);
+    }
+    entries.push({ ...entry, resolved: file.resolved, payload });
+  }
+
+  for (const role of [
+    "analysis_candidate", "candidate_approval", "media_policy", "reader_snapshot",
+    "visual_plan", "visual_qa_record", "editorial_qa_record",
+  ]) {
+    if (roleCounts.get(role) !== 1) throw new Error(`Invalid weekly bundle manifest authority role count: ${role}`);
+  }
+
+  if (
+    entries.length !== BUNDLE_V1_ENTRIES.length ||
+    BUNDLE_V1_ENTRIES.some(([entryPath, role], index) => (
+      entries[index]?.path !== entryPath || entries[index]?.role !== role
+    ))
+  ) {
+    throw new Error("Invalid weekly bundle manifest entry order");
+  }
+  if (options.sourcePath) {
+    const configuredSourcePath = path.resolve(options.sourcePath);
+    let sourceStat;
+    let sourceParent;
+    let sourceParentStat;
+    try {
+      sourceStat = await fsp.lstat(configuredSourcePath);
+      sourceParentStat = await fsp.lstat(path.dirname(configuredSourcePath));
+      sourceParent = await fsp.realpath(path.dirname(configuredSourcePath));
+    } catch {
+      throw new Error("Invalid weekly bundle manifest snapshot path");
+    }
+    if (
+      sourceParent !== root ||
+      sourceParentStat.isSymbolicLink() ||
+      !sourceParentStat.isDirectory() ||
+      path.basename(configuredSourcePath) !== BUNDLE_SNAPSHOT_PATH ||
+      sourceStat.isSymbolicLink() ||
+      !sourceStat.isFile() ||
+      await fsp.realpath(configuredSourcePath) !== entries[BUNDLE_CORE_ENTRIES.length].resolved
+    ) {
+      throw new Error("Invalid weekly bundle manifest snapshot path");
+    }
+  }
+
+  const snapshotEntry = entries[BUNDLE_CORE_ENTRIES.length];
+  let manifestSnapshot;
+  try {
+    manifestSnapshot = validateWeeklySnapshot(JSON.parse(snapshotEntry.payload.toString("utf8")));
+  } catch (error) {
+    throw new Error(`Invalid weekly bundle manifest snapshot: ${error.message}`);
+  }
+  if (canonicalSha256(manifestSnapshot) !== canonicalSha256(snapshot)) {
+    throw new Error("Invalid weekly bundle manifest snapshot identity");
+  }
+  const readerMediaEntries = entries.filter((entry) => entry.role === "reader_media");
+  if (readerMediaEntries.length !== snapshot.content.media.length) {
+    throw new Error("Invalid weekly bundle manifest reader media count");
+  }
+  for (const [index, media] of snapshot.content.media.entries()) {
+    const entry = readerMediaEntries[index];
+    if (
+      entry.path !== media.asset_ref || entry.sha256 !== media.asset_sha256 ||
+      entry.size_bytes !== media.size_bytes || entry.mime_type !== media.mime_type ||
+      entry.width !== media.width || entry.height !== media.height ||
+      entry.rights_scope !== media.rights_scope
+    ) {
+      throw new Error(`Invalid weekly bundle manifest reader media receipt: ${media.id}`);
+    }
+  }
+  return { root, manifest };
+}
+
+async function loadBundledWeeklyMedia(media, options = {}) {
+  let root;
+  try {
+    root = await resolveWeeklyBundleRoot(options);
+    const { resolved, stat: assetStat } = await resolveWeeklyBundleEntry(root, media.asset_ref);
+    const maxBytes = options.mediaMaxBytes || 8 * 1024 * 1024;
+    if (assetStat.size > maxBytes || assetStat.size !== media.size_bytes) throw new Error("asset size mismatch");
+    const buffer = await fsp.readFile(resolved);
+    if (buffer.length !== media.size_bytes) throw new Error("asset changed while being read");
+    if (sha256(buffer) !== media.asset_sha256) throw new Error("asset hash mismatch");
+    const details = sniffImage(buffer, media.mime_type);
+    if (
+      details.contentType !== media.mime_type ||
+      details.width !== media.width ||
+      details.height !== media.height
+    ) {
+      throw new Error("asset metadata mismatch");
+    }
+    return { buffer, ...details };
+  } catch (error) {
+    throw new Error(`Invalid bundled weekly media ${media.id}: ${error.message}`);
+  }
+}
+
 async function loadWeeklyMediaAssets(snapshot, options = {}) {
   if (!["weekly-insight-publication/v3", "weekly-insight-publication/v4"].includes(snapshot.schema_version)) {
     return [];
   }
   const loader = options.loadMedia || ((media) => defaultLoadWeeklyMedia(media, options));
   return Promise.all(snapshot.content.media.map(async (media) => {
-    if (!media.src) throw new Error(`Weekly media requires a source image: ${media.id}`);
-    const loaded = await loader(media);
+    if (!media.asset_ref && !media.src) throw new Error(`Weekly media requires a source image: ${media.id}`);
+    const loaded = media.asset_ref
+      ? await loadBundledWeeklyMedia(media, options)
+      : await loader(media);
     const buffer = Buffer.isBuffer(loaded) ? loaded : loaded?.buffer;
     if (!Buffer.isBuffer(buffer)) throw new Error(`Weekly media loader returned no image: ${media.id}`);
     const details = sniffImage(buffer, loaded?.contentType);
@@ -449,6 +717,8 @@ async function publishWeeklySnapshot(input, options = {}) {
   const artifactDir = path.join(publishRoot, snapshot.artifact_id);
   const stageDir = path.join(publishRoot, `.stage-${snapshot.artifact_id}-${crypto.randomUUID()}`);
   await fsp.mkdir(publishRoot, { recursive: true });
+
+  await validateWeeklyBundleManifest(snapshot, options);
 
   if (fs.existsSync(artifactDir)) {
     const existing = await readMatchingArtifact(artifactDir, snapshot);

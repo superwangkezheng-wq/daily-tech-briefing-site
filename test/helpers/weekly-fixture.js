@@ -515,9 +515,137 @@ function createWeeklyV4Snapshot(overrides = {}) {
   return snapshot;
 }
 
+function createWeeklyV41Snapshot(overrides = {}) {
+  const topicCount = Number.isInteger(overrides.topicCount) ? overrides.topicCount : 1;
+  const base = createWeeklyV4Snapshot({ topicCount });
+  const sequenceLabels = ["①", "②", "③", "④", "⑤"];
+  const topics = base.content.topics.map((topic, topicIndex) => {
+    const suffix = String(topicIndex + 1).padStart(2, "0");
+    const [whatChanged, howItWorks, evidenceAndLimits] = topic.facts.sections;
+    const sections = [
+      {
+        ...whatChanged,
+        paragraphs: [
+          `专题 ${topicIndex + 1}的公开事件属于 CSRF 类请求问题，时间与成立条件均可核对。`,
+          whatChanged.paragraphs[1],
+        ],
+      },
+      {
+        anchor: `thesis_v4_${suffix}_case_study`,
+        section_id: `case_study_${suffix}`,
+        role: "case_study",
+        kind: "case_study",
+        title: "公开案例与执行过程",
+        paragraphs: [
+          "initial_assistant_prompt 会把初始指令传给 Agent Builder。",
+          "Preview Mode 会立即试运行 Agent，随后计划任务继续按时执行。",
+        ],
+        items: [],
+        evidence_ids: [...whatChanged.evidence_ids],
+        media_ids: [],
+      },
+      howItWorks,
+      {
+        anchor: `thesis_v4_${suffix}_architecture`,
+        section_id: `architecture_${suffix}`,
+        role: "architecture",
+        kind: "architecture",
+        title: "执行链与控制架构",
+        paragraphs: ["执行隔离限制文件、网络、凭据与工具的可达范围。"],
+        items: [],
+        evidence_ids: [...howItWorks.evidence_ids],
+        media_ids: [],
+      },
+      evidenceAndLimits,
+    ].map((section, index) => ({
+      ...section,
+      sequence_label: sequenceLabels[index] || `${index + 1}、`,
+    }));
+    const terms = [
+      {
+        term: "CSRF",
+        explanation: "攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
+        first_section_id: whatChanged.section_id,
+        after_section_anchor: whatChanged.anchor,
+        after_paragraph_index: 0,
+        reader_text: "CSRF：攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
+      },
+      ...topic.facts.terms,
+      {
+        term: "initial_assistant_prompt",
+        explanation: "Workspace Agent Builder URL 中用来传入初始指令的参数。",
+        first_section_id: `case_study_${suffix}`,
+        after_section_anchor: `thesis_v4_${suffix}_case_study`,
+        after_paragraph_index: 0,
+        reader_text: "initial_assistant_prompt：Workspace Agent Builder URL 中用来传入初始指令的参数。",
+      },
+      {
+        term: "Preview Mode",
+        explanation: "用于立即试运行 Agent 的预览功能。",
+        first_section_id: `case_study_${suffix}`,
+        after_section_anchor: `thesis_v4_${suffix}_case_study`,
+        after_paragraph_index: 1,
+        reader_text: "Preview Mode：用于立即试运行 Agent 的预览功能。",
+      },
+      {
+        term: "执行隔离",
+        explanation: "用沙箱和访问边界限制 Agent 能够触达的文件、网络与凭据。",
+        first_section_id: `architecture_${suffix}`,
+        after_section_anchor: `thesis_v4_${suffix}_architecture`,
+        after_paragraph_index: 0,
+        reader_text: "执行隔离：用沙箱和访问边界限制 Agent 能够触达的文件、网络与凭据。",
+      },
+    ];
+    const groups = [];
+    const groupBySectionId = new Map();
+    for (const term of terms) {
+      let group = groupBySectionId.get(term.first_section_id);
+      if (!group) {
+        group = {
+          first_section_id: term.first_section_id,
+          after_section_anchor: term.after_section_anchor,
+          after_paragraph_index: term.after_paragraph_index,
+          reader_texts: [],
+        };
+        groupBySectionId.set(term.first_section_id, group);
+        groups.push(group);
+      }
+      group.after_paragraph_index = Math.max(group.after_paragraph_index, term.after_paragraph_index);
+      group.reader_texts.push(term.reader_text);
+    }
+    return {
+      ...topic,
+      facts: {
+        ...topic.facts,
+        sections,
+        terms,
+        term_note_groups: groups,
+      },
+    };
+  });
+  const content = {
+    ...base.content,
+    topics,
+    ...overrides.content,
+  };
+  return createWeeklyV4Snapshot({
+    topicCount,
+    ...overrides,
+    artifact_id: overrides.artifact_id || `wsi-2026-w31-v4-1-${topicCount}`,
+    source_run_id: overrides.source_run_id || `weekly-run-2026-w31-v4-1-${topicCount}`,
+    version: "4.1",
+    publication: {
+      ...base.publication,
+      ...overrides.publication,
+    },
+    content,
+  });
+}
+
 module.exports = {
   createWeeklySnapshot,
   createWeeklyV2Snapshot,
   createWeeklyV3Snapshot,
   createWeeklyV4Snapshot,
+  createWeeklyV41Snapshot,
 };
