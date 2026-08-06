@@ -20,6 +20,13 @@
 
   function statusLabel(item) {
     if (item.status === "no_selection") return "本期无入选";
+    if (item.content_schema_version === "weekly-insight-publication/v4") {
+      if (item.issue_kind === "complete_issue") return `${item.selected_topics} 个技术专题`;
+      if (item.issue_kind === "topic_preview") {
+        return item.selected_topics === 1 ? "单题内容评审" : `${item.selected_topics} 个专题内容评审`;
+      }
+      return "本期无入选";
+    }
     if (["weekly-insight-publication/v2", "weekly-insight-publication/v3"].includes(item.content_schema_version)) {
       return `${item.selected_topics} 个专题`;
     }
@@ -56,9 +63,12 @@
           card.querySelector("h2").textContent = item.title;
           card.querySelector(".insight-card__dek").textContent = item.dek || "本期洞察保留证据边界与适用范围。";
           const anchors = card.querySelector(".insight-card__anchors");
-          (item.section_anchors || []).slice(0, 4).forEach((anchor) => {
+          const sectionLabels = item.content_schema_version === "weekly-insight-publication/v4"
+            ? (item.reader_sections || ["事实与案例", "发现", "产业影响", "战略建议"])
+            : (item.section_anchors || []).slice(0, 4).map((anchor) => anchor.replaceAll("_", " "));
+          sectionLabels.forEach((label) => {
             const tag = document.createElement("span");
-            tag.textContent = anchor.replaceAll("_", " ");
+            tag.textContent = label;
             anchors.append(tag);
           });
           card.querySelector(".insight-card__receipt").textContent = `${item.artifact_id} · v${item.version} · ${item.content_sha256.slice(0, 12)}`;
@@ -132,15 +142,68 @@
       if (label) label.textContent = "展开";
     }));
 
+    const chapterNav = toc?.querySelector("[data-v4-chapter-nav]");
+    const topics = [...document.querySelectorAll("[data-v4-topic]")];
+    if (chapterNav && topics.length) {
+      const topicLinks = [...toc.querySelectorAll('.weekly-toc__links a[href^="#"]')];
+      const chapterLinks = [...chapterNav.querySelectorAll("[data-v4-chapter-link]")];
+      const currentTopic = chapterNav.querySelector("[data-v4-current-topic]");
+      let scheduled = false;
+      const updateChapterNav = () => {
+        scheduled = false;
+        let topic = topics[0];
+        for (const candidate of topics) {
+          if (candidate.getBoundingClientRect().top <= 190) topic = candidate;
+          else break;
+        }
+        if (currentTopic) currentTopic.textContent = topic.dataset.sequenceLabel || "当前专题";
+        topicLinks.forEach((link) => {
+          if (link.getAttribute("href") === `#${topic.id}`) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+        const chapters = [...topic.querySelectorAll("[data-v4-chapter]")];
+        let activeChapter = chapters[0];
+        for (const candidate of chapters) {
+          if (candidate.getBoundingClientRect().top <= 210) activeChapter = candidate;
+          else break;
+        }
+        chapterLinks.forEach((link) => {
+          const target = topic.querySelector(`[data-v4-chapter="${link.dataset.v4ChapterLink}"]`);
+          if (!target) return;
+          link.href = `#${target.id}`;
+          if (target === activeChapter) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      };
+      const scheduleChapterNavUpdate = () => {
+        if (scheduled) return;
+        scheduled = true;
+        window.requestAnimationFrame(updateChapterNav);
+      };
+      window.addEventListener("scroll", scheduleChapterNavUpdate, { passive: true });
+      window.addEventListener("resize", scheduleChapterNavUpdate);
+      scheduleChapterNavUpdate();
+    }
+
     const dialog = document.querySelector("[data-feedback-dialog]");
     document.querySelector("[data-feedback-open]")?.addEventListener("click", () => dialog?.showModal());
+    dialog?.querySelector(".feedback-dialog__close")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      dialog.close();
+    });
     document.querySelector("[data-feedback-submit]")?.addEventListener("click", async (event) => {
       const button = event.currentTarget;
       const status = dialog.querySelector("[data-feedback-status]");
       const comment = dialog.querySelector("[data-feedback-text]").value.trim();
-      const file = dialog.querySelector("[data-feedback-docx]").files[0];
+      const fileInput = dialog.querySelector("[data-feedback-docx]");
+      const file = fileInput.files[0];
+      const maxDocxBytes = Number(fileInput.dataset.maxBytes || 8 * 1024 * 1024);
       if (!comment) { status.textContent = "请填写反馈内容。"; return; }
-      if (file && file.size > 8 * 1024 * 1024) { status.textContent = "Word 文件不能超过 8 MB。"; return; }
+      if (file && file.size > maxDocxBytes) {
+        const maxMegabytes = (maxDocxBytes / (1024 * 1024)).toLocaleString("zh-CN", { maximumFractionDigits: 1 });
+        status.textContent = `Word 文件不能超过 ${maxMegabytes} MB。`;
+        return;
+      }
       button.disabled = true;
       status.textContent = "正在绑定快照并计算章节差异…";
       try {

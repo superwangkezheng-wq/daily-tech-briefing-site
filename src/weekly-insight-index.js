@@ -15,6 +15,7 @@ function compareInsight(a, b) {
 }
 
 function toIndexEntry(manifest) {
+  const isV4 = manifest.content_schema_version === "weekly-insight-publication/v4";
   return {
     content_schema_version: manifest.content_schema_version || "weekly-insight-publication/v1",
     artifact_id: manifest.artifact_id,
@@ -22,11 +23,13 @@ function toIndexEntry(manifest) {
     version: manifest.version,
     content_sha256: manifest.content_sha256,
     section_anchors: manifest.section_anchors,
+    reader_sections: isV4 ? ["事实与案例", "发现", "产业影响", "战略建议"] : undefined,
     publication: manifest.publication,
     period: manifest.period,
     title: manifest.title,
     dek: manifest.dek,
     status: manifest.status,
+    issue_kind: manifest.issue_kind,
     selected_theses: manifest.selected_theses,
     selected_topics: manifest.selected_topics,
     committed_at: manifest.committed_at,
@@ -71,7 +74,10 @@ async function buildWeeklyInsightCache(options = {}) {
         });
         continue;
       }
-      await publishWeeklySnapshot(input, { publishRoot });
+      await publishWeeklySnapshot(input, {
+        publishRoot,
+        maxDocxBytes: options.maxDocxBytes ?? SITE_CONFIG.weeklyFeedbackMaxDocxBytes,
+      });
     } catch (error) {
       errors.push({ source_file: name, error: error.message });
     }

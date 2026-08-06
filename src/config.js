@@ -1,6 +1,7 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const packageJson = require("../package.json");
+const { DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES } = require("./weekly-limits");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DEFAULT_DATA_DIR = path.join(ROOT_DIR, "data");
@@ -121,7 +122,10 @@ const SITE_CONFIG = {
     DEFAULT_WEEKLY_RELEASE_OVERRIDES_FILE,
   ),
   weeklyPreviewToken: process.env.WEEKLY_PREVIEW_TOKEN || "",
-  weeklyFeedbackMaxDocxBytes: parseInteger(process.env.WEEKLY_FEEDBACK_MAX_DOCX_BYTES, 8 * 1024 * 1024),
+  weeklyFeedbackMaxDocxBytes: parseInteger(
+    process.env.WEEKLY_FEEDBACK_MAX_DOCX_BYTES,
+    DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES,
+  ),
   opsStatusFile: resolveProjectPath(process.env.OPS_STATUS_FILE, path.join(cacheDir, "ops-status.json")),
   refreshStateFile: resolveProjectPath(process.env.REFRESH_STATE_FILE, path.join(cacheDir, "refresh-state.json")),
   openclawBin: process.env.OPENCLAW_BIN || "openclaw",

@@ -29,5 +29,8 @@
     "run:tunnel:quick": "zsh scripts/run-cloudflare-quick.sh",
     "install:launchd": "zsh scripts/install-launchd.sh",
     "uninstall:launchd": "zsh scripts/uninstall-launchd.sh"
+  },
+  "dependencies": {
+    "jpeg-js": "0.4.4"
   }
 }

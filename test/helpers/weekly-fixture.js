@@ -359,4 +359,165 @@ function createWeeklyV3Snapshot(overrides = {}) {
   return snapshot;
 }
 
-module.exports = { createWeeklySnapshot, createWeeklyV2Snapshot, createWeeklyV3Snapshot };
+function createWeeklyV4Topic(index, total, evidenceId = "evidence-v4") {
+  const number = index + 1;
+  const suffix = String(number).padStart(2, "0");
+  const anchorPrefix = `thesis_v4_${suffix}`;
+  return {
+    topic_id: `topic-v4-${suffix}`,
+    thesis_id: `thesis-v4-${suffix}`,
+    sequence_label: `专题 ${suffix}/${String(total).padStart(2, "0")}`,
+    title: `技术专题 ${number}的完整文章标题`,
+    facts: {
+      title: "事实与案例",
+      sections: [
+        {
+          anchor: `${anchorPrefix}_what_changed`,
+          section_id: `event_${suffix}`,
+          role: "what_changed",
+          kind: "what_changed",
+          title: "公开事件与发生条件",
+          paragraphs: [
+            `专题 ${number}的公开事件、时间和利用条件均可从原始资料核对。`,
+            "连接器授权决定 Agent 可以访问的邮件、文件或数据库范围。",
+          ],
+          items: [],
+          evidence_ids: [evidenceId],
+          media_ids: [],
+        },
+        {
+          anchor: `${anchorPrefix}_how_it_works`,
+          section_id: `mechanism_${suffix}`,
+          role: "how_it_works",
+          kind: "how_it_works",
+          title: "技术机制和控制关系",
+          paragraphs: ["Agent 在模型判断之外还受身份、权限、执行环境和计划任务策略约束。"],
+          items: ["模型判断、人工确认和确定性策略承担不同职责。"],
+          evidence_ids: [evidenceId],
+          media_ids: [],
+        },
+        {
+          anchor: `${anchorPrefix}_evidence_and_limits`,
+          section_id: `limits_${suffix}`,
+          role: "evidence_and_limits",
+          kind: "evidence_and_limits",
+          title: "证据边界与适用范围",
+          paragraphs: ["已修复的具体漏洞不能用于估算其他平台的日常攻击率。"],
+          items: [],
+          evidence_ids: [evidenceId],
+          media_ids: [],
+        },
+      ],
+      terms: [
+        {
+          term: "连接器",
+          explanation: "让 Agent 调用邮件、文件、数据库等外部系统的接口及授权配置。",
+          first_section_id: `event_${suffix}`,
+          after_section_anchor: `${anchorPrefix}_what_changed`,
+          after_paragraph_index: 1,
+          reader_text: "连接器：让 Agent 调用邮件、文件、数据库等外部系统的接口及授权配置。",
+        },
+      ],
+    },
+    findings: {
+      title: "发现",
+      items: [
+        {
+          anchor: `${anchorPrefix}_finding_1`,
+          finding_id: `finding-v4-${suffix}-1`,
+          title: `1、专题 ${number}的背景与原因在此时同时聚集`,
+          paragraphs: ["企业 Agent 数量、可调用工具和企业系统连接同时增加，使统一治理成为投产条件。"],
+          evidence_ids: [evidenceId],
+        },
+      ],
+    },
+    industry_impact: {
+      anchor: `${anchorPrefix}_industry`,
+      kind: "industry_impact",
+      title: "产业影响",
+      headline: "Agent 平台验收将覆盖身份、权限、审计和停用。",
+      paragraphs: ["企业客户会要求平台提供 Agent 资产清单、执行轨迹和紧急停用能力。"],
+      items: ["采购验收需要同时考察治理效果和任务成功率。"],
+      evidence_ids: [evidenceId],
+      media_ids: [],
+    },
+    strategic_recommendation: {
+      anchor: `${anchorPrefix}_recommendation`,
+      kind: "strategic_recommendation",
+      title: "战略建议",
+      headline: "联想中国区应把 Agent 治理纳入产品和项目验收。",
+      paragraphs: ["擎天、百应与 AI Foundry 需要让客户看清每个 Agent 的所有者、权限、连接器和运行计划。"],
+      items: ["交付统一停用入口、撤权验证和任务成功率报告。"],
+      evidence_ids: [evidenceId],
+      media_ids: [],
+    },
+  };
+}
+
+function createWeeklyV4Snapshot(overrides = {}) {
+  const topicCount = Number.isInteger(overrides.topicCount) ? overrides.topicCount : 1;
+  const status = topicCount === 0 ? "no_selection" : topicCount < 3 ? "partial" : "complete";
+  const issueKind = topicCount === 0 ? "empty_preview" : topicCount < 3 ? "topic_preview" : "complete_issue";
+  const releaseEligible = topicCount >= 3;
+  const evidence = topicCount === 0 ? [] : [{
+    id: "evidence-v4",
+    title: "example.com",
+    publisher: "example.com",
+    source_url: "https://example.com/weekly-v4",
+    published_at: "2026-07-31",
+    accessed_at: "2026-08-03T09:00:00+08:00",
+    role: "source_in",
+    note: "支持事件、机制和边界，不外推未披露结论。",
+  }];
+  const content = {
+    title: "企业 Agent 治理进入产品验收阶段",
+    dek: "本期把可核对的事件、技术机制、产业影响和联想中国区动作放在同一阅读顺序中。",
+    period: {
+      start: "2026-07-27",
+      end: "2026-08-02",
+      label: "2026 W31",
+      as_of: "2026-08-03T09:30:00+08:00",
+    },
+    status,
+    issue_kind: issueKind,
+    selected_topics: topicCount,
+    topics: Array.from({ length: topicCount }, (_, index) => createWeeklyV4Topic(index, topicCount)),
+    evidence,
+    media: [],
+    ...overrides.content,
+  };
+  const snapshot = {
+    schema_version: "weekly-insight-publication/v4",
+    artifact_id: `wsi-2026-w31-v4-${topicCount}`,
+    source_run_id: `weekly-run-2026-w31-v4-${topicCount}`,
+    version: "4.0",
+    approved_candidate_sha256: "e".repeat(64),
+    content_sha256: canonicalSha256(content),
+    approval: {
+      status: "approved",
+      approval_id: `approval-2026-w31-v4-${topicCount}`,
+      approved_at: "2026-08-03T10:00:00+08:00",
+    },
+    ...overrides,
+    publication: {
+      public_enabled: false,
+      visibility: "internal_preview",
+      authorization_id: null,
+      release_eligible: releaseEligible,
+      ...overrides.publication,
+    },
+    content,
+  };
+  delete snapshot.topicCount;
+  snapshot.content_sha256 = Object.prototype.hasOwnProperty.call(overrides, "content_sha256")
+    ? overrides.content_sha256
+    : canonicalSha256(snapshot.content);
+  return snapshot;
+}
+
+module.exports = {
+  createWeeklySnapshot,
+  createWeeklyV2Snapshot,
+  createWeeklyV3Snapshot,
+  createWeeklyV4Snapshot,
+};

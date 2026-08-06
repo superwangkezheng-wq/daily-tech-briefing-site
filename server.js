@@ -127,6 +127,7 @@ function toPublicWeeklyDetail(detail) {
       period: detail.manifest.period,
       title: detail.manifest.title,
       status: detail.manifest.status,
+      issue_kind: detail.manifest.issue_kind,
       selected_theses: detail.manifest.selected_theses,
       selected_topics: detail.manifest.selected_topics,
     },
@@ -144,6 +145,7 @@ function toPublicWeeklyIndex(index) {
       version: item.version,
       content_sha256: item.content_sha256,
       section_anchors: item.section_anchors,
+      reader_sections: item.reader_sections,
       publication: {
         public_enabled: item.publication?.public_enabled === true,
         visibility: item.publication?.visibility,
@@ -152,6 +154,7 @@ function toPublicWeeklyIndex(index) {
       title: item.title,
       dek: item.dek,
       status: item.status,
+      issue_kind: item.issue_kind,
       selected_theses: item.selected_theses,
       selected_topics: item.selected_topics,
       committed_at: item.committed_at,

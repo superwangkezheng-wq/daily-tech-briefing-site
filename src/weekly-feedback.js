@@ -3,6 +3,7 @@ const fsp = require("node:fs/promises");
 const path = require("node:path");
 const { canonicalSha256 } = require("./weekly-insight-contract");
 const { readZipEntries } = require("./ooxml");
+const { DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES } = require("./weekly-limits");
 
 function decodeXml(value) {
   return String(value || "")
@@ -35,7 +36,7 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function parseBookmarkedSections(documentXml, expectedAnchors, bookmarkNames = {}) {
+function locateBookmarkedSections(documentXml, expectedAnchors, bookmarkNames = {}, options = {}) {
   const sections = {};
   const starts = [...documentXml.matchAll(/<w:bookmarkStart\b[^>]*\/>/g)].map((match) => ({
     index: match.index,
@@ -46,19 +47,78 @@ function parseBookmarkedSections(documentXml, expectedAnchors, bookmarkNames = {
   for (const anchor of expectedAnchors) {
     const bookmarkName = bookmarkNames[anchor] || anchor;
     const matches = starts.filter((start) => start.name === bookmarkName);
+    if (!matches.length && options.allowMissingBookmarks) {
+      sections[anchor] = null;
+      continue;
+    }
     if (matches.length !== 1 || !matches[0].id) throw new Error(`DOCX missing or duplicate section bookmark: ${anchor}`);
     const start = matches[0];
     const endPattern = new RegExp(`<w:bookmarkEnd\\b[^>]*\\bw:id="${escapeRegExp(start.id)}"[^>]*/>`);
     const afterStart = start.index + start.xml.length;
     const end = endPattern.exec(documentXml.slice(afterStart));
     if (!end) throw new Error(`DOCX missing section bookmark end: ${anchor}`);
-    sections[anchor] = textFromXml(documentXml.slice(start.index, afterStart + end.index));
+    sections[anchor] = {
+      start: start.index,
+      end: afterStart + end.index + end[0].length,
+      text: textFromXml(documentXml.slice(start.index, afterStart + end.index)),
+    };
   }
   return sections;
 }
 
+function parseBookmarkedSections(documentXml, expectedAnchors, bookmarkNames = {}) {
+  return Object.fromEntries(
+    Object.entries(locateBookmarkedSections(documentXml, expectedAnchors, bookmarkNames))
+      .map(([anchor, section]) => [anchor, section?.text ?? null]),
+  );
+}
+
+function normalizeWordText(xml) {
+  return ["t", "instrText", "delText"].reduce(
+    (normalized, tag) => normalized.replace(
+      new RegExp(`(<w:${tag}\\b[^>]*>)[\\s\\S]*?(<\\/w:${tag}>)`, "g"),
+      "$1<weekly-text/>$2",
+    ),
+    xml,
+  );
+}
+
+function documentXmlForOverall(documentXml, locatedSections, textChangedAnchors) {
+  return Object.entries(locatedSections)
+    .filter(([, section]) => section)
+    .sort((left, right) => right[1].start - left[1].start)
+    .reduce(
+      (xml, [anchor, section]) => {
+        if (!textChangedAnchors.has(anchor)) return xml;
+        return `${xml.slice(0, section.start)}${normalizeWordText(xml.slice(section.start, section.end))}${xml.slice(section.end)}`;
+      },
+      documentXml,
+    );
+}
+
+function mediaManifest(entries) {
+  return [...entries.entries()]
+    .filter(([name]) => name.startsWith("word/media/") && name.length > "word/media/".length)
+    .map(([name, value]) => ({
+      name,
+      sha256: crypto.createHash("sha256").update(value).digest("hex"),
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function documentRelationshipsManifest(entries) {
+  const name = "word/_rels/document.xml.rels";
+  const value = entries.get(name);
+  if (!value) throw new Error("Invalid DOCX: document relationships are missing");
+  return {
+    name,
+    sha256: crypto.createHash("sha256").update(value).digest("hex"),
+  };
+}
+
 function readDocxContract(buffer, expectedAnchors, options = {}) {
-  const entries = readZipEntries(buffer, options);
+  const { allowMissingBookmarks = false, ...zipOptions } = options;
+  const entries = readZipEntries(buffer, zipOptions);
   const customXml = entries.get("docProps/custom.xml")?.toString("utf8");
   const documentXml = entries.get("word/document.xml")?.toString("utf8");
   if (!customXml || !documentXml) throw new Error("Invalid DOCX: required parts are missing");
@@ -81,9 +141,26 @@ function readDocxContract(buffer, expectedAnchors, options = {}) {
       throw new Error("Invalid DOCX: section_bookmarks contains duplicate names");
     }
   }
+  const locatedSections = locateBookmarkedSections(documentXml, expectedAnchors, bookmarkNames, {
+    allowMissingBookmarks,
+  });
+  const media = mediaManifest(entries);
+  const documentRelationships = documentRelationshipsManifest(entries);
   return {
     properties,
-    sections: parseBookmarkedSections(documentXml, expectedAnchors, bookmarkNames),
+    sections: Object.fromEntries(
+      Object.entries(locatedSections).map(([anchor, section]) => [anchor, section?.text ?? null]),
+    ),
+    document_text: textFromXml(documentXml),
+    document_xml: documentXml,
+    located_sections: locatedSections,
+    media,
+    document_relationships: documentRelationships,
+    content_fingerprint: canonicalSha256({
+      document_xml: documentXml,
+      document_relationships: documentRelationships,
+      media,
+    }),
   };
 }
 
@@ -101,7 +178,7 @@ async function saveWeeklyFeedback(options) {
     sectionAnchor = "overall",
     comment,
     editedDocx,
-    maxDocxBytes = 8 * 1024 * 1024,
+    maxDocxBytes = DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES,
   } = options;
   const normalizedComment = String(comment || "").trim();
   if (!normalizedComment || normalizedComment.length > 4000) throw new Error("Feedback comment must be 1..4000 characters");
@@ -120,7 +197,7 @@ async function saveWeeklyFeedback(options) {
     if (!Buffer.isBuffer(editedDocx) || editedDocx.length > maxDocxBytes) throw new Error("Edited DOCX is invalid or too large");
     const zipOptions = { maxEntryBytes: Math.min(maxDocxBytes * 2, 16 * 1024 * 1024) };
     const original = readDocxContract(await fsp.readFile(originalDocxPath), anchors, zipOptions);
-    const edited = readDocxContract(editedDocx, anchors, zipOptions);
+    const edited = readDocxContract(editedDocx, anchors, { ...zipOptions, allowMissingBookmarks: true });
     const expected = {
       artifact_id: snapshot.artifact_id,
       source_run_id: snapshot.source_run_id,
@@ -140,7 +217,27 @@ async function saveWeeklyFeedback(options) {
         before: excerpt(original.sections[anchor]),
         after: excerpt(edited.sections[anchor]),
       }));
-    finalHash = canonicalSha256(edited.sections);
+    const textChangedAnchors = new Set(sectionDiffs.map((diff) => diff.anchor));
+    const originalOverallFingerprint = canonicalSha256({
+      document_xml: documentXmlForOverall(original.document_xml, original.located_sections, textChangedAnchors),
+      document_relationships: original.document_relationships,
+      media: original.media,
+    });
+    const editedOverallFingerprint = canonicalSha256({
+      document_xml: documentXmlForOverall(edited.document_xml, edited.located_sections, textChangedAnchors),
+      document_relationships: edited.document_relationships,
+      media: edited.media,
+    });
+    if (originalOverallFingerprint !== editedOverallFingerprint) {
+      sectionDiffs.push({
+        anchor: "overall",
+        before_sha256: originalOverallFingerprint,
+        after_sha256: editedOverallFingerprint,
+        before: excerpt(original.document_text),
+        after: excerpt(edited.document_text),
+      });
+    }
+    if (sectionDiffs.length) finalHash = edited.content_fingerprint;
   }
 
   const record = {

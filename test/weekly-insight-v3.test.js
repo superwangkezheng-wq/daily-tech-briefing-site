@@ -3,6 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
+const jpegCodec = require("jpeg-js");
 const { readZipEntries } = require("../src/ooxml");
 const { createZip } = require("../src/ooxml");
 const { validateWeeklySnapshot } = require("../src/weekly-insight-contract");
@@ -112,14 +113,14 @@ test("v3 HTML and DOCX use the same reading order without preview or legacy labe
 
 test("v3 media loading uses real JPEG dimensions and blocks unapproved or oversized remote assets", async () => {
   const snapshot = validateWeeklySnapshot(createWeeklyV3Snapshot());
-  const jpeg = Buffer.from([
-    0xff, 0xd8,
-    0xff, 0xc0, 0x00, 0x0b, 0x08, 0x03, 0x20, 0x04, 0xb0, 0x01, 0x01, 0x11, 0x00,
-    0xff, 0xd9,
-  ]);
+  const jpeg = jpegCodec.encode({
+    width: 120,
+    height: 80,
+    data: Buffer.alloc(120 * 80 * 4, 0xff),
+  }, 80).data;
   const [loaded] = await loadWeeklyMediaAssets(snapshot, { loadMedia: async () => jpeg });
-  assert.equal(loaded.width, 1200);
-  assert.equal(loaded.height, 800);
+  assert.equal(loaded.width, 120);
+  assert.equal(loaded.height, 80);
 
   const remote = createWeeklyV3Snapshot({ content: { media: [{
     ...snapshot.content.media[0],

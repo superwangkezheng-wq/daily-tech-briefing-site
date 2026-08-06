@@ -86,6 +86,17 @@ async function loadWeeklyReleaseOverride(filePath, snapshot) {
 function evaluateWeeklyRelease(snapshot, options = {}) {
   const now = options.now instanceof Date ? options.now : new Date(options.now || Date.now());
   if (Number.isNaN(now.valueOf())) throw new Error("Invalid release evaluation time");
+  if (
+    snapshot.schema_version === "weekly-insight-publication/v4" &&
+    snapshot.content.issue_kind === "empty_preview"
+  ) {
+    return {
+      eligible: false,
+      reason: "empty_preview_not_publishable",
+      time_zone: RELEASE_TIME_ZONE,
+      publish_at: null,
+    };
+  }
   if (snapshot.publication.public_enabled !== true) {
     return {
       eligible: true,
