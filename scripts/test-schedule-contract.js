@@ -71,7 +71,17 @@ assert.deepEqual(overrideConfig.dailyCollectionSlots, ["morning", "afternoon"]);
 
 assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.morning.plist"), [
   { hour: 10, minute: 0 },
+  { hour: 10, minute: 30 },
 ]);
+const morningRefreshTemplate = readText(path.join(
+  LAUNCHD_TEMPLATES,
+  "com.dailytech.site.refresh.morning.plist",
+));
+assert.equal(
+  (morningRefreshTemplate.match(/<key>StartCalendarInterval<\/key>/g) || []).length,
+  1,
+  "the 10:00 daily refresh and 10:30 weekly release scan must share one LaunchAgent scheduler",
+);
 assertPlistTime(path.join(LAUNCHD_TEMPLATES, "com.dailytech.site.refresh.afternoon.plist"), [
   { hour: 15, minute: 20 },
 ]);

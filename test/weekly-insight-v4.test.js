@@ -143,6 +143,7 @@ test("v4.1 consumes numbered reader sections and private sidecar media without l
   assert.deepEqual(normalized.content.topics[0].facts.sections.map((section) => section.sequence_label), ["①", "②", "③", "④", "⑤"]);
   assert.equal(normalized.content.topics[0].facts.term_note_groups.length, 3);
   assert.equal(normalized.content.topics[0].facts.terms.length, 5);
+  assert.equal(normalized.content.topics[0].findings.title, "发现");
   assert.deepEqual(normalized.content.topics[0].facts.term_note_groups[0].reader_texts, [
     "CSRF：攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
     "连接器：让 Agent 调用邮件、文件、数据库等外部系统的接口及授权配置。",
@@ -165,6 +166,42 @@ test("v4.1 consumes numbered reader sections and private sidecar media without l
   assert.match(word, />⑤　证据边界与适用范围<\/w:t>/);
   assert.match(word, /<w:pStyle w:val="WeeklyTopicSequence"\/>/);
   assert.match(styles, /w:styleId="WeeklyTopicSequence"[\s\S]*?<w:sz w:val="22"\/>/);
+  assert.match(html, /<body class="weekly-page weekly-detail-page weekly-detail-page--v4 weekly-detail-page--v4-1">/);
+  assert.match(html, />关键发现<\/h2>/);
+  assert.match(word, />关键发现<\/w:t>/);
+  assert.doesNotMatch(html, />发现<\/h2>/);
+  assert.doesNotMatch(word, />发现<\/w:t>/);
+  assert.doesNotMatch(html, /data-copy-anchor=/);
+  assert.match(html, /class="topic-references"><span>source<\/span>/);
+  assert.match(word, />source \[1\]<\/w:t>/);
+  assert.match(html, /说明：内部分析引用并保留出处/);
+  assert.match(word, /说明：内部分析引用并保留出处/);
+  assert.doesNotMatch(html, /使用说明：/);
+  assert.doesNotMatch(word, /使用说明：/);
+  assert.match(
+    html,
+    /<ul class="v4-strategy-points"><li>擎天、百应与 AI Foundry[^<]+<\/li><li>交付统一停用入口、撤权验证和任务成功率报告。<\/li><\/ul>/,
+  );
+  const strategyTextIndex = word.indexOf("擎天、百应与 AI Foundry");
+  assert.notEqual(strategyTextIndex, -1);
+  const strategyParagraphStart = word.lastIndexOf("<w:p>", strategyTextIndex);
+  const strategyParagraphEnd = word.indexOf("</w:p>", strategyTextIndex);
+  const strategyParagraph = word.slice(strategyParagraphStart, strategyParagraphEnd);
+  assert.match(strategyParagraph, /<w:numPr>/);
+  const finalFactText = normalized.content.topics[0].facts.sections.at(-1).paragraphs.at(-1);
+  const finalFactIndex = word.indexOf(finalFactText);
+  assert.notEqual(finalFactIndex, -1);
+  const finalFactSourceIndex = word.indexOf(">source [", finalFactIndex);
+  assert.notEqual(finalFactSourceIndex, -1);
+  const finalFactSourceParagraphStart = word.lastIndexOf("<w:p>", finalFactSourceIndex);
+  const precedingParagraphStart = word.lastIndexOf("<w:p>", finalFactSourceParagraphStart - 1);
+  const precedingParagraph = word.slice(precedingParagraphStart, finalFactSourceParagraphStart);
+  const sourceParagraph = word.slice(
+    finalFactSourceParagraphStart,
+    word.indexOf("</w:p>", finalFactSourceParagraphStart),
+  );
+  assert.match(precedingParagraph, /<w:keepNext\/>/);
+  assert.doesNotMatch(sourceParagraph, /<w:keepNext\/>/);
   const comparisonBase64 = comparisonPng.toString("base64");
   const architectureBase64 = architecturePng.toString("base64");
   assert.equal(html.split(comparisonBase64).length - 1, 1);
@@ -1028,6 +1065,24 @@ test("v4.0 preserves unnumbered fact headings and each term's original paragraph
   assert.doesNotMatch(word, /　(?:公开事件与发生条件|历史背景与边界)<\/w:t>/);
   assert.equal((html.match(/class="v4-term-line"/g) || []).length, 2);
   assert.equal((html.match(/class="v4-term-notes"/g) || []).length, 0);
+  assert.doesNotMatch(html, /weekly-detail-page--v4-1/);
+  assert.match(html, />发现<\/h2>/);
+  assert.doesNotMatch(html, />关键发现<\/h2>/);
+  assert.match(html, /data-copy-anchor=/);
+  assert.match(html, /class="topic-references"><span>证据<\/span>/);
+  assert.doesNotMatch(html, /class="topic-references"><span>source<\/span>/);
+  assert.doesNotMatch(html, /class="v4-strategy-points"/);
+  assert.match(word, />发现<\/w:t>/);
+  assert.doesNotMatch(word, />关键发现<\/w:t>/);
+  assert.doesNotMatch(word, />source \[[0-9]+\]<\/w:t>/);
+  const v40StrategyText = snapshot.content.topics[0].strategic_recommendation.paragraphs[0];
+  const v40StrategyIndex = word.indexOf(v40StrategyText);
+  assert.notEqual(v40StrategyIndex, -1);
+  const v40StrategyParagraph = word.slice(
+    word.lastIndexOf("<w:p>", v40StrategyIndex),
+    word.indexOf("</w:p>", v40StrategyIndex),
+  );
+  assert.doesNotMatch(v40StrategyParagraph, /<w:numPr>/);
   const orderedMarkers = [
     "公开事件涉及 CSRF",
     "CSRF：攻击者诱导",

@@ -173,6 +173,10 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
     previewIndex.insights.find((item) => item.artifact_id === internalV41.artifact_id)?.version,
     "4.1",
   );
+  assert.deepEqual(
+    previewIndex.insights.find((item) => item.artifact_id === internalV41.artifact_id)?.reader_sections,
+    ["事实与案例", "关键发现", "产业影响", "战略建议"],
+  );
   assert.equal((await fetch(`${base}/insights/${internal.artifact_id}`)).status, 404);
   const internalPage = await fetch(`${base}/insights/${internal.artifact_id}?preview_token=gate5-preview-secret`);
   assert.equal(internalPage.status, 200);

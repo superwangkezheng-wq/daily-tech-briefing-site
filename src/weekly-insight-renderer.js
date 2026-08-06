@@ -142,6 +142,16 @@ function closeBookmarkInLastParagraph(body, bookmarkId) {
   body[lastIndex] = body[lastIndex].replace(/<\/w:p>$/, `<w:bookmarkEnd w:id="${bookmarkId}"/></w:p>`);
 }
 
+function keepLastParagraphWithNext(body) {
+  const lastIndex = body.length - 1;
+  if (lastIndex < 0 || !body[lastIndex].includes("<w:pPr>")) {
+    throw new Error("Cannot keep DOCX source with missing preceding paragraph");
+  }
+  if (!body[lastIndex].includes("<w:keepNext/>")) {
+    body[lastIndex] = body[lastIndex].replace("<w:pPr>", "<w:pPr><w:keepNext/>");
+  }
+}
+
 function stylesXml(includeV4Styles = false) {
   const run = (extra = "", display = false) => `<w:rPr>${display ? DISPLAY_FONT_XML : BODY_FONT_XML}${CJK_LANGUAGE_XML}${extra}</w:rPr>`;
   const v4Styles = includeV4Styles
@@ -267,11 +277,13 @@ function pointList(items) {
     : "";
 }
 
-function referenceLinks(evidenceIds, evidenceById) {
+function referenceLinks(evidenceIds, evidenceById, options = {}) {
+  const label = options.label || "证据";
+  const ariaLabel = options.ariaLabel || "查看证据";
   const links = evidenceIds.map((id) => evidenceById.get(id)).filter(Boolean).map((item) => (
-    `<a href="#evidence-${escapeHtml(item.id)}" aria-label="查看证据 ${item.reference_number}">[${item.reference_number}]</a>`
+    `<a href="#evidence-${escapeHtml(item.id)}" aria-label="${escapeHtml(ariaLabel)} ${item.reference_number}">[${item.reference_number}]</a>`
   ));
-  return links.length ? `<footer class="topic-references"><span>证据</span>${links.join("")}</footer>` : "";
+  return links.length ? `<footer class="topic-references"><span>${escapeHtml(label)}</span>${links.join("")}</footer>` : "";
 }
 
 function v2AnalysisBlockMarkup(block, evidenceById, mediaById) {
@@ -536,7 +548,26 @@ function renderWeeklyV3Docx(snapshot, options = {}) {
   return packageWeeklyDocx(snapshot, body, sectionBookmarks, mediaAssets);
 }
 
-function v4MediaMarkup(media, assetById) {
+function v4ReaderProfile(snapshot) {
+  const isV41 = snapshot.version === "4.1";
+  function findingsTitle(title) {
+    if (!isV41) return title;
+    if (title !== "发现") throw new Error("v4.1 reader alias requires canonical findings.title 发现");
+    return "关键发现";
+  }
+  return {
+    isV41,
+    anchorButton: (anchor) => (isV41
+      ? ""
+      : `<button type="button" class="anchor-copy" data-copy-anchor="${escapeHtml(anchor)}" aria-label="复制本节链接">#</button>`),
+    evidenceLabel: isV41 ? "source" : "证据",
+    evidenceAriaLabel: isV41 ? "查看来源" : "查看证据",
+    findingsTitle,
+    rightsPrefix: isV41 ? "说明" : "使用说明",
+  };
+}
+
+function v4MediaMarkup(media, assetById, profile) {
   const asset = assetById.get(media.id);
   const embeddedSrc = asset?.buffer && asset?.contentType
     ? `data:${asset.contentType};base64,${asset.buffer.toString("base64")}`
@@ -547,7 +578,7 @@ function v4MediaMarkup(media, assetById) {
     ? `<a href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(media.source_label)}</a>`
     : escapeHtml(media.source_label);
   const rightsNote = media.asset_ref && media.usage_rights
-    ? `使用说明：${media.usage_rights}`
+    ? `${profile.rightsPrefix}：${media.usage_rights}`
     : "";
   const visual = src
     ? `<div class="insight-media__frame"><img src="${escapeHtml(src)}" alt="${escapeHtml(media.alt)}" loading="lazy" data-weekly-media><div class="insight-media__fallback" hidden>图像暂不可用 · ${escapeHtml(media.alt)}</div></div>`
@@ -558,8 +589,8 @@ function v4MediaMarkup(media, assetById) {
   return `<figure class="insight-media v4-media">${visual}${caption}</figure>`;
 }
 
-function v4MediaListMarkup(mediaIds, mediaById, assetById) {
-  return mediaIds.map((id) => mediaById.get(id)).filter(Boolean).map((media) => v4MediaMarkup(media, assetById)).join("");
+function v4MediaListMarkup(mediaIds, mediaById, assetById, profile) {
+  return mediaIds.map((id) => mediaById.get(id)).filter(Boolean).map((media) => v4MediaMarkup(media, assetById, profile)).join("");
 }
 
 function v4TermLinesMarkup(facts, section, paragraphIndex) {
@@ -584,7 +615,7 @@ function v4TermNotesMarkup(readerTexts) {
   return `<aside class="v4-term-notes" aria-label="术语备注">${readerTexts.map((readerText) => `<p class="v4-term-note"><em>${escapeHtml(readerText)}</em></p>`).join("")}</aside>`;
 }
 
-function v4FactSectionMarkup(facts, section, evidenceById, mediaById, assetById) {
+function v4FactSectionMarkup(facts, section, evidenceById, mediaById, assetById, profile) {
   const enhancedReaderProfile = Array.isArray(facts.term_note_groups);
   const noteGroups = v4TermNoteGroupsForSection(facts, section);
   const paragraphs = section.paragraphs.map((paragraph, paragraphIndex) => {
@@ -600,11 +631,11 @@ function v4FactSectionMarkup(facts, section, evidenceById, mediaById, assetById)
     ? `<span class="v4-fact-index" aria-hidden="true">${escapeHtml(section.sequence_label)}</span>`
     : "";
   const modifier = enhancedReaderProfile ? " v4-fact-section--numbered" : "";
-  return `<section class="v4-fact-section${modifier}" id="${escapeHtml(section.anchor)}" data-section-anchor="${escapeHtml(section.anchor)}"><header>${sectionNumber}<h3>${escapeHtml(section.title)}</h3><button type="button" class="anchor-copy" data-copy-anchor="${escapeHtml(section.anchor)}" aria-label="复制本节链接">#</button></header><div class="v4-longform">${paragraphs}${pointList(section.items)}${v4MediaListMarkup(section.media_ids, mediaById, assetById)}${referenceLinks(section.evidence_ids, evidenceById)}</div></section>`;
+  return `<section class="v4-fact-section${modifier}" id="${escapeHtml(section.anchor)}" data-section-anchor="${escapeHtml(section.anchor)}"><header>${sectionNumber}<h3>${escapeHtml(section.title)}</h3>${profile.anchorButton(section.anchor)}</header><div class="v4-longform">${paragraphs}${pointList(section.items)}${v4MediaListMarkup(section.media_ids, mediaById, assetById, profile)}${referenceLinks(section.evidence_ids, evidenceById, { label: profile.evidenceLabel, ariaLabel: profile.evidenceAriaLabel })}</div></section>`;
 }
 
-function v4FindingMarkup(finding, evidenceById) {
-  return `<section class="v4-finding" id="${escapeHtml(finding.anchor)}" data-section-anchor="${escapeHtml(finding.anchor)}"><header><h3>${escapeHtml(finding.title)}</h3><button type="button" class="anchor-copy" data-copy-anchor="${escapeHtml(finding.anchor)}" aria-label="复制本节链接">#</button></header>${contentParagraphs(finding.paragraphs)}${referenceLinks(finding.evidence_ids, evidenceById)}</section>`;
+function v4FindingMarkup(finding, evidenceById, profile) {
+  return `<section class="v4-finding" id="${escapeHtml(finding.anchor)}" data-section-anchor="${escapeHtml(finding.anchor)}"><header><h3>${escapeHtml(finding.title)}</h3>${profile.anchorButton(finding.anchor)}</header>${contentParagraphs(finding.paragraphs)}${referenceLinks(finding.evidence_ids, evidenceById, { label: profile.evidenceLabel, ariaLabel: profile.evidenceAriaLabel })}</section>`;
 }
 
 function v4ActionsMarkup(actions = []) {
@@ -612,8 +643,11 @@ function v4ActionsMarkup(actions = []) {
   return `<div class="v4-placed-actions">${actions.map((item) => `<article><h4>${escapeHtml(item.statement)}</h4><p>${escapeHtml(item.action)}</p><footer>决策窗口：${escapeHtml(item.decision_window)}</footer></article>`).join("")}</div>`;
 }
 
-function v4AnalysisMarkup(block, evidenceById, mediaById, assetById, modifier) {
-  return `<section class="v4-analysis v4-analysis--${modifier}" id="${escapeHtml(block.anchor)}" data-section-anchor="${escapeHtml(block.anchor)}"><header><h3>${escapeHtml(block.headline)}</h3><button type="button" class="anchor-copy" data-copy-anchor="${escapeHtml(block.anchor)}" aria-label="复制本节链接">#</button></header>${contentParagraphs(block.paragraphs)}${pointList(block.items)}${v4ActionsMarkup(block.actions)}${v4MediaListMarkup(block.media_ids, mediaById, assetById)}${referenceLinks(block.evidence_ids, evidenceById)}</section>`;
+function v4AnalysisMarkup(block, evidenceById, mediaById, assetById, modifier, profile) {
+  const readerCopy = modifier === "strategy" && profile.isV41
+    ? `<ul class="v4-strategy-points">${[...block.paragraphs, ...block.items].map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+    : `${contentParagraphs(block.paragraphs)}${pointList(block.items)}`;
+  return `<section class="v4-analysis v4-analysis--${modifier}" id="${escapeHtml(block.anchor)}" data-section-anchor="${escapeHtml(block.anchor)}"><header><h3>${escapeHtml(block.headline)}</h3>${profile.anchorButton(block.anchor)}</header>${readerCopy}${v4ActionsMarkup(block.actions)}${v4MediaListMarkup(block.media_ids, mediaById, assetById, profile)}${referenceLinks(block.evidence_ids, evidenceById, { label: profile.evidenceLabel, ariaLabel: profile.evidenceAriaLabel })}</section>`;
 }
 
 function v4ChapterHeading(title) {
@@ -649,6 +683,7 @@ function renderWeeklyV4Html(snapshot, options = {}) {
   const mediaById = new Map(content.media.map((item) => [item.id, item]));
   const assetById = new Map((options.mediaAssets || []).map((asset) => [asset.id, asset]));
   const feedbackMaxDocxBytes = Number(options.feedbackMaxDocxBytes || 0);
+  const profile = v4ReaderProfile(snapshot);
   const statusLabel = v4StatusLabel(content);
   const navItems = [
     ...(content.weekly_synthesis ? [{ anchor: "weekly-synthesis", label: "主", title: "本期主线" }] : []),
@@ -664,17 +699,17 @@ function renderWeeklyV4Html(snapshot, options = {}) {
     ? `<section class="v4-synthesis" id="weekly-synthesis"><p class="eyebrow">本期主线</p><h2>${escapeHtml(content.weekly_synthesis.title)}</h2>${synthesisParagraphs(content.weekly_synthesis.paragraphs)}</section>`
     : "";
   const topics = content.topics.map((topic, topicIndex) => {
-    const facts = `<section class="v4-chapter v4-chapter--facts" id="${escapeHtml(v4ChapterId(topic, "facts"))}" data-v4-chapter="facts">${v4ChapterHeading(topic.facts.title)}${topic.facts.sections.map((section) => v4FactSectionMarkup(topic.facts, section, evidenceById, mediaById, assetById)).join("")}</section>`;
-    const findings = `<section class="v4-chapter v4-chapter--findings" id="${escapeHtml(v4ChapterId(topic, "findings"))}" data-v4-chapter="findings">${v4ChapterHeading(topic.findings.title)}${topic.findings.items.map((finding) => v4FindingMarkup(finding, evidenceById)).join("")}</section>`;
-    const impact = `<section class="v4-chapter v4-chapter--impact" id="${escapeHtml(v4ChapterId(topic, "impact"))}" data-v4-chapter="impact">${v4ChapterHeading(topic.industry_impact.title)}${v4AnalysisMarkup(topic.industry_impact, evidenceById, mediaById, assetById, "impact")}</section>`;
-    const strategy = `<section class="v4-chapter v4-chapter--strategy" id="${escapeHtml(v4ChapterId(topic, "strategy"))}" data-v4-chapter="strategy">${v4ChapterHeading(topic.strategic_recommendation.title)}${v4AnalysisMarkup(topic.strategic_recommendation, evidenceById, mediaById, assetById, "strategy")}</section>`;
+    const facts = `<section class="v4-chapter v4-chapter--facts" id="${escapeHtml(v4ChapterId(topic, "facts"))}" data-v4-chapter="facts">${v4ChapterHeading(topic.facts.title)}${topic.facts.sections.map((section) => v4FactSectionMarkup(topic.facts, section, evidenceById, mediaById, assetById, profile)).join("")}</section>`;
+    const findings = `<section class="v4-chapter v4-chapter--findings" id="${escapeHtml(v4ChapterId(topic, "findings"))}" data-v4-chapter="findings">${v4ChapterHeading(profile.findingsTitle(topic.findings.title))}${topic.findings.items.map((finding) => v4FindingMarkup(finding, evidenceById, profile)).join("")}</section>`;
+    const impact = `<section class="v4-chapter v4-chapter--impact" id="${escapeHtml(v4ChapterId(topic, "impact"))}" data-v4-chapter="impact">${v4ChapterHeading(topic.industry_impact.title)}${v4AnalysisMarkup(topic.industry_impact, evidenceById, mediaById, assetById, "impact", profile)}</section>`;
+    const strategy = `<section class="v4-chapter v4-chapter--strategy" id="${escapeHtml(v4ChapterId(topic, "strategy"))}" data-v4-chapter="strategy">${v4ChapterHeading(topic.strategic_recommendation.title)}${v4AnalysisMarkup(topic.strategic_recommendation, evidenceById, mediaById, assetById, "strategy", profile)}</section>`;
     return `<article class="v4-topic" id="${escapeHtml(topic.topic_id)}" data-v4-topic data-topic-index="${topicIndex}" data-sequence-label="${escapeHtml(topic.sequence_label)}"><header class="v4-topic-intro"><p>${escapeHtml(topic.sequence_label)}</p><h2>${escapeHtml(topic.title)}</h2></header>${facts}${findings}${impact}${strategy}</article>`;
   }).join("");
   const firstTopic = content.topics[0];
   const chapterNav = firstTopic
     ? `<nav class="v4-chapter-nav" data-v4-chapter-nav aria-label="当前专题章节"><p data-v4-current-topic>${escapeHtml(firstTopic.sequence_label)}</p>${[
       ["facts", "01", firstTopic.facts.title],
-      ["findings", "02", firstTopic.findings.title],
+      ["findings", "02", profile.findingsTitle(firstTopic.findings.title)],
       ["impact", "03", firstTopic.industry_impact.title],
       ["strategy", "04", firstTopic.strategic_recommendation.title],
     ].map(([chapter, label, title]) => `<a href="#${escapeHtml(v4ChapterId(firstTopic, chapter))}" data-v4-chapter-link="${chapter}"><span>${label}</span>${escapeHtml(title)}</a>`).join("")}</nav>`
@@ -697,22 +732,25 @@ function v4TermNotesParagraphXml(readerTexts) {
   return `<w:p><w:pPr><w:pStyle w:val="WeeklyEvidence"/><w:pBdr><w:top w:val="single" w:sz="4" w:space="6" w:color="D8CEC1"/><w:bottom w:val="single" w:sz="4" w:space="6" w:color="D8CEC1"/></w:pBdr><w:spacing w:before="80" w:after="80" w:line="280" w:lineRule="auto"/></w:pPr>${runs}</w:p>`;
 }
 
-function pushV4EvidenceNotesDocx(body, evidenceIds, evidenceById) {
+function pushV4EvidenceNotesDocx(body, evidenceIds, evidenceById, profile) {
   const references = evidenceIds
     .map((evidenceId) => evidenceById.get(evidenceId))
     .filter(Boolean)
     .map((evidence) => `[${evidence.reference_number}]`);
-  if (references.length) body.push(paragraphXml(`证据 ${references.join(" ")}`, "WeeklyEvidence"));
+  if (references.length) {
+    keepLastParagraphWithNext(body);
+    body.push(paragraphXml(`${profile.evidenceLabel} ${references.join(" ")}`, "WeeklyEvidence"));
+  }
 }
 
-function pushV4MediaDocx(body, mediaIds, mediaById, assetById) {
+function pushV4MediaDocx(body, mediaIds, mediaById, assetById, profile) {
   for (const mediaId of mediaIds) {
     const media = mediaById.get(mediaId);
     if (!media) continue;
     const asset = assetById.get(mediaId);
     if (asset) body.push(imageDrawingXml(media, asset));
     const source = [media.source_label, media.source_url].filter(Boolean).join("｜");
-    const rightsNote = media.asset_ref && media.usage_rights ? `使用说明：${media.usage_rights}` : "";
+    const rightsNote = media.asset_ref && media.usage_rights ? `${profile.rightsPrefix}：${media.usage_rights}` : "";
     const readerNotes = [media.caption, source ? `来源：${source}` : "", rightsNote].filter(Boolean);
     if (readerNotes.length) {
       body.push(paragraphXml(readerNotes.join("｜"), "WeeklyEvidence"));
@@ -720,7 +758,7 @@ function pushV4MediaDocx(body, mediaIds, mediaById, assetById) {
   }
 }
 
-function pushV4FactSectionDocx(body, facts, section, sectionBookmarks, bookmarkId, evidenceById, mediaById, assetById) {
+function pushV4FactSectionDocx(body, facts, section, sectionBookmarks, bookmarkId, evidenceById, mediaById, assetById, profile) {
   const enhancedReaderProfile = Array.isArray(facts.term_note_groups);
   const heading = enhancedReaderProfile ? `${section.sequence_label}　${section.title}` : section.title;
   body.push(bookmarkedHeadingXml(heading, sectionBookmarks[section.anchor], bookmarkId, "WeeklyHeading2"));
@@ -740,29 +778,33 @@ function pushV4FactSectionDocx(body, facts, section, sectionBookmarks, bookmarkI
     }
   }
   for (const item of section.items) body.push(paragraphXml(item, "WeeklyBullet", { bullet: true }));
-  pushV4MediaDocx(body, section.media_ids, mediaById, assetById);
-  pushV4EvidenceNotesDocx(body, section.evidence_ids, evidenceById);
+  pushV4MediaDocx(body, section.media_ids, mediaById, assetById, profile);
+  pushV4EvidenceNotesDocx(body, section.evidence_ids, evidenceById, profile);
   closeBookmarkInLastParagraph(body, bookmarkId);
 }
 
-function pushV4FindingDocx(body, finding, sectionBookmarks, bookmarkId, evidenceById) {
+function pushV4FindingDocx(body, finding, sectionBookmarks, bookmarkId, evidenceById, profile) {
   body.push(bookmarkedHeadingXml(finding.title, sectionBookmarks[finding.anchor], bookmarkId, "WeeklyHeading2"));
   for (const paragraph of finding.paragraphs) body.push(paragraphXml(paragraph));
-  pushV4EvidenceNotesDocx(body, finding.evidence_ids, evidenceById);
+  pushV4EvidenceNotesDocx(body, finding.evidence_ids, evidenceById, profile);
   closeBookmarkInLastParagraph(body, bookmarkId);
 }
 
-function pushV4AnalysisDocx(body, block, sectionBookmarks, bookmarkId, evidenceById, mediaById, assetById) {
+function pushV4AnalysisDocx(body, block, sectionBookmarks, bookmarkId, evidenceById, mediaById, assetById, modifier, profile) {
   body.push(bookmarkedHeadingXml(block.headline, sectionBookmarks[block.anchor], bookmarkId, "WeeklyHeading2"));
-  for (const paragraph of block.paragraphs) body.push(paragraphXml(paragraph));
+  for (const paragraph of block.paragraphs) {
+    body.push(modifier === "strategy" && profile.isV41
+      ? paragraphXml(paragraph, "WeeklyBullet", { bullet: true })
+      : paragraphXml(paragraph));
+  }
   for (const item of block.items) body.push(paragraphXml(item, "WeeklyBullet", { bullet: true }));
   for (const item of block.actions || []) {
     body.push(paragraphXml(item.statement, "WeeklySummary"));
     body.push(paragraphXml(item.action));
     body.push(paragraphXml(`决策窗口：${item.decision_window}`, "WeeklyMeta"));
   }
-  pushV4MediaDocx(body, block.media_ids, mediaById, assetById);
-  pushV4EvidenceNotesDocx(body, block.evidence_ids, evidenceById);
+  pushV4MediaDocx(body, block.media_ids, mediaById, assetById, profile);
+  pushV4EvidenceNotesDocx(body, block.evidence_ids, evidenceById, profile);
   closeBookmarkInLastParagraph(body, bookmarkId);
 }
 
@@ -777,6 +819,7 @@ function renderWeeklyV4Docx(snapshot, options = {}) {
     entryName: `${index + 1}-${String(asset.id).replace(/[^A-Za-z0-9_-]/g, "-")}.${asset.extension}`,
   }));
   const assetById = new Map(mediaAssets.map((asset) => [asset.id, asset]));
+  const profile = v4ReaderProfile(snapshot);
   const body = [
     paragraphXml("周度技术战略洞察", "WeeklyKicker"),
     paragraphXml(snapshot.content.title, "WeeklyTitle"),
@@ -795,16 +838,16 @@ function renderWeeklyV4Docx(snapshot, options = {}) {
     body.push(paragraphXml(topic.title, "WeeklyTopicTitle"));
     body.push(headingParagraphXml(topic.facts.title));
     for (const section of topic.facts.sections) {
-      pushV4FactSectionDocx(body, topic.facts, section, sectionBookmarks, bookmarkId++, evidenceById, mediaById, assetById);
+      pushV4FactSectionDocx(body, topic.facts, section, sectionBookmarks, bookmarkId++, evidenceById, mediaById, assetById, profile);
     }
-    body.push(headingParagraphXml(topic.findings.title));
+    body.push(headingParagraphXml(profile.findingsTitle(topic.findings.title)));
     for (const finding of topic.findings.items) {
-      pushV4FindingDocx(body, finding, sectionBookmarks, bookmarkId++, evidenceById);
+      pushV4FindingDocx(body, finding, sectionBookmarks, bookmarkId++, evidenceById, profile);
     }
     body.push(headingParagraphXml(topic.industry_impact.title));
-    pushV4AnalysisDocx(body, topic.industry_impact, sectionBookmarks, bookmarkId++, evidenceById, mediaById, assetById);
+    pushV4AnalysisDocx(body, topic.industry_impact, sectionBookmarks, bookmarkId++, evidenceById, mediaById, assetById, "impact", profile);
     body.push(headingParagraphXml(topic.strategic_recommendation.title));
-    pushV4AnalysisDocx(body, topic.strategic_recommendation, sectionBookmarks, bookmarkId++, evidenceById, mediaById, assetById);
+    pushV4AnalysisDocx(body, topic.strategic_recommendation, sectionBookmarks, bookmarkId++, evidenceById, mediaById, assetById, "strategy", profile);
   }
   if (snapshot.content.evidence.length) {
     body.push(paragraphXml("证据来源", "WeeklyHeading1"));
@@ -827,7 +870,12 @@ function renderWeeklyV4Docx(snapshot, options = {}) {
 }
 
 function renderWeeklyHtml(snapshot, options = {}) {
-  if (snapshot.schema_version === "weekly-insight-publication/v4") return renderWeeklyV4Html(snapshot, options);
+  if (snapshot.schema_version === "weekly-insight-publication/v4") {
+    const html = renderWeeklyV4Html(snapshot, options);
+    return snapshot.version === "4.1"
+      ? html.replace("weekly-detail-page--v4\"", "weekly-detail-page--v4 weekly-detail-page--v4-1\"")
+      : html;
+  }
   if (snapshot.schema_version === "weekly-insight-publication/v3") return renderWeeklyV3Html(snapshot);
   if (snapshot.schema_version === "weekly-insight-publication/v2") return renderWeeklyV2Html(snapshot);
   return renderWeeklyV1Html(snapshot);

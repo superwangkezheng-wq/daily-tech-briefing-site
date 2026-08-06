@@ -31,7 +31,9 @@ function toIndexEntry(manifest) {
     version: manifest.version,
     content_sha256: manifest.content_sha256,
     section_anchors: manifest.section_anchors,
-    reader_sections: isV4 ? ["事实与案例", "发现", "产业影响", "战略建议"] : undefined,
+    reader_sections: isV4
+      ? ["事实与案例", manifest.version === "4.1" ? "关键发现" : "发现", "产业影响", "战略建议"]
+      : undefined,
     publication: manifest.publication,
     period: manifest.period,
     title: manifest.title,

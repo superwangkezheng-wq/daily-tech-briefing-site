@@ -1,6 +1,8 @@
 const fs = require("node:fs");
+const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const path = require("node:path");
+const { canonicalSha256 } = require("../src/weekly-insight-contract");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const SKIP_DIRS = new Set([".git", ".cache", "node_modules", "data/feedback", "data/maintenance"]);
@@ -38,6 +40,28 @@ const RULES = [
   },
 ];
 
+const BUNDLE_MANIFEST_FIELDS = new Set([
+  "schema_version", "artifact_id", "approved_candidate_sha256", "content_sha256",
+  "snapshot_path", "public_enabled", "release_eligible", "bundle_entries_sha256", "entries",
+]);
+const BUNDLE_ENTRY_FIELDS = new Set(["path", "role", "sha256", "size_bytes"]);
+const BUNDLE_MEDIA_ENTRY_FIELDS = new Set([
+  ...BUNDLE_ENTRY_FIELDS, "mime_type", "width", "height", "rights_scope",
+]);
+const BUNDLE_LAYOUT = [
+  ["weekly-analysis-candidate.json", "analysis_candidate"],
+  ["projection-approval.json", "candidate_approval"],
+  ["publication-media-policy.json", "media_policy"],
+  ["weekly-insight-publication-v4.json", "reader_snapshot"],
+  ["media/agentforger-csrf-comparison.png", "reader_media"],
+  ["media/agent-control-chain.png", "reader_media"],
+  ["media/agent-control-chain.svg", "editable_export"],
+  ["media/agent-control-chain.drawio", "editable_source"],
+  ["visual_asset_plan.json", "visual_plan"],
+  ["visual_asset_log.md", "visual_qa_record"],
+  ["editorial-review.md", "editorial_qa_record"],
+];
+
 function shouldSkipDir(relativePath) {
   return [...SKIP_DIRS].some((dir) => relativePath === dir || relativePath.startsWith(`${dir}${path.sep}`));
 }
@@ -60,7 +84,6 @@ function walk(dir, files = []) {
   return files;
 }
 
-const findings = [];
 function trackedFiles() {
   try {
     return execFileSync("git", ["ls-files", "-z"], {
@@ -76,27 +99,199 @@ function trackedFiles() {
   }
 }
 
-for (const filePath of trackedFiles()) {
-  const relativePath = path.relative(ROOT_DIR, filePath);
-  if (relativePath === ".git" || relativePath === "scripts/audit-public-package.js") {
-    continue;
+function regularFilesUnder(directory, files = [], options = {}) {
+  if (!fs.existsSync(directory)) {
+    throw new Error(`${options.context || "directory"}: does not exist`);
   }
-  const text = fs.readFileSync(filePath, "utf8");
-  for (const rule of RULES) {
-    if (rule.publicOnly && !(relativePath === "public" || relativePath.startsWith(`public${path.sep}`))) continue;
-    const matches = text.match(rule.pattern);
-    if (matches) {
-      findings.push(`${relativePath}: ${rule.name} (${matches.length})`);
+  const rootStat = fs.lstatSync(directory);
+  if (rootStat.isSymbolicLink()) {
+    if (options.onSymbolicLink) options.onSymbolicLink(directory);
+    else throw new Error(`${options.context || "directory"}: symbolic links are not allowed`);
+    return files;
+  }
+  if (!rootStat.isDirectory()) throw new Error(`${options.context || "directory"}: expected a directory`);
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const fullPath = path.join(directory, entry.name);
+    const stat = fs.lstatSync(fullPath);
+    if (stat.isSymbolicLink()) {
+      if (options.onSymbolicLink) options.onSymbolicLink(fullPath);
+      else throw new Error(`${options.context || "directory"}: symbolic links are not allowed`);
+    } else if (stat.isDirectory()) {
+      regularFilesUnder(fullPath, files, options);
+    } else if (stat.isFile()) {
+      files.push(fullPath);
+    } else throw new Error(`${options.context || "directory"}: non-regular files are not allowed`);
+  }
+  return files;
+}
+
+function assertExactFields(value, expected, context) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`Invalid weekly bundle manifest ${context}`);
+  }
+  const actual = Object.keys(value);
+  if (actual.length !== expected.size || actual.some((field) => !expected.has(field))) {
+    const missing = [...expected].filter((field) => !actual.includes(field));
+    const unexpected = actual.filter((field) => !expected.has(field));
+    throw new Error(
+      `Invalid weekly bundle manifest ${context} fields` +
+      `${missing.length ? `; missing ${missing.join(",")}` : ""}` +
+      `${unexpected.length ? `; unexpected ${unexpected.join(",")}` : ""}`,
+    );
+  }
+}
+
+function isSafeBundlePath(value) {
+  return (
+    typeof value === "string" && value.length > 0 && !value.includes("\\") &&
+    !path.posix.isAbsolute(value) && path.posix.normalize(value) === value &&
+    value.split("/").every((part) => part && part !== "." && part !== "..")
+  );
+}
+
+function validatePrivacyManifest(manifest, manifestPath) {
+  assertExactFields(manifest, BUNDLE_MANIFEST_FIELDS, "root");
+  if (
+    manifest.schema_version !== "weekly-insight-private-bundle/v1" ||
+    typeof manifest.artifact_id !== "string" || !manifest.artifact_id ||
+    !/^[0-9a-f]{64}$/.test(String(manifest.approved_candidate_sha256 || "")) ||
+    !/^[0-9a-f]{64}$/.test(String(manifest.content_sha256 || "")) ||
+    manifest.snapshot_path !== "weekly-insight-publication-v4.json" ||
+    typeof manifest.public_enabled !== "boolean" ||
+    typeof manifest.release_eligible !== "boolean" ||
+    !Array.isArray(manifest.entries) || manifest.entries.length !== BUNDLE_LAYOUT.length ||
+    !/^[0-9a-f]{64}$/.test(String(manifest.bundle_entries_sha256 || "")) ||
+    canonicalSha256(manifest.entries) !== manifest.bundle_entries_sha256
+  ) {
+    throw new Error("Invalid weekly bundle manifest identity or entries hash");
+  }
+
+  const bundleRoot = path.dirname(manifestPath);
+  for (const [index, entry] of manifest.entries.entries()) {
+    const expected = BUNDLE_LAYOUT[index];
+    const context = `entry ${index}`;
+    const fields = entry?.role === "reader_media" ? BUNDLE_MEDIA_ENTRY_FIELDS : BUNDLE_ENTRY_FIELDS;
+    assertExactFields(entry, fields, context);
+    if (
+      entry.path !== expected[0] || entry.role !== expected[1] ||
+      !isSafeBundlePath(entry.path) ||
+      !/^[0-9a-f]{64}$/.test(String(entry.sha256 || "")) ||
+      !Number.isSafeInteger(entry.size_bytes) || entry.size_bytes < 0
+    ) {
+      throw new Error(`Invalid weekly bundle manifest ${context} receipt`);
+    }
+    if (entry.role === "reader_media" && (
+      entry.mime_type !== "image/png" ||
+      !Number.isSafeInteger(entry.width) || entry.width <= 0 ||
+      !Number.isSafeInteger(entry.height) || entry.height <= 0 ||
+      !["internal_only", "public_allowed"].includes(entry.rights_scope)
+    )) {
+      throw new Error(`Invalid weekly bundle manifest ${context}.rights_scope or media metadata`);
+    }
+    const entryPath = path.join(bundleRoot, entry.path);
+    const stat = fs.lstatSync(entryPath);
+    if (stat.isSymbolicLink() || !stat.isFile() || stat.size !== entry.size_bytes) {
+      throw new Error(`Invalid weekly bundle manifest ${context} file receipt`);
+    }
+    const payload = fs.readFileSync(entryPath);
+    const sha256 = crypto.createHash("sha256").update(payload).digest("hex");
+    if (sha256 !== entry.sha256) throw new Error(`Invalid weekly bundle manifest ${context} byte receipt`);
+  }
+  const actualPaths = regularFilesUnder(bundleRoot, [], { context: "weekly bundle" })
+    .map((filePath) => path.relative(bundleRoot, filePath).split(path.sep).join("/"))
+    .sort();
+  const expectedPaths = [path.basename(manifestPath), ...manifest.entries.map((entry) => entry.path)].sort();
+  if (
+    actualPaths.length !== expectedPaths.length ||
+    actualPaths.some((filePath, index) => filePath !== expectedPaths[index])
+  ) {
+    throw new Error("Invalid weekly bundle manifest: undeclared or missing bundle files");
+  }
+  return manifest;
+}
+
+function internalMediaHashes(weeklySourceDir) {
+  const hashes = new Set();
+  const manifestPaths = regularFilesUnder(weeklySourceDir, [], { context: "weekly source" })
+    .filter((filePath) => path.basename(filePath) === "bundle-manifest.json");
+  if (!manifestPaths.length) {
+    throw new Error("weekly source: expected at least one validated bundle-manifest.json");
+  }
+  for (const filePath of manifestPaths) {
+    let manifest;
+    try {
+      manifest = validatePrivacyManifest(JSON.parse(fs.readFileSync(filePath, "utf8")), filePath);
+    } catch (error) {
+      throw new Error(`Invalid weekly bundle manifest ${path.relative(weeklySourceDir, filePath)}: ${error.message}`);
+    }
+    for (const entry of manifest.entries) {
+      if (
+        entry.role === "reader_media" &&
+        entry.rights_scope === "internal_only"
+      ) {
+        hashes.add(entry.sha256);
+      }
     }
   }
+  return hashes;
 }
 
-if (findings.length) {
-  console.error("Public package privacy audit failed:");
-  for (const finding of findings) {
-    console.error(`- ${finding}`);
+function findInternalMediaInPublicRoot({ publicDir, weeklySourceDir }) {
+  const deniedHashes = internalMediaHashes(weeklySourceDir);
+  const findings = [];
+  const publicFiles = regularFilesUnder(publicDir, [], {
+    context: "public root",
+    onSymbolicLink(filePath) {
+      findings.push(`${path.join("public", path.relative(publicDir, filePath))}: symbolic links are not allowed`);
+    },
+  });
+  for (const filePath of publicFiles) {
+    const sha256 = crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+    if (deniedHashes.has(sha256)) {
+      const relativePath = path.join("public", path.relative(publicDir, filePath));
+      findings.push(`${relativePath}: internal-only weekly media bytes (${sha256})`);
+    }
   }
-  process.exit(1);
+  return findings;
 }
 
-console.log("public package privacy audit ok");
+function runAudit() {
+  const findings = [];
+  for (const filePath of trackedFiles()) {
+    const relativePath = path.relative(ROOT_DIR, filePath);
+    if (relativePath === ".git" || relativePath === "scripts/audit-public-package.js") {
+      continue;
+    }
+    const text = fs.readFileSync(filePath, "utf8");
+    for (const rule of RULES) {
+      if (rule.publicOnly && !(relativePath === "public" || relativePath.startsWith(`public${path.sep}`))) continue;
+      const matches = text.match(rule.pattern);
+      if (matches) {
+        findings.push(`${relativePath}: ${rule.name} (${matches.length})`);
+      }
+    }
+  }
+  const configuredWeeklySourceDir = process.env.WEEKLY_INSIGHT_SOURCE_DIR;
+  const defaultWeeklySourceDir = path.join(ROOT_DIR, "data/weekly-insights");
+  if (configuredWeeklySourceDir || fs.existsSync(defaultWeeklySourceDir)) {
+    findings.push(...findInternalMediaInPublicRoot({
+      publicDir: path.join(ROOT_DIR, "public"),
+      weeklySourceDir: path.resolve(configuredWeeklySourceDir || defaultWeeklySourceDir),
+    }));
+  }
+  return findings;
+}
+
+if (require.main === module) {
+  const findings = runAudit();
+  if (findings.length) {
+    console.error("Public package privacy audit failed:");
+    for (const finding of findings) {
+      console.error(`- ${finding}`);
+    }
+    process.exit(1);
+  }
+  console.log("public package privacy audit ok");
+}
+
+module.exports = { findInternalMediaInPublicRoot, runAudit };
