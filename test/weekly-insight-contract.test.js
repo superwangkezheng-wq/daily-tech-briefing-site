@@ -162,9 +162,12 @@ for (const mediaKind of ["image", "architecture", "benchmark"]) {
           caption: "Public-safe figure",
           source_label: "Example",
           source_url: "https://example.com/report",
+          usage_rights: "Internal analytical quotation with attribution.",
         }],
       },
     });
-    assert.equal(validateWeeklySnapshot(snapshot).content.media[0].kind, mediaKind);
+    const validated = validateWeeklySnapshot(snapshot).content.media[0];
+    assert.equal(validated.kind, mediaKind);
+    assert.equal(validated.usage_rights, "Internal analytical quotation with attribution.");
   });
 }

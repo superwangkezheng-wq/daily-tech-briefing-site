@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
-const { createWeeklySnapshot, createWeeklyV2Snapshot } = require("./helpers/weekly-fixture");
+const { createWeeklySnapshot, createWeeklyV2Snapshot, createWeeklyV3Snapshot } = require("./helpers/weekly-fixture");
 const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
 const { createServer, SITE_CONFIG } = require("../server");
 
@@ -23,6 +23,7 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   const internal = createWeeklyV2Snapshot({
     content: { title: "内部预览：不得出现在公开 API" },
   });
+  const internalV3 = createWeeklyV3Snapshot();
   const publicSnapshot = createWeeklySnapshot({
     artifact_id: "wsi-public-2026-w29",
     source_run_id: "weekly-run-public-w29",
@@ -43,6 +44,7 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   });
   await Promise.all([
     fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "internal.json"), JSON.stringify(internal)),
+    fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "internal-v3.json"), JSON.stringify(internalV3)),
     fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "public.json"), JSON.stringify(publicSnapshot)),
   ]);
   await buildWeeklyInsightCache();
@@ -64,14 +66,23 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   assert.equal(publicIndex.insights[0].publication.authorization_id, undefined);
 
   const previewIndex = await fetch(`${base}/api/insights?preview_token=gate5-preview-secret`).then((res) => res.json());
-  assert.equal(previewIndex.count, 2);
+  assert.equal(previewIndex.count, 3);
   const internalIndexItem = previewIndex.insights.find((item) => item.artifact_id === internal.artifact_id);
   assert.equal(internalIndexItem.content_schema_version, "weekly-insight-publication/v2");
   assert.equal(internalIndexItem.selected_topics, 1);
+  const v3IndexItem = previewIndex.insights.find((item) => item.artifact_id === internalV3.artifact_id);
+  assert.equal(v3IndexItem.content_schema_version, "weekly-insight-publication/v3");
+  assert.equal(v3IndexItem.selected_topics, 1);
   assert.equal((await fetch(`${base}/insights/${internal.artifact_id}`)).status, 404);
   const internalPage = await fetch(`${base}/insights/${internal.artifact_id}?preview_token=gate5-preview-secret`);
   assert.equal(internalPage.status, 200);
   assert.match(await internalPage.text(), /内部预览/);
+  assert.equal((await fetch(`${base}/insights/${internalV3.artifact_id}`)).status, 404);
+  const v3Page = await fetch(`${base}/insights/${internalV3.artifact_id}?preview_token=gate5-preview-secret`);
+  assert.equal(v3Page.status, 200);
+  const v3Html = await v3Page.text();
+  assert.match(v3Html, /事实与案例/);
+  assert.doesNotMatch(v3Html, /内部预览|联想中国区启示|期级战略建议/);
 
   const internalApi = await fetch(`${base}/api/insights/${internal.artifact_id}?preview_token=gate5-preview-secret`).then((res) => res.json());
   assert.equal(internalApi.approval, undefined);
@@ -82,6 +93,9 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   const word = await fetch(`${base}/api/insights/${internal.artifact_id}/word?preview_token=gate5-preview-secret`);
   assert.equal(word.status, 200);
   assert.match(word.headers.get("content-type"), /wordprocessingml/);
+  const v3Word = await fetch(`${base}/api/insights/${internalV3.artifact_id}/word?preview_token=gate5-preview-secret`);
+  assert.equal(v3Word.status, 200);
+  assert.match(v3Word.headers.get("content-type"), /wordprocessingml/);
 
   const unauthorizedFeedback = await fetch(`${base}/api/insights/${internal.artifact_id}/feedback`, {
     method: "POST",

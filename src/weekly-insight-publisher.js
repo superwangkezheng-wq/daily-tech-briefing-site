@@ -1,6 +1,8 @@
 const crypto = require("node:crypto");
+const dns = require("node:dns/promises");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
+const net = require("node:net");
 const path = require("node:path");
 const { validateWeeklySnapshot } = require("./weekly-insight-contract");
 const { renderWeeklyHtml, renderWeeklyDocx, wordBookmarkName } = require("./weekly-insight-renderer");
@@ -8,6 +10,143 @@ const { readZipEntries } = require("./ooxml");
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function sniffImage(buffer, declaredType = "") {
+  if (
+    buffer.length >= 24 &&
+    buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+  ) {
+    return {
+      contentType: "image/png",
+      extension: "png",
+      width: buffer.readUInt32BE(16),
+      height: buffer.readUInt32BE(20),
+    };
+  }
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    let offset = 2;
+    while (offset + 8 < buffer.length) {
+      if (buffer[offset] !== 0xff) {
+        offset += 1;
+        continue;
+      }
+      while (buffer[offset] === 0xff) offset += 1;
+      const marker = buffer[offset];
+      offset += 1;
+      if (marker === 0xd8 || marker === 0xd9 || (marker >= 0xd0 && marker <= 0xd7)) continue;
+      if (offset + 2 > buffer.length) break;
+      const segmentLength = buffer.readUInt16BE(offset);
+      if (segmentLength < 2 || offset + segmentLength > buffer.length) break;
+      if ((marker === 0xc0 || marker === 0xc2) && segmentLength >= 7) {
+        return {
+          contentType: "image/jpeg",
+          extension: "jpg",
+          height: buffer.readUInt16BE(offset + 3),
+          width: buffer.readUInt16BE(offset + 5),
+        };
+      }
+      offset += segmentLength;
+    }
+    throw new Error("Unsupported weekly media JPEG dimensions");
+  }
+  throw new Error(`Unsupported weekly media image type: ${declaredType || "unknown"}`);
+}
+
+function isPrivateAddress(address) {
+  const normalized = String(address || "").toLowerCase();
+  if (net.isIP(normalized) === 6) {
+    if (normalized === "::" || normalized === "::1" || normalized.startsWith("fc") || normalized.startsWith("fd")) return true;
+    if (/^fe[89ab]/.test(normalized)) return true;
+    const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/.exec(normalized);
+    return mapped ? isPrivateAddress(mapped[1]) : false;
+  }
+  if (net.isIP(normalized) !== 4) return false;
+  const [a, b] = normalized.split(".").map(Number);
+  return a === 0 || a === 10 || a === 127 || a >= 224 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && (b === 0 || b === 168)) ||
+    (a === 198 && (b === 18 || b === 19));
+}
+
+async function validateRemoteMediaUrl(media, parsed, options) {
+  if (parsed.protocol !== "https:" || (parsed.port && parsed.port !== "443")) {
+    throw new Error(`Weekly media must use HTTPS or a local weekly asset: ${media.id}`);
+  }
+  const allowedHosts = new Set(
+    (Array.isArray(options.mediaAllowedHosts) ? options.mediaAllowedHosts : [])
+      .map((host) => String(host || "").trim().toLowerCase())
+      .filter(Boolean),
+  );
+  if (media.source_url) allowedHosts.add(new URL(media.source_url).hostname.toLowerCase());
+  const hostname = parsed.hostname.toLowerCase();
+  if (!allowedHosts.has(hostname)) throw new Error(`Weekly media host is not allowlisted: ${media.id}`);
+  if (hostname === "localhost" || hostname.endsWith(".localhost") || hostname.endsWith(".local") || isPrivateAddress(hostname)) {
+    throw new Error(`Weekly media host resolves to a private address: ${media.id}`);
+  }
+  const lookupHost = options.lookupHost || ((host) => dns.lookup(host, { all: true, verbatim: true }));
+  const addresses = await lookupHost(hostname);
+  if (!Array.isArray(addresses) || !addresses.length || addresses.some((item) => isPrivateAddress(item.address))) {
+    throw new Error(`Weekly media host resolves to a private address: ${media.id}`);
+  }
+}
+
+async function defaultLoadWeeklyMedia(media, options = {}) {
+  const parsed = new URL(media.src);
+  const publicRoot = path.resolve(options.publicRoot || path.join(__dirname, "..", "public"));
+  const pathname = decodeURIComponent(parsed.pathname);
+  if (pathname.startsWith("/weekly-assets/")) {
+    const localPath = path.resolve(publicRoot, `.${pathname}`);
+    const weeklyAssetsRoot = path.join(publicRoot, "weekly-assets") + path.sep;
+    if (!localPath.startsWith(weeklyAssetsRoot)) throw new Error(`Unsafe weekly media path: ${media.id}`);
+    try {
+      const buffer = await fsp.readFile(localPath);
+      return { buffer, ...sniffImage(buffer) };
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
+  }
+  await validateRemoteMediaUrl(media, parsed, options);
+  const fetchImpl = options.fetchImpl || fetch;
+  const response = await fetchImpl(parsed, {
+    headers: { "user-agent": "DailyTechWeeklyInsight/1.0" },
+    redirect: "error",
+    signal: AbortSignal.timeout(options.mediaTimeoutMs || 5000),
+  });
+  if (!response.ok) throw new Error(`Weekly media request failed (${response.status}): ${media.id}`);
+  const declaredBytes = Number(response.headers.get("content-length") || 0);
+  const maxBytes = options.mediaMaxBytes || 8 * 1024 * 1024;
+  if (declaredBytes > maxBytes) throw new Error(`Weekly media exceeds ${maxBytes} bytes: ${media.id}`);
+  if (!response.body) throw new Error(`Weekly media request returned no body: ${media.id}`);
+  const chunks = [];
+  let totalBytes = 0;
+  for await (const chunk of response.body) {
+    const buffer = Buffer.from(chunk);
+    totalBytes += buffer.length;
+    if (totalBytes > maxBytes) throw new Error(`Weekly media exceeds ${maxBytes} bytes: ${media.id}`);
+    chunks.push(buffer);
+  }
+  const buffer = Buffer.concat(chunks, totalBytes);
+  return { buffer, ...sniffImage(buffer, response.headers.get("content-type") || "") };
+}
+
+async function loadWeeklyMediaAssets(snapshot, options = {}) {
+  if (snapshot.schema_version !== "weekly-insight-publication/v3") return [];
+  const loader = options.loadMedia || ((media) => defaultLoadWeeklyMedia(media, options));
+  return Promise.all(snapshot.content.media.map(async (media) => {
+    if (!media.src) throw new Error(`V3 media requires a source image: ${media.id}`);
+    const loaded = await loader(media);
+    const buffer = Buffer.isBuffer(loaded) ? loaded : loaded?.buffer;
+    if (!Buffer.isBuffer(buffer)) throw new Error(`Weekly media loader returned no image: ${media.id}`);
+    const details = sniffImage(buffer, loaded?.contentType);
+    return {
+      id: media.id,
+      buffer,
+      ...details,
+    };
+  }));
 }
 
 async function fileReceipt(filePath) {
@@ -94,9 +233,10 @@ async function publishWeeklySnapshot(input, options = {}) {
 
   try {
     await fsp.mkdir(stageDir, { recursive: false });
+    const mediaAssets = await loadWeeklyMediaAssets(snapshot, options);
     const html = htmlRenderer(snapshot);
     await fsp.writeFile(path.join(stageDir, "index.html"), html, "utf8");
-    const docx = docxRenderer(snapshot);
+    const docx = await docxRenderer(snapshot, { mediaAssets });
     if (!Buffer.isBuffer(docx)) throw new Error("DOCX renderer must return a Buffer");
     await fsp.writeFile(path.join(stageDir, `${snapshot.artifact_id}.docx`), docx);
     const { section_anchors, ...approvedSnapshot } = snapshot;
@@ -143,4 +283,10 @@ async function publishWeeklySnapshot(input, options = {}) {
   }
 }
 
-module.exports = { publishWeeklySnapshot, verifyHtml, verifyDocx, readMatchingArtifact };
+module.exports = {
+  publishWeeklySnapshot,
+  verifyHtml,
+  verifyDocx,
+  readMatchingArtifact,
+  loadWeeklyMediaAssets,
+};

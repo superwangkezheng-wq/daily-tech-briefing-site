@@ -4,6 +4,8 @@ const path = require("node:path");
 const { randomUUID } = require("node:crypto");
 const { SITE_CONFIG } = require("./config");
 const { publishWeeklySnapshot } = require("./weekly-insight-publisher");
+const { validateWeeklySnapshot } = require("./weekly-insight-contract");
+const { evaluateWeeklyRelease, loadWeeklyReleaseOverride } = require("./weekly-publication-schedule");
 
 function compareInsight(a, b) {
   const aEnd = String(a.period?.end || "");
@@ -48,19 +50,39 @@ async function buildWeeklyInsightCache(options = {}) {
   await fsp.mkdir(publishRoot, { recursive: true });
   const names = (await fsp.readdir(sourceDir)).filter((name) => name.endsWith(".json")).sort();
   const errors = [];
+  const deferred = [];
   for (const name of names) {
     try {
       const input = await readJson(path.join(sourceDir, name));
+      const snapshot = validateWeeklySnapshot(input);
+      const override = typeof options.resolveReleaseOverride === "function"
+        ? await options.resolveReleaseOverride(snapshot)
+        : await loadWeeklyReleaseOverride(
+          options.releaseOverridesFile || SITE_CONFIG.weeklyReleaseOverridesFile,
+          snapshot,
+        );
+      const release = evaluateWeeklyRelease(snapshot, { now: options.now, override });
+      if (!release.eligible) {
+        deferred.push({
+          artifact_id: snapshot.artifact_id,
+          source_run_id: snapshot.source_run_id,
+          reason: release.reason,
+          publish_at: release.publish_at,
+        });
+        continue;
+      }
       await publishWeeklySnapshot(input, { publishRoot });
     } catch (error) {
       errors.push({ source_file: name, error: error.message });
     }
   }
+  const deferredArtifactIds = new Set(deferred.map((item) => item.artifact_id));
   const published = [];
   for (const entry of await fsp.readdir(publishRoot, { withFileTypes: true })) {
     if (!entry.isDirectory() || entry.name.startsWith(".stage-")) continue;
     try {
-      published.push(toIndexEntry(await readJson(path.join(publishRoot, entry.name, "manifest.json"))));
+      const manifest = await readJson(path.join(publishRoot, entry.name, "manifest.json"));
+      if (!deferredArtifactIds.has(manifest.artifact_id)) published.push(toIndexEntry(manifest));
     } catch (error) {
       errors.push({ source_file: `${entry.name}/manifest.json`, error: error.message });
     }
@@ -73,9 +95,10 @@ async function buildWeeklyInsightCache(options = {}) {
     count: published.length,
     insights: published,
     errors,
+    deferred,
   };
   await writeJsonAtomic(path.join(publishRoot, "index.json"), index);
-  return { generatedAt: index.generated_at, published, errors, totalFiles: names.length };
+  return { generatedAt: index.generated_at, published, errors, deferred, totalFiles: names.length };
 }
 
 async function getWeeklyInsights(options = {}) {

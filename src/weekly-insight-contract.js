@@ -29,12 +29,27 @@ const V2_CONTENT_FIELDS = new Set([
   "title", "dek", "period", "status", "selected_topics", "weekly_synthesis", "topics",
   "strategic_recommendations", "evidence", "media",
 ]);
+const V3_CONTENT_FIELDS = new Set([
+  "title", "dek", "period", "status", "selected_topics", "weekly_synthesis", "topics",
+  "recommendation_title", "strategic_recommendations", "evidence", "media",
+]);
 const PERIOD_FIELDS = new Set(["start", "end", "label", "as_of"]);
 const SECTION_FIELDS = new Set(["anchor", "kind", "title", "summary", "items", "evidence_ids", "media_ids"]);
 const TOPIC_FIELDS = new Set([
   "topic_id", "thesis_id", "kicker", "title", "standfirst", "article_sections",
   "industry_impact", "lenovo_china_implication",
 ]);
+const V3_TOPIC_FIELDS = new Set([
+  "topic_id", "thesis_id", "title", "facts", "findings", "industry_impact",
+]);
+const V3_FACTS_FIELDS = new Set([
+  "anchor", "kind", "title", "paragraphs", "items", "terms", "evidence_ids", "media_ids",
+]);
+const V3_INDUSTRY_FIELDS = new Set([
+  "anchor", "kind", "title", "headline", "paragraphs", "items", "evidence_ids", "media_ids",
+]);
+const V3_FINDING_FIELDS = new Set(["finding_id", "headline", "paragraphs", "evidence_ids"]);
+const TERM_FIELDS = new Set(["term", "explanation"]);
 const ARTICLE_SECTION_FIELDS = new Set([
   "anchor", "section_id", "role", "kind", "title", "paragraphs", "items", "evidence_ids", "media_ids",
 ]);
@@ -48,7 +63,11 @@ const ARTICLE_ROLES = new Set([
   "benchmark", "comparison", "timeline", "case_study", "historical_context",
 ]);
 const EVIDENCE_FIELDS = new Set(["id", "title", "publisher", "source_url", "published_at", "accessed_at", "role", "note"]);
-const MEDIA_FIELDS = new Set(["id", "kind", "src", "alt", "caption", "source_label", "source_url"]);
+const MEDIA_FIELDS = new Set([
+  "id", "kind", "src", "alt", "caption", "source_label", "source_url", "usage_rights",
+  "logic_type", "logic_summary",
+]);
+const VISUAL_LOGIC_TYPES = new Set(["causal", "comparison", "dependency", "flow", "stack", "timeline"]);
 const APPROVAL_FIELDS = new Set(["status", "approval_id", "approved_at"]);
 const PUBLICATION_FIELDS = new Set(["public_enabled", "visibility", "authorization_id"]);
 
@@ -171,14 +190,14 @@ function validateEvidence(evidence, index) {
   };
 }
 
-function validateMedia(media, index) {
+function validateMedia(media, index, { requireVisualLogic = false } = {}) {
   if (!media || typeof media !== "object") throw new Error(`Invalid content.media[${index}]`);
   rejectUnknownFields(media, MEDIA_FIELDS, `content.media[${index}]`);
   const kind = requireString(media.kind, `content.media[${index}].kind`, { max: 40 });
   if (!["image", "architecture", "benchmark"].includes(kind)) {
     throw new Error(`Invalid content.media[${index}].kind`);
   }
-  return {
+  const normalized = {
     id: requireString(media.id, `content.media[${index}].id`, { max: 80 }),
     kind,
     src: normalizeHttpUrl(media.src, `content.media[${index}].src`, { nullable: true }),
@@ -187,6 +206,26 @@ function validateMedia(media, index) {
     source_label: optionalString(media.source_label, `content.media[${index}].source_label`, 200),
     source_url: normalizeHttpUrl(media.source_url, `content.media[${index}].source_url`, { nullable: true }),
   };
+  if (Object.prototype.hasOwnProperty.call(media, "usage_rights")) {
+    normalized.usage_rights = optionalString(
+      media.usage_rights,
+      `content.media[${index}].usage_rights`,
+      200,
+    );
+  }
+  if (Object.prototype.hasOwnProperty.call(media, "logic_type")) {
+    normalized.logic_type = optionalString(media.logic_type, `content.media[${index}].logic_type`, 40);
+  }
+  if (Object.prototype.hasOwnProperty.call(media, "logic_summary")) {
+    normalized.logic_summary = optionalString(media.logic_summary, `content.media[${index}].logic_summary`, 500);
+  }
+  if (normalized.logic_type && !VISUAL_LOGIC_TYPES.has(normalized.logic_type)) {
+    throw new Error(`Invalid content.media[${index}].logic_type`);
+  }
+  if (requireVisualLogic && kind === "architecture" && !(normalized.logic_type && normalized.logic_summary)) {
+    throw new Error(`Architecture content.media[${index}] requires logic_type and logic_summary`);
+  }
+  return normalized;
 }
 
 function validateV1Content(content) {
@@ -385,6 +424,140 @@ function validateV2Content(content) {
   };
 }
 
+function validateV3Block(block, topicIndex, field, expectedKind) {
+  const context = `content.topics[${topicIndex}].${field}`;
+  if (!block || typeof block !== "object" || Array.isArray(block)) throw new Error(`Invalid ${context}`);
+  rejectUnknownFields(block, field === "facts" ? V3_FACTS_FIELDS : V3_INDUSTRY_FIELDS, context);
+  if (block.kind !== expectedKind) throw new Error(`Invalid ${context}.kind`);
+  const paragraphs = stringArray(block.paragraphs, `${context}.paragraphs`);
+  if (!paragraphs.length) throw new Error(`Invalid ${context}.paragraphs`);
+  const result = {
+    anchor: anchorString(block.anchor, `${context}.anchor`),
+    kind: expectedKind,
+    title: requireString(block.title, `${context}.title`, { max: 240 }),
+    paragraphs,
+    items: stringArray(block.items, `${context}.items`),
+    evidence_ids: stringArray(block.evidence_ids, `${context}.evidence_ids`, 80),
+    media_ids: stringArray(block.media_ids, `${context}.media_ids`, 80),
+  };
+  if (field === "facts") {
+    if (result.title !== "事实与案例") throw new Error(`Invalid ${context}.title`);
+    result.terms = requiredArray(block.terms, `${context}.terms`).map((term, termIndex) => {
+      const termContext = `${context}.terms[${termIndex}]`;
+      if (!term || typeof term !== "object" || Array.isArray(term)) throw new Error(`Invalid ${termContext}`);
+      rejectUnknownFields(term, TERM_FIELDS, termContext);
+      return {
+        term: requireString(term.term, `${termContext}.term`, { max: 120 }),
+        explanation: requireString(term.explanation, `${termContext}.explanation`, { max: 500 }),
+      };
+    });
+  } else {
+    if (result.title !== "产业影响") throw new Error(`Invalid ${context}.title`);
+    result.headline = requireString(block.headline, `${context}.headline`, { max: 1000 });
+  }
+  return result;
+}
+
+function validateV3Finding(finding, topicIndex, findingIndex) {
+  const context = `content.topics[${topicIndex}].findings[${findingIndex}]`;
+  if (!finding || typeof finding !== "object" || Array.isArray(finding)) throw new Error(`Invalid ${context}`);
+  rejectUnknownFields(finding, V3_FINDING_FIELDS, context);
+  const paragraphs = stringArray(finding.paragraphs, `${context}.paragraphs`);
+  if (!paragraphs.length) throw new Error(`Invalid ${context}.paragraphs`);
+  return {
+    finding_id: requireString(finding.finding_id, `${context}.finding_id`, {
+      max: 160,
+      pattern: /^[a-z][a-z0-9_-]{2,159}$/,
+    }),
+    headline: requireString(finding.headline, `${context}.headline`, { max: 240 }),
+    paragraphs,
+    evidence_ids: stringArray(finding.evidence_ids, `${context}.evidence_ids`, 80),
+  };
+}
+
+function validateV3Topic(topic, index) {
+  const context = `content.topics[${index}]`;
+  if (!topic || typeof topic !== "object" || Array.isArray(topic)) throw new Error(`Invalid ${context}`);
+  rejectUnknownFields(topic, V3_TOPIC_FIELDS, context);
+  const findings = requiredArray(topic.findings, `${context}.findings`)
+    .map((finding, findingIndex) => validateV3Finding(finding, index, findingIndex));
+  if (findings.length < 1 || findings.length > 3) {
+    throw new Error(`Invalid ${context}.findings; expected one to three findings`);
+  }
+  return {
+    topic_id: requireString(topic.topic_id, `${context}.topic_id`, { max: 160 }),
+    thesis_id: requireString(topic.thesis_id, `${context}.thesis_id`, { max: 160 }),
+    title: requireString(topic.title, `${context}.title`, { max: 500 }),
+    facts: validateV3Block(topic.facts, index, "facts", "facts"),
+    findings,
+    industry_impact: validateV3Block(topic.industry_impact, index, "industry_impact", "industry_impact"),
+  };
+}
+
+function validateV3Content(content) {
+  if (!content || typeof content !== "object" || Array.isArray(content)) throw new Error("Invalid content");
+  rejectUnknownFields(content, V3_CONTENT_FIELDS, "content");
+  const selectedTopics = content.selected_topics;
+  if (!Number.isInteger(selectedTopics) || selectedTopics < 0 || selectedTopics > 5) {
+    throw new Error("Invalid content.selected_topics; expected 0..5");
+  }
+  const status = requireString(content.status, "content.status", { max: 40 });
+  if (!["complete", "partial", "no_selection"].includes(status)) throw new Error("Invalid content.status");
+  if ((selectedTopics === 0) !== (status === "no_selection")) {
+    throw new Error("content.status and selected_topics are inconsistent");
+  }
+  const topics = requiredArray(content.topics, "content.topics").map(validateV3Topic);
+  if (topics.length !== selectedTopics) throw new Error("content.selected_topics and topics length are inconsistent");
+  let weeklySynthesis = null;
+  if (content.weekly_synthesis !== null && content.weekly_synthesis !== undefined) {
+    rejectUnknownFields(content.weekly_synthesis, SYNTHESIS_FIELDS, "content.weekly_synthesis");
+    weeklySynthesis = {
+      title: requireString(content.weekly_synthesis.title, "content.weekly_synthesis.title", { max: 240 }),
+      paragraphs: stringArray(content.weekly_synthesis.paragraphs, "content.weekly_synthesis.paragraphs"),
+    };
+    if (!weeklySynthesis.paragraphs.length) throw new Error("Invalid content.weekly_synthesis.paragraphs");
+  }
+  if (content.recommendation_title !== "战略建议") throw new Error("Invalid content.recommendation_title");
+  const strategicRecommendations = requiredArray(
+    content.strategic_recommendations,
+    "content.strategic_recommendations",
+  ).map(validateRecommendation);
+  const evidence = requiredArray(content.evidence, "content.evidence").map(validateEvidence);
+  const media = requiredArray(content.media, "content.media")
+    .map((item, index) => validateMedia(item, index, { requireVisualLogic: true }));
+  const evidenceIds = new Set(evidence.map((item) => item.id));
+  const mediaIds = new Set(media.map((item) => item.id));
+  if (evidenceIds.size !== evidence.length) throw new Error("Duplicate evidence id");
+  if (mediaIds.size !== media.length) throw new Error("Duplicate media id");
+  const blocks = topics.flatMap((topic) => [topic.facts, ...topic.findings, topic.industry_impact]);
+  const anchors = [
+    ...topics.flatMap((topic) => [
+      topic.facts.anchor,
+      ...topic.findings.map((finding) => finding.finding_id),
+      topic.industry_impact.anchor,
+    ]),
+    ...strategicRecommendations.map((item) => item.anchor),
+  ];
+  if (new Set(anchors).size !== anchors.length) throw new Error("Duplicate section anchor");
+  for (const block of blocks) {
+    for (const id of block.evidence_ids) if (!evidenceIds.has(id)) throw new Error(`Unknown evidence id: ${id}`);
+    for (const id of block.media_ids || []) if (!mediaIds.has(id)) throw new Error(`Unknown media id: ${id}`);
+  }
+  return {
+    title: requireString(content.title, "content.title", { max: 500 }),
+    dek: requireString(content.dek, "content.dek", { max: 3000 }),
+    period: validatePeriod(content.period),
+    status,
+    selected_topics: selectedTopics,
+    weekly_synthesis: weeklySynthesis,
+    topics,
+    recommendation_title: "战略建议",
+    strategic_recommendations: strategicRecommendations,
+    evidence,
+    media,
+  };
+}
+
 function validateWeeklySnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
     throw new Error("Weekly insight snapshot must be an object");
@@ -392,7 +565,7 @@ function validateWeeklySnapshot(snapshot) {
   for (const key of Object.keys(snapshot)) {
     if (!SNAPSHOT_FIELDS.has(key)) throw new Error(`Unknown field at website seam: ${key}`);
   }
-  if (!["weekly-insight-publication/v1", "weekly-insight-publication/v2"].includes(snapshot.schema_version)) {
+  if (!["weekly-insight-publication/v1", "weekly-insight-publication/v2", "weekly-insight-publication/v3"].includes(snapshot.schema_version)) {
     throw new Error("Unsupported schema_version");
   }
   const artifactId = requireString(snapshot.artifact_id, "artifact_id", {
@@ -428,9 +601,11 @@ function validateWeeklySnapshot(snapshot) {
     throw new Error("Unpublished snapshots must use internal_preview visibility");
   }
 
-  const content = snapshot.schema_version === "weekly-insight-publication/v2"
-    ? validateV2Content(snapshot.content)
-    : validateV1Content(snapshot.content);
+  const content = snapshot.schema_version === "weekly-insight-publication/v3"
+    ? validateV3Content(snapshot.content)
+    : snapshot.schema_version === "weekly-insight-publication/v2"
+      ? validateV2Content(snapshot.content)
+      : validateV1Content(snapshot.content);
   const contentHash = canonicalSha256(content);
   if (contentHash !== declaredContentHash) throw new Error("content_sha256 does not match canonical content");
   return {
@@ -447,7 +622,16 @@ function validateWeeklySnapshot(snapshot) {
       authorization_id: authorizationId,
     },
     content,
-    section_anchors: snapshot.schema_version === "weekly-insight-publication/v2"
+    section_anchors: snapshot.schema_version === "weekly-insight-publication/v3"
+      ? [
+        ...content.topics.flatMap((topic) => [
+          topic.facts.anchor,
+          ...topic.findings.map((finding) => finding.finding_id),
+          topic.industry_impact.anchor,
+        ]),
+        ...content.strategic_recommendations.map((recommendation) => recommendation.anchor),
+      ]
+      : snapshot.schema_version === "weekly-insight-publication/v2"
       ? [
         ...content.topics.flatMap((topic) => [
           ...topic.article_sections.map((section) => section.anchor),

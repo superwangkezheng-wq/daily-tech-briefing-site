@@ -9,6 +9,7 @@ const DEFAULT_FEEDBACK_DIR = path.join(DEFAULT_DATA_DIR, "feedback");
 const DEFAULT_MAINTENANCE_DIR = path.join(DEFAULT_DATA_DIR, "maintenance");
 const DEFAULT_WEEKLY_SOURCE_DIR = path.join(DEFAULT_DATA_DIR, "weekly-insights");
 const DEFAULT_WEEKLY_FEEDBACK_DIR = path.join(DEFAULT_DATA_DIR, "weekly-feedback");
+const DEFAULT_WEEKLY_RELEASE_OVERRIDES_FILE = path.join(DEFAULT_DATA_DIR, "weekly-release-overrides.json");
 const DEFAULT_CACHE_DIR = path.join(ROOT_DIR, ".cache");
 
 function parseEnvValue(raw) {
@@ -115,6 +116,10 @@ const SITE_CONFIG = {
   weeklySourceDir,
   weeklyCacheDir,
   weeklyFeedbackDir: resolveProjectPath(process.env.WEEKLY_INSIGHT_FEEDBACK_DIR, DEFAULT_WEEKLY_FEEDBACK_DIR),
+  weeklyReleaseOverridesFile: resolveProjectPath(
+    process.env.WEEKLY_INSIGHT_RELEASE_OVERRIDES_FILE,
+    DEFAULT_WEEKLY_RELEASE_OVERRIDES_FILE,
+  ),
   weeklyPreviewToken: process.env.WEEKLY_PREVIEW_TOKEN || "",
   weeklyFeedbackMaxDocxBytes: parseInteger(process.env.WEEKLY_FEEDBACK_MAX_DOCX_BYTES, 8 * 1024 * 1024),
   opsStatusFile: resolveProjectPath(process.env.OPS_STATUS_FILE, path.join(cacheDir, "ops-status.json")),

@@ -20,7 +20,9 @@
 
   function statusLabel(item) {
     if (item.status === "no_selection") return "本期无入选";
-    if (item.content_schema_version === "weekly-insight-publication/v2") return `${item.selected_topics} 个专题`;
+    if (["weekly-insight-publication/v2", "weekly-insight-publication/v3"].includes(item.content_schema_version)) {
+      return `${item.selected_topics} 个专题`;
+    }
     return `${item.selected_theses} 条判断`;
   }
 

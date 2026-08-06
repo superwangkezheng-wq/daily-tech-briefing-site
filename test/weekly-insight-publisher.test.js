@@ -94,12 +94,13 @@ test("DOCX declares CJK-safe business styles and real bullet numbering", async (
   assert.equal(xmlAttribute(relationships.get("http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"), "Target"), "numbering.xml");
 
   const styles = new Map(xmlElements(stylesXml, "w:style").map((element) => [xmlAttribute(element, "w:styleId"), element]));
-  for (const styleId of ["Normal", "WeeklyTitle"]) {
+  for (const [styleId, eastAsiaFont] of [["Normal", "PingFang SC"], ["WeeklyTitle", "Songti SC"]]) {
     const style = styles.get(styleId);
     assert.ok(style, `missing ${styleId}`);
-    assert.match(style, /<w:rFonts\b[^>]*w:ascii="Arial Unicode MS"[^>]*w:hAnsi="Arial Unicode MS"[^>]*w:eastAsia="Arial Unicode MS"/);
+    assert.match(style, new RegExp(`<w:rFonts\\b[^>]*w:eastAsia="${eastAsiaFont}"`));
     assert.match(style, /<w:lang\b[^>]*w:val="zh-CN"[^>]*w:eastAsia="zh-CN"/);
   }
+  assert.match(documentXml, /<w:rPr><w:rFonts\b[^>]*w:eastAsia="PingFang SC"[^>]*\/><w:lang\b[^>]*w:eastAsia="zh-CN"\/><\/w:rPr><w:t/);
   for (const style of styles.values()) {
     assert.ok(style.indexOf("<w:pPr>") < style.indexOf("<w:rPr>"), `paragraph properties must precede run properties in ${xmlAttribute(style, "w:styleId")}`);
   }

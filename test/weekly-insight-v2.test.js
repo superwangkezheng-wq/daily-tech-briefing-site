@@ -122,6 +122,34 @@ test("v2 HTML and DOCX share topic-first reading order and never expose audit ba
   assert.deepEqual(receipt.section_anchors, validateWeeklySnapshot(snapshot).section_anchors);
 });
 
+test("v2 topic narrative renders as presentation sheets without title subtitles", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v2-presentation-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const snapshot = createWeeklyV2Snapshot();
+  const receipt = await publishWeeklySnapshot(snapshot, { publishRoot: root });
+  const html = await fs.readFile(path.join(receipt.artifact_dir, "index.html"), "utf8");
+  const documentXml = readZipEntries(
+    await fs.readFile(path.join(receipt.artifact_dir, `${snapshot.artifact_id}.docx`)),
+  ).get("word/document.xml").toString("utf8");
+
+  assert.doesNotMatch(html, />Context-state control</);
+  assert.doesNotMatch(html, /状态保留、压缩与同步开始成为 Agent 的能力—成本控制面。/);
+  assert.doesNotMatch(documentXml, /Context-state control/);
+  assert.doesNotMatch(documentXml, /状态保留、压缩与同步开始成为 Agent 的能力—成本控制面。/);
+  assert.match(html, /class="weekly-synthesis__lead"/);
+  assert.equal((html.match(/class="topic-presentation-sheet/g) || []).length, 2);
+  assert.equal((html.match(/class="topic-story /g) || []).length, 3);
+  assert.match(html, /class="topic-story__heading"/);
+  assert.match(html, /class="topic-story__prose"/);
+  assert.match(html, /class="topic-story__visuals"/);
+  assert.equal((html.match(/class="topic-story__structured"/g) || []).length, 3);
+  assert.match(
+    html,
+    /class="topic-story__content"[\s\S]*?<\/div><div class="topic-story__structured"><ul class="insight-points">/,
+  );
+  assert.equal((html.match(/class="topic-analysis-pair"/g) || []).length, 1);
+});
+
 test("v2 edited Word produces section-level topic and issue recommendation diffs", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v2-feedback-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));

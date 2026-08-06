@@ -31,6 +31,11 @@ const RULES = [
     name: "filled app secret",
     pattern: /(APP_SECRET|API_KEY|SECRET_KEY)=(?!\s*$|replace-|your-|change-)\S+/gi,
   },
+  {
+    name: "internal strategy marker in public static assets",
+    pattern: /联想中国区|万全智算|Lenovo China/gi,
+    publicOnly: true,
+  },
 ];
 
 function shouldSkipDir(relativePath) {
@@ -78,6 +83,7 @@ for (const filePath of trackedFiles()) {
   }
   const text = fs.readFileSync(filePath, "utf8");
   for (const rule of RULES) {
+    if (rule.publicOnly && !(relativePath === "public" || relativePath.startsWith(`public${path.sep}`))) continue;
     const matches = text.match(rule.pattern);
     if (matches) {
       findings.push(`${relativePath}: ${rule.name} (${matches.length})`);

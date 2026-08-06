@@ -239,4 +239,124 @@ function createWeeklyV2Snapshot(overrides = {}) {
   return snapshot;
 }
 
-module.exports = { createWeeklySnapshot, createWeeklyV2Snapshot };
+function createWeeklyV3Snapshot(overrides = {}) {
+  const content = {
+    title: "企业 Agent 进入统一治理阶段",
+    dek: "从已确认事件与公开案例出发，解释治理控制为何在本期变得重要。",
+    period: {
+      start: "2026-07-27",
+      end: "2026-08-02",
+      label: "2026 W31",
+      as_of: "2026-08-03T09:30:00+08:00",
+    },
+    status: "complete",
+    selected_topics: 1,
+    weekly_synthesis: {
+      title: "本期主线：Agent 的运行边界开始进入平台治理范围",
+      paragraphs: ["连接器授权、计划任务与持续运行把 Agent 治理从单次交互扩展到完整生命周期。"],
+    },
+    topics: [
+      {
+        topic_id: "topic-agent-governance",
+        thesis_id: "thesis-runtime-001",
+        title: "企业开始把 Agent 纳入统一身份和权限管理",
+        facts: {
+          anchor: "thesis_runtime_001_facts",
+          kind: "facts",
+          title: "事实与案例",
+          paragraphs: [
+            "AgentForger 利用了已经修复的 CSRF（跨站请求伪造）问题。攻击者诱导已登录用户的浏览器提交未经用户确认的请求。",
+            "公开复现显示，连接器授权、Agent 创建、审批设置与计划任务共同决定了后续执行范围；该案例不能代表其他 Agent 平台的总体安全状态。",
+          ],
+          items: ["漏洞已修复，公开披露与修复时间均可回溯。"],
+          terms: [{ term: "CSRF", explanation: "攻击者诱导已登录用户的浏览器提交未经用户确认的请求。" }],
+          evidence_ids: ["evidence-agentforger"],
+          media_ids: ["architecture-agent-governance"],
+        },
+        findings: [
+          {
+            finding_id: "finding-agent-volume",
+            headline: "Agent 数量增长推动统一治理",
+            paragraphs: ["分散的创建入口、授权记录和计划任务增加了追踪、撤权和停用的难度，这在 Agent 数量增长后变得更重要。"],
+            evidence_ids: ["evidence-agentforger"],
+          },
+        ],
+        industry_impact: {
+          anchor: "thesis_runtime_001_industry",
+          kind: "industry_impact",
+          title: "产业影响",
+          headline: "Agent 管理将覆盖身份、权限、运行记录和停用流程",
+          paragraphs: ["平台需要把统一清单、最小权限、操作审计、环境隔离和停用能力纳入产品验收。"],
+          items: ["安全控制要与任务成功率、误报、审批次数和恢复时间共同验收。"],
+          evidence_ids: ["evidence-agentforger"],
+          media_ids: [],
+        },
+      },
+    ],
+    recommendation_title: "战略建议",
+    strategic_recommendations: [
+      {
+        anchor: "recommendation_agent_governance_recommendation",
+        headline: "建立 Agent 生命周期治理基线。",
+        rationale: "连接器权限和计划任务使一次配置错误可能影响后续执行。",
+        action: "在既有平台中统一清单、所有者、权限、运行记录、版本和停用入口。",
+        decision_window: "下一次平台版本规划前",
+      },
+    ],
+    evidence: [
+      {
+        id: "evidence-agentforger",
+        title: "AgentForger 公开披露与修复记录",
+        publisher: "Zenity Labs",
+        source_url: "https://labs.zenity.io/p/agentforger-part-1-chatgpt-cross-site-agent-forgery",
+        published_at: "2026-07-31",
+        accessed_at: "2026-08-03T09:00:00+08:00",
+        role: "source_in",
+        note: "支持事件过程、成立条件和修复状态，不外推其他平台。",
+      },
+    ],
+    media: [
+      {
+        id: "architecture-agent-governance",
+        kind: "architecture",
+        src: "http://127.0.0.1:4331/weekly-assets/gate6-w31/agent-governance-four-layer.png",
+        alt: "企业 Agent 治理依赖关系图",
+        caption: "Agent 经由连接器访问企业系统，治理控制约束身份、权限和审计。",
+        source_label: "依据公开事实绘制",
+        source_url: "https://labs.zenity.io/p/agentforger-part-1-chatgpt-cross-site-agent-forgery",
+        usage_rights: "本项目依据公开事实绘制",
+        logic_type: "dependency",
+        logic_summary: "Agent 调用连接器访问企业系统；身份、权限和审计控制共同约束调用范围。",
+      },
+    ],
+    ...overrides.content,
+  };
+
+  const snapshot = {
+    schema_version: "weekly-insight-publication/v3",
+    artifact_id: "wsi-2026-w31-v3",
+    source_run_id: "weekly-run-2026-w31-v3",
+    version: "1.0",
+    approved_candidate_sha256: "d".repeat(64),
+    content_sha256: canonicalSha256(content),
+    approval: {
+      status: "approved",
+      approval_id: "approval-2026-w31-v3",
+      approved_at: "2026-08-03T10:00:00+08:00",
+    },
+    ...overrides,
+    publication: {
+      public_enabled: false,
+      visibility: "internal_preview",
+      authorization_id: null,
+      ...overrides.publication,
+    },
+    content,
+  };
+  snapshot.content_sha256 = Object.prototype.hasOwnProperty.call(overrides, "content_sha256")
+    ? overrides.content_sha256
+    : canonicalSha256(snapshot.content);
+  return snapshot;
+}
+
+module.exports = { createWeeklySnapshot, createWeeklyV2Snapshot, createWeeklyV3Snapshot };
