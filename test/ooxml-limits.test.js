@@ -36,3 +36,13 @@ test("rejects truncated headers, too many entries, and excessive archive totals"
   assert.throws(() => readZipEntries(entries, { maxEntryBytes: 100, maxEntries: 1 }), /exceeds 1 entries/i);
   assert.throws(() => readZipEntries(entries, { maxEntryBytes: 100, maxTotalBytes: 100 }), /exceeds 100 total bytes/i);
 });
+
+test("rejects encrypted entries and CRC mismatches", () => {
+  const encrypted = createZip([["word/document.xml", Buffer.from("safe")]]);
+  encrypted.writeUInt16LE(encrypted.readUInt16LE(6) | 0x0001, 6);
+  assert.throws(() => readZipEntries(encrypted), /encrypted/i);
+
+  const corrupted = createZip([["word/document.xml", Buffer.from("safe")]]);
+  corrupted[30 + Buffer.byteLength("word/document.xml")] ^= 0xff;
+  assert.throws(() => readZipEntries(corrupted), /CRC|checksum/i);
+});

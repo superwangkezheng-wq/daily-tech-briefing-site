@@ -13,6 +13,7 @@ const {
 } = require("./helpers/weekly-fixture");
 const { createValidPng } = require("./helpers/image-fixture");
 const { writeV41BundleManifest } = require("./helpers/weekly-bundle-fixture");
+const { createZip, readZipEntries } = require("../src/ooxml");
 const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
 const { createServer, SITE_CONFIG } = require("../server");
 
@@ -23,11 +24,13 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
     weeklyCacheDir: SITE_CONFIG.weeklyCacheDir,
     weeklyFeedbackDir: SITE_CONFIG.weeklyFeedbackDir,
     weeklyPreviewToken: SITE_CONFIG.weeklyPreviewToken,
+    weeklyFeedbackToken: SITE_CONFIG.weeklyFeedbackToken,
   };
   SITE_CONFIG.weeklySourceDir = path.join(root, "source");
   SITE_CONFIG.weeklyCacheDir = path.join(root, "cache");
   SITE_CONFIG.weeklyFeedbackDir = path.join(root, "feedback");
   SITE_CONFIG.weeklyPreviewToken = "gate5-preview-secret";
+  SITE_CONFIG.weeklyFeedbackToken = "gate5-feedback-secret";
   await fs.mkdir(SITE_CONFIG.weeklySourceDir, { recursive: true });
   const internal = createWeeklyV2Snapshot({
     content: { title: "内部预览：不得出现在公开 API" },
@@ -199,7 +202,11 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   assert.equal((await fetch(`${base}/api/insights/${internalV41.artifact_id}/word`)).status, 404);
   const v41Page = await fetch(`${base}/insights/${internalV41.artifact_id}?preview_token=gate5-preview-secret`);
   assert.equal(v41Page.status, 200);
-  assert.ok((await v41Page.text()).includes(internalV41Image.toString("base64")));
+  const v41Html = await v41Page.text();
+  assert.ok(v41Html.includes(internalV41Image.toString("base64")));
+  assert.match(v41Html, />通过 Codex 反馈</);
+  assert.match(v41Html, />上传修改后 Word</);
+  assert.doesNotMatch(v41Html, />提交校准反馈</);
   assert.equal(
     (await fetch(`${base}/api/insights/${internalV41.artifact_id}?preview_token=gate5-preview-secret`)).status,
     200,
@@ -209,6 +216,7 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   );
   assert.equal(v41Word.status, 200);
   assert.match(v41Word.headers.get("content-type"), /wordprocessingml/);
+  const v41SystemWord = Buffer.from(await v41Word.arrayBuffer());
   const publicMediaRoute = await fetch(`${base}/weekly-assets/agentforger-csrf-comparison.png`);
   assert.doesNotMatch(publicMediaRoute.headers.get("content-type") || "", /^image\//);
   assert.notDeepEqual(Buffer.from(await publicMediaRoute.arrayBuffer()), internalV41Image);
@@ -230,24 +238,110 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
   assert.equal(v4Word.status, 200);
   assert.match(v4Word.headers.get("content-type"), /wordprocessingml/);
 
-  const unauthorizedFeedback = await fetch(`${base}/api/insights/${internal.artifact_id}/feedback`, {
+  const unauthorizedFeedback = await fetch(`${base}/api/insights/${internalV41.artifact_id}/feedback?preview_token=gate5-preview-secret`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ sectionAnchor: "overall", comment: "should not store" }),
+    body: JSON.stringify({ feedbackId: "019d1234-5678-7abc-8def-0123456789ab", editedDocxBase64: v41SystemWord.toString("base64") }),
   });
   assert.equal(unauthorizedFeedback.status, 404);
-  const feedback = await fetch(`${base}/api/insights/${internal.artifact_id}/feedback?preview_token=gate5-preview-secret`, {
+  const editedEntries = readZipEntries(v41SystemWord);
+  const editedDocument = editedEntries.get("word/document.xml").toString("utf8");
+  assert.match(editedDocument, /背景与原因在此时同时聚集/);
+  editedEntries.set(
+    "word/document.xml",
+    Buffer.from(editedDocument.replace("背景与原因在此时同时聚集", "背景、原因与时机在此时同时聚集")),
+  );
+  const feedbackId = "019d1234-5678-7abc-8def-0123456789ab";
+  const feedback = await fetch(`${base}/api/insights/${internalV41.artifact_id}/feedback?preview_token=gate5-preview-secret`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      "x-weekly-feedback-token": "gate5-feedback-secret",
+    },
     body: JSON.stringify({
-      sectionAnchor: "thesis_agent_context_state_control_what_changed",
-      comment: "请校准事实段落。",
+      feedbackId,
+      editedDocxBase64: createZip([...editedEntries.entries()]).toString("base64"),
     }),
   });
   assert.equal(feedback.status, 201);
   const feedbackBody = await feedback.json();
-  assert.equal(feedbackBody.receipt.artifact_id, internal.artifact_id);
-  assert.equal(feedbackBody.receipt.draft_content_sha256, internal.content_sha256);
-  assert.equal(Object.prototype.hasOwnProperty.call(feedbackBody.receipt, "file_path"), false);
-  assert.equal((await fs.readdir(SITE_CONFIG.weeklyFeedbackDir)).length, 1);
+  assert.equal(feedbackBody.receipt.artifact_id, internalV41.artifact_id);
+  assert.equal(feedbackBody.receipt.draft_content_sha256, internalV41.content_sha256);
+  assert.deepEqual(feedbackBody.receipt.feedback_areas, ["findings"]);
+  assert.equal(feedbackBody.receipt.calibration_status, "pending_review");
+  const bundlePath = path.join(SITE_CONFIG.weeklyFeedbackDir, internalV41.artifact_id, feedbackId);
+  assert.deepEqual((await fs.readdir(bundlePath)).sort(), [
+    "adapter-record.json",
+    "human-final.docx",
+    "outbox-manifest.json",
+    "system-draft.docx",
+  ]);
+  const outboxManifest = JSON.parse(await fs.readFile(path.join(bundlePath, "outbox-manifest.json"), "utf8"));
+  const wbrReceipt = {
+    status: "written",
+    feedback_id: feedbackId,
+    artifact_id: internalV41.artifact_id,
+    source_run_id: internalV41.source_run_id,
+    draft_content_sha256: internalV41.content_sha256,
+    bundle_sha256: "a".repeat(64),
+    bundle_path: "/private/wbr/path/must-not-be-persisted",
+    written_at: "2026-08-09T12:00:00+08:00",
+  };
+  const ackRequest = (receipt = wbrReceipt) => fetch(`${base}/api/insights/${internalV41.artifact_id}/feedback-ack?preview_token=gate5-preview-secret`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-weekly-feedback-token": "gate5-feedback-secret",
+    },
+    body: JSON.stringify({
+      feedbackId,
+      bundleSha256: outboxManifest.bundle_sha256,
+      wbrReceipt: receipt,
+    }),
+  });
+  assert.equal((await ackRequest()).status, 201);
+  assert.equal((await ackRequest({ ...wbrReceipt, status: "already_present", written_at: null })).status, 200);
+  const ackRecord = JSON.parse(await fs.readFile(path.join(bundlePath, "ack.json"), "utf8"));
+  assert.equal(ackRecord.wbr_receipt.artifact_id, internalV41.artifact_id);
+  assert.equal(Object.prototype.hasOwnProperty.call(ackRecord.wbr_receipt, "bundle_path"), false);
+
+  const unchangedFeedback = await fetch(`${base}/api/insights/${internalV41.artifact_id}/feedback?preview_token=gate5-preview-secret`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-weekly-feedback-token": "gate5-feedback-secret",
+    },
+    body: JSON.stringify({
+      feedbackId: "019d1234-5678-7abc-8def-0123456789ac",
+      editedDocxBase64: v41SystemWord.toString("base64"),
+    }),
+  });
+  assert.equal(unchangedFeedback.status, 400);
+  assert.match((await unchangedFeedback.json()).error, /does not contain any changes/i);
+
+  const blockedOutbox = path.join(root, "blocked-outbox");
+  await fs.writeFile(blockedOutbox, "not a directory");
+  SITE_CONFIG.weeklyFeedbackDir = blockedOutbox;
+  const originalConsoleError = console.error;
+  console.error = () => {};
+  let failedFeedback;
+  try {
+    failedFeedback = await fetch(`${base}/api/insights/${internalV41.artifact_id}/feedback?preview_token=gate5-preview-secret`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-weekly-feedback-token": "gate5-feedback-secret",
+      },
+      body: JSON.stringify({
+        feedbackId: "019d1234-5678-7abc-8def-0123456789ad",
+        editedDocxBase64: createZip([...editedEntries.entries()]).toString("base64"),
+      }),
+    });
+  } finally {
+    console.error = originalConsoleError;
+  }
+  assert.equal(failedFeedback.status, 500);
+  const failedFeedbackBody = await failedFeedback.json();
+  assert.equal(failedFeedbackBody.error, "Word 反馈处理失败，请稍后重试");
+  assert.doesNotMatch(JSON.stringify(failedFeedbackBody), /blocked-outbox|ENOTDIR|mkdir/i);
 });

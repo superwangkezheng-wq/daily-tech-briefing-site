@@ -98,17 +98,26 @@ function readZipEntries(buffer, options = {}) {
     if (entries.size >= maxEntries) throw new Error(`ZIP archive exceeds ${maxEntries} entries`);
     const flags = buffer.readUInt16LE(offset + 6);
     const method = buffer.readUInt16LE(offset + 8);
+    const expectedCrc = buffer.readUInt32LE(offset + 14);
     const compressedSize = buffer.readUInt32LE(offset + 18);
     const uncompressedSize = buffer.readUInt32LE(offset + 22);
     const nameLength = buffer.readUInt16LE(offset + 26);
     const extraLength = buffer.readUInt16LE(offset + 28);
+    if (flags & 0x0001) throw new Error("Encrypted DOCX entries are not supported");
     if (flags & 0x0008) throw new Error("DOCX data descriptors are not supported");
     const nameStart = offset + 30;
     const dataStart = nameStart + nameLength + extraLength;
     const dataEnd = dataStart + compressedSize;
     if (dataEnd > buffer.length) throw new Error("Invalid ZIP entry length");
     if (uncompressedSize > maxEntryBytes) throw new Error(`ZIP entry exceeds ${maxEntryBytes} bytes`);
-    const name = buffer.subarray(nameStart, nameStart + nameLength).toString("utf8");
+    let name;
+    try {
+      name = new TextDecoder("utf-8", { fatal: true }).decode(
+        buffer.subarray(nameStart, nameStart + nameLength),
+      );
+    } catch (error) {
+      throw new Error("DOCX ZIP entry names must use valid UTF-8");
+    }
     if (entries.has(name)) throw new Error(`Duplicate ZIP entry: ${name}`);
     const compressed = buffer.subarray(dataStart, dataEnd);
     let inflated;
@@ -120,6 +129,7 @@ function readZipEntries(buffer, options = {}) {
       if (inflated.length > maxEntryBytes) throw new Error(`ZIP entry exceeds ${maxEntryBytes} bytes`);
     } else throw new Error(`Unsupported ZIP compression method: ${method}`);
     if (inflated.length !== uncompressedSize) throw new Error(`ZIP entry size mismatch: ${name}`);
+    if (crc32(inflated) !== expectedCrc) throw new Error(`ZIP entry CRC checksum mismatch: ${name}`);
     totalBytes += inflated.length;
     if (totalBytes > maxTotalBytes) throw new Error(`ZIP archive exceeds ${maxTotalBytes} total bytes`);
     entries.set(name, inflated);

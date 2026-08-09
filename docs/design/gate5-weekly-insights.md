@@ -8,8 +8,8 @@ Gate 5 在现有 Node 服务内增加一条窄而深的 `weekly_insight` 内容�
 2. 网站严格校验 allowlist、内容哈希、0–4 条状态与逐期公开授权；网站不调用分析执行器，也不解释原始研究产物。
 3. 现有 refresh 每次同时触发 daily 与 weekly 构建。两者用 `Promise.all` 隔离结果，不增加 scheduler。
 4. weekly publisher 在同一 staging 目录生成 HTML、DOCX、content JSON，校验标识与 anchors 后最后写 manifest，再原子 rename。
-5. `.cache/weekly-insights` 是私有派生缓存。`public_enabled=false` 的期刊只有携带 `WEEKLY_PREVIEW_TOKEN` 才能读取页面、API、Word 和提交反馈。
-6. feedback 绑定 artifact/run/version/draft/final hash；若上传编辑后的 Word，则依照 DOCX bookmarks 计算 section-level diff。前端不修改 WBR Skill。
+5. `.cache/weekly-insights` 是私有派生缓存。`public_enabled=false` 的期刊只有携带 `WEEKLY_PREVIEW_TOKEN` 才能读取页面、API 和 Word；Word 反馈还必须单独提供 `WEEKLY_FEEDBACK_TOKEN`。
+6. 网页只有“通过 Codex 反馈”和“上传修改后 Word”两个入口。Codex 入口只复制带 artifact/hash/topic/anchor/category/page URL 的模板；Word 入口核验同一快照的 DOCX bookmarks 与 package state，生成 `weekly-insight-docx-diff/v2` 和原子 outbox。两者都只进入 `pending_review`，前端不修改 WBR Skill。
 
 权威消费合同见 [weekly-insight-publication-v1.md](../contracts/weekly-insight-publication-v1.md)。
 
@@ -47,7 +47,7 @@ OpenDesign 原型中的示例事实只用于版式探索，没有进入仓库或
 | XSS | 标题与正文转义，外链仅 http(s) | publisher tests |
 | HTML/DOCX 一致 | artifact/run/version/hash/anchors 一致 | publisher + OOXML tests |
 | 半套失败 | DOCX 失败后无 artifact 目录 | atomic publisher test |
-| 反馈校准 | 精确 snapshot 绑定、bookmark section diff、错误 artifact 拒绝 | feedback tests |
+| 反馈校准 | 精确 snapshot 绑定、bookmark/package diff、v2 canonical outbox hash、ack/retry/碰撞 | feedback + WBR cross-repo tests |
 | 未公开隔离 | 无 token 的页面/API/Word/feedback 均不可见 | server integration test |
 | 公开授权 | `approved` 不能推断 public；public 需单独 authorization id | contract tests |
 | weekly 失败 | daily 成功结果保留 | isolation test |

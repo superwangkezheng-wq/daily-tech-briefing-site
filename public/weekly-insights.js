@@ -185,39 +185,104 @@
       scheduleChapterNavUpdate();
     }
 
-    const dialog = document.querySelector("[data-feedback-dialog]");
-    document.querySelector("[data-feedback-open]")?.addEventListener("click", () => dialog?.showModal());
-    dialog?.querySelector(".feedback-dialog__close")?.addEventListener("click", (event) => {
-      event.preventDefault();
-      dialog.close();
+    const codexDialog = document.querySelector("[data-codex-feedback-dialog]");
+    const wordDialog = document.querySelector("[data-word-feedback-dialog]");
+    document.querySelector("[data-codex-feedback-open]")?.addEventListener("click", () => codexDialog?.showModal());
+    document.querySelector("[data-word-feedback-open]")?.addEventListener("click", () => wordDialog?.showModal());
+    [codexDialog, wordDialog].forEach((dialog) => {
+      dialog?.querySelector(".feedback-dialog__close")?.addEventListener("click", (event) => {
+        event.preventDefault();
+        dialog.close();
+      });
     });
-    document.querySelector("[data-feedback-submit]")?.addEventListener("click", async (event) => {
+
+    const codexSelect = codexDialog?.querySelector("[data-codex-feedback-section]");
+    const codexTemplate = codexDialog?.querySelector("[data-codex-feedback-template]");
+    const updateCodexTemplate = () => {
+      if (!codexSelect || !codexTemplate) return;
+      const option = codexSelect.selectedOptions[0];
+      const cleanUrl = new URL(window.location.origin + window.location.pathname);
+      cleanUrl.hash = option?.value || "";
+      const categories = {
+        facts: "事实与案例",
+        findings: "关键发现",
+        industry_impact: "产业影响",
+        strategic_recommendation: "战略建议",
+        overall: "整篇",
+      };
+      codexTemplate.value = [
+        "请将以下意见作为绑定原始产物的 pending_review 反馈，不要直接改写已发布内容或 Skill。",
+        `artifact_id: ${artifactId}`,
+        `content_sha256: ${document.querySelector('meta[name="weekly:content_sha256"]')?.content || ""}`,
+        `topic_id: ${option?.dataset.topicId || "overall"}`,
+        `reader_anchor: ${option?.value || "overall"}`,
+        `feedback_category: ${categories[option?.dataset.feedbackCategory] || option?.dataset.feedbackCategory || "整篇"}`,
+        `page_url: ${cleanUrl}`,
+        "",
+        "反馈意见：",
+      ].join("\n");
+    };
+    codexSelect?.addEventListener("change", updateCodexTemplate);
+    updateCodexTemplate();
+    codexDialog?.querySelector("[data-codex-feedback-copy]")?.addEventListener("click", async () => {
+      const status = codexDialog.querySelector("[data-codex-feedback-status]");
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error("当前浏览器无法使用剪贴板。");
+        await navigator.clipboard.writeText(codexTemplate.value);
+        status.textContent = "已复制，请在 Codex 中粘贴并补充意见。";
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    });
+
+    let feedbackId = null;
+    const nextFeedbackId = () => {
+      if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+      if (!globalThis.crypto?.getRandomValues) {
+        throw new Error("当前浏览器无法安全生成反馈编号。");
+      }
+      const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+      bytes[6] = (bytes[6] & 0x0f) | 0x40;
+      bytes[8] = (bytes[8] & 0x3f) | 0x80;
+      const hex = [...bytes].map((value) => value.toString(16).padStart(2, "0")).join("");
+      return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+    };
+    wordDialog?.querySelector("[data-word-feedback-submit]")?.addEventListener("click", async (event) => {
       const button = event.currentTarget;
-      const status = dialog.querySelector("[data-feedback-status]");
-      const comment = dialog.querySelector("[data-feedback-text]").value.trim();
-      const fileInput = dialog.querySelector("[data-feedback-docx]");
+      const status = wordDialog.querySelector("[data-word-feedback-status]");
+      const fileInput = wordDialog.querySelector("[data-feedback-docx]");
+      const tokenInput = wordDialog.querySelector("[data-feedback-token]");
+      if (!status || !fileInput || !tokenInput) return;
+      const token = tokenInput.value;
       const file = fileInput.files[0];
-      const maxDocxBytes = Number(fileInput.dataset.maxBytes || 8 * 1024 * 1024);
-      if (!comment) { status.textContent = "请填写反馈内容。"; return; }
-      if (file && file.size > maxDocxBytes) {
+      const parsedMaxDocxBytes = Number(fileInput.dataset.maxBytes);
+      const maxDocxBytes = Number.isFinite(parsedMaxDocxBytes) && parsedMaxDocxBytes > 0
+        ? parsedMaxDocxBytes
+        : 8 * 1024 * 1024;
+      if (!file) { status.textContent = "请选择修改后的 Word 文件。"; return; }
+      if (!token) { status.textContent = "请输入私有反馈凭据。"; return; }
+      if (file.size > maxDocxBytes) {
         const maxMegabytes = (maxDocxBytes / (1024 * 1024)).toLocaleString("zh-CN", { maximumFractionDigits: 1 });
-        status.textContent = `Word 文件不能超过 ${maxMegabytes} MB。`;
+        status.textContent = `Word 文件不能超过 ${maxMegabytes} MiB。`;
         return;
       }
       button.disabled = true;
-      status.textContent = "正在绑定快照并计算章节差异…";
+      status.textContent = "正在校验书签、快照绑定和包差异…";
       try {
-        const payload = {
-          sectionAnchor: dialog.querySelector("[data-feedback-section]").value,
-          comment,
-          editedDocxBase64: file ? await fileToBase64(file) : "",
-        };
-        const result = await fetchJson(`/api/insights/${encodeURIComponent(artifactId)}/feedback`, {
+        feedbackId ||= nextFeedbackId();
+        await fetchJson(`/api/insights/${encodeURIComponent(artifactId)}/feedback`, {
           method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload),
+          headers: {
+            "content-type": "application/json",
+            "x-weekly-feedback-token": token,
+          },
+          body: JSON.stringify({
+            feedbackId,
+            editedDocxBase64: await fileToBase64(file),
+          }),
         });
-        status.textContent = `已记录 · ${result.receipt.section_diffs.length} 个章节发生变化`;
+        status.textContent = "已收到，等待 Codex/WBR 复核";
+        feedbackId = null;
       } catch (error) {
         status.textContent = error.message;
       } finally {

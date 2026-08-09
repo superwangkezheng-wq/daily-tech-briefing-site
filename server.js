@@ -7,7 +7,11 @@ const { SITE_CONFIG } = require("./src/config");
 const { getSnapshotsIndex, getLatestSnapshotMeta, getSnapshotDetail } = require("./src/site-index");
 const { buildContentCache } = require("./src/content-index");
 const { getWeeklyInsights, getWeeklyInsight } = require("./src/weekly-insight-index");
-const { saveWeeklyFeedback } = require("./src/weekly-feedback");
+const { buildWeeklyDocxFeedback } = require("./src/weekly-docx-feedback-v2");
+const {
+  commitWeeklyFeedbackOutbox,
+  acknowledgeWeeklyFeedback,
+} = require("./src/weekly-feedback-outbox");
 const { appendOpsLog, readOpsStatus, updateOpsStatus } = require("./src/ops-store");
 const { saveFeedback } = require("./src/feedback-store");
 
@@ -102,6 +106,17 @@ function isWeeklyPreviewAuthorized(req, searchParams) {
   const headerToken = String(req.headers["x-weekly-preview-token"] || "");
   const queryToken = String(searchParams.get("preview_token") || "");
   return headerToken === SITE_CONFIG.weeklyPreviewToken || queryToken === SITE_CONFIG.weeklyPreviewToken;
+}
+
+function tokenMatches(expected, supplied) {
+  const expectedBytes = Buffer.from(String(expected || ""));
+  const suppliedBytes = Buffer.from(String(supplied || ""));
+  return expectedBytes.length > 0 && expectedBytes.length === suppliedBytes.length
+    && crypto.timingSafeEqual(expectedBytes, suppliedBytes);
+}
+
+function isWeeklyFeedbackAuthorized(req) {
+  return tokenMatches(SITE_CONFIG.weeklyFeedbackToken, req.headers["x-weekly-feedback-token"]);
 }
 
 function toPublicWeeklyDetail(detail) {
@@ -276,7 +291,7 @@ async function handleApi(req, res, pathname, searchParams) {
     return sendJson(res, 200, toPublicWeeklyIndex(index));
   }
 
-  const weeklyMatch = pathname.match(/^\/api\/insights\/([a-z0-9][a-z0-9-]{2,99})(?:\/(word|feedback))?$/);
+  const weeklyMatch = pathname.match(/^\/api\/insights\/([a-z0-9][a-z0-9-]{2,99})(?:\/(word|feedback|feedback-ack))?$/);
   if (weeklyMatch) {
     const artifactId = weeklyMatch[1];
     const action = weeklyMatch[2] || "detail";
@@ -296,29 +311,80 @@ async function handleApi(req, res, pathname, searchParams) {
       );
     }
     if (req.method === "POST" && action === "feedback") {
+      if (!isWeeklyFeedbackAuthorized(req)) return sendJson(res, 404, { error: "Weekly insight not found" });
       try {
         const maxBodyBytes = Math.ceil(SITE_CONFIG.weeklyFeedbackMaxDocxBytes * 1.5) + 64 * 1024;
         const rawBody = await readRequestBody(req, maxBodyBytes);
         const body = rawBody ? JSON.parse(rawBody) : {};
         const encoded = String(body.editedDocxBase64 || "").trim();
-        if (encoded && !/^[A-Za-z0-9+/=\r\n]+$/.test(encoded)) {
+        if (!encoded || !/^[A-Za-z0-9+/=\r\n]+$/.test(encoded)) {
           return sendJson(res, 400, { error: "编辑后的 Word 编码无效" });
         }
-        const editedDocx = encoded ? Buffer.from(encoded, "base64") : null;
-        const result = await saveWeeklyFeedback({
+        const humanDocx = Buffer.from(encoded, "base64");
+        if (humanDocx.length > SITE_CONFIG.weeklyFeedbackMaxDocxBytes) {
+          return sendJson(res, 400, { error: "编辑后的 Word 超过 8 MiB 上限" });
+        }
+        const systemDocx = await fsp.readFile(path.join(detail.artifact_dir, `${artifactId}.docx`));
+        const diff = buildWeeklyDocxFeedback({
           snapshot: detail,
-          manifest: detail.manifest,
-          originalDocxPath: path.join(detail.artifact_dir, `${artifactId}.docx`),
-          feedbackDir: SITE_CONFIG.weeklyFeedbackDir,
-          sectionAnchor: String(body.sectionAnchor || "overall"),
-          comment: String(body.comment || ""),
-          editedDocx,
-          maxDocxBytes: SITE_CONFIG.weeklyFeedbackMaxDocxBytes,
+          systemDocx,
+          humanDocx,
+          feedbackId: String(body.feedbackId || ""),
         });
-        const { file_path, ...receipt } = result;
-        return sendJson(res, 201, { ok: true, receipt });
+        const committed = await commitWeeklyFeedbackOutbox({
+          root: SITE_CONFIG.weeklyFeedbackDir,
+          snapshot: detail,
+          systemDocx,
+          humanDocx,
+          ...diff,
+        });
+        return sendJson(res, committed.status === "committed" ? 201 : 200, {
+          ok: true,
+          receipt: {
+            status: committed.status,
+            feedback_id: diff.adapter.feedback_id,
+            artifact_id: detail.artifact_id,
+            source_run_id: detail.source_run_id,
+            version: detail.version,
+            draft_content_sha256: detail.content_sha256,
+            outbox_bundle_sha256: committed.manifest.bundle_sha256,
+            section_anchors: diff.section_anchors,
+            feedback_areas: diff.feedback_areas,
+            calibration_status: "pending_review",
+          },
+        });
       } catch (error) {
-        return sendJson(res, 400, { error: error.message });
+        if (error.expose === true) return sendJson(res, 400, { error: error.message });
+        console.error("Weekly Word feedback failed", error);
+        return sendJson(res, 500, { error: "Word 反馈处理失败，请稍后重试" });
+      }
+    }
+    if (req.method === "POST" && action === "feedback-ack") {
+      if (!isWeeklyFeedbackAuthorized(req)) return sendJson(res, 404, { error: "Weekly insight not found" });
+      try {
+        const rawBody = await readRequestBody(req, 256 * 1024);
+        const body = rawBody ? JSON.parse(rawBody) : {};
+        const feedbackId = String(body.feedbackId || "");
+        if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(feedbackId)) {
+          const error = new Error("Invalid feedback_id");
+          error.expose = true;
+          throw error;
+        }
+        const ack = await acknowledgeWeeklyFeedback({
+          root: SITE_CONFIG.weeklyFeedbackDir,
+          artifactId,
+          feedbackId,
+          bundleSha256: String(body.bundleSha256 || ""),
+          receipt: body.wbrReceipt,
+        });
+        return sendJson(res, ack.status === "acknowledged" ? 201 : 200, {
+          ok: true,
+          receipt: { status: ack.status, artifact_id: artifactId, feedback_id: feedbackId },
+        });
+      } catch (error) {
+        if (error.expose === true) return sendJson(res, 400, { error: error.message });
+        console.error("Weekly feedback acknowledgement failed", error);
+        return sendJson(res, 500, { error: "WBR 回执处理失败，请稍后重试" });
       }
     }
     return sendJson(res, 405, { error: "Method not allowed" });

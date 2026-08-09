@@ -37,6 +37,77 @@ function safeHttpUrl(value) {
   }
 }
 
+function weeklyFeedbackActionsMarkup(snapshot) {
+  return `<a class="button button--primary" data-word-download href="/api/insights/${escapeHtml(snapshot.artifact_id)}/word">导出 Word (.docx)</a><button class="button" type="button" data-print>打印 / PDF</button><button class="button" type="button" data-codex-feedback-open>通过 Codex 反馈</button><button class="button" type="button" data-word-feedback-open>上传修改后 Word</button>`;
+}
+
+function weeklyFeedbackDialogsMarkup(snapshot, feedbackOptions, maxDocxBytes) {
+  const maxAttribute = Number.isSafeInteger(maxDocxBytes) && maxDocxBytes > 0
+    ? ` data-max-bytes="${maxDocxBytes}"`
+    : "";
+  const options = feedbackOptions.map((item) => `<option value="${escapeHtml(item.anchor)}" data-topic-id="${escapeHtml(item.topic_id || "overall")}" data-feedback-category="${escapeHtml(item.category || "overall")}">${escapeHtml(item.title)}</option>`).join("");
+  return `<dialog class="feedback-dialog" data-codex-feedback-dialog><form method="dialog"><button class="feedback-dialog__close" value="cancel" aria-label="关闭">×</button><p class="eyebrow">绑定原始内容</p><h2>通过 Codex 反馈</h2><p>选择页面位置后复制模板，再在 Codex 中补充意见。反馈只进入待人工复核，不会直接改写内容或 Skill。</p><label>反馈对应内容<select data-codex-feedback-section>${options}</select></label><label>Codex 反馈模板<textarea data-codex-feedback-template readonly rows="10"></textarea></label><output data-codex-feedback-status></output><button class="button button--primary" type="button" data-codex-feedback-copy>复制反馈模板</button></form></dialog><dialog class="feedback-dialog" data-word-feedback-dialog><form method="dialog"><button class="feedback-dialog__close" value="cancel" aria-label="关闭">×</button><p class="eyebrow">精确 Word 差异</p><h2>上传修改后 Word</h2><p>只接受由本页同一不可变快照导出并编辑的 Word。系统会核对书签、包状态、artifact 与内容哈希。</p><label>修改后 Word (.docx)<input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" data-feedback-docx${maxAttribute} required></label><label>私有反馈凭据<input type="password" autocomplete="off" data-feedback-token required></label><output data-word-feedback-status></output><button class="button button--primary" type="button" data-word-feedback-submit>上传并生成待复核回执</button></form></dialog>`;
+}
+
+function feedbackOptionsForSnapshot(snapshot) {
+  if (snapshot.schema_version === "weekly-insight-publication/v4") {
+    return snapshot.content.topics.flatMap((topic, topicIndex) => [
+      ...topic.facts.sections.map((section) => ({
+        anchor: section.anchor,
+        title: `专题 ${topicIndex + 1} · ${section.title}`,
+        topic_id: topic.topic_id,
+        category: "facts",
+      })),
+      ...topic.findings.items.map((finding) => ({
+        anchor: finding.anchor,
+        title: `专题 ${topicIndex + 1} · ${finding.title}`,
+        topic_id: topic.topic_id,
+        category: "findings",
+      })),
+      {
+        anchor: topic.industry_impact.anchor,
+        title: `专题 ${topicIndex + 1} · ${topic.industry_impact.title}`,
+        topic_id: topic.topic_id,
+        category: "industry_impact",
+      },
+      {
+        anchor: topic.strategic_recommendation.anchor,
+        title: `专题 ${topicIndex + 1} · ${topic.strategic_recommendation.title}`,
+        topic_id: topic.topic_id,
+        category: "strategic_recommendation",
+      },
+    ]);
+  }
+  const titles = new Map();
+  const visit = (value) => {
+    if (Array.isArray(value)) value.forEach(visit);
+    else if (value && typeof value === "object") {
+      if (typeof value.anchor === "string") titles.set(value.anchor, value.title || value.headline || value.anchor);
+      Object.values(value).forEach(visit);
+    }
+  };
+  visit(snapshot.content);
+  return snapshot.section_anchors.map((anchor) => ({
+    anchor,
+    title: titles.get(anchor) || anchor,
+    topic_id: "overall",
+    category: "overall",
+  }));
+}
+
+function modernizeWeeklyFeedbackHtml(html, snapshot, maxDocxBytes) {
+  const actions = weeklyFeedbackActionsMarkup(snapshot);
+  const dialogs = weeklyFeedbackDialogsMarkup(
+    snapshot,
+    feedbackOptionsForSnapshot(snapshot),
+    maxDocxBytes,
+  );
+  return html
+    .replace(/<div class="insight-actions">[\s\S]*?<\/div>/, `<div class="insight-actions">${actions}</div>`)
+    .replace(/<div class="weekly-rail-actions">[\s\S]*?<\/div>/, `<div class="weekly-rail-actions">${actions}</div>`)
+    .replace(/<dialog class="feedback-dialog" data-feedback-dialog>[\s\S]*?<\/dialog>/, dialogs);
+}
+
 function mediaMarkup(media) {
   const src = safeHttpUrl(media.src);
   const sourceUrl = safeHttpUrl(media.source_url);
@@ -715,11 +786,13 @@ function renderWeeklyV4Html(snapshot, options = {}) {
     ].map(([chapter, label, title]) => `<a href="#${escapeHtml(v4ChapterId(firstTopic, chapter))}" data-v4-chapter-link="${chapter}"><span>${label}</span>${escapeHtml(title)}</a>`).join("")}</nav>`
     : "";
   const feedbackOptions = content.topics.flatMap((topic, topicIndex) => [
-    ...topic.facts.sections.map((section) => ({ anchor: section.anchor, title: `专题 ${topicIndex + 1} · ${section.title}` })),
-    ...topic.findings.items.map((finding) => ({ anchor: finding.anchor, title: `专题 ${topicIndex + 1} · ${finding.title}` })),
-    { anchor: topic.industry_impact.anchor, title: `专题 ${topicIndex + 1} · ${topic.industry_impact.title}` },
-    { anchor: topic.strategic_recommendation.anchor, title: `专题 ${topicIndex + 1} · ${topic.strategic_recommendation.title}` },
+    ...topic.facts.sections.map((section) => ({ anchor: section.anchor, title: `专题 ${topicIndex + 1} · ${section.title}`, topic_id: topic.topic_id, category: "facts" })),
+    ...topic.findings.items.map((finding) => ({ anchor: finding.anchor, title: `专题 ${topicIndex + 1} · ${finding.title}`, topic_id: topic.topic_id, category: "findings" })),
+    { anchor: topic.industry_impact.anchor, title: `专题 ${topicIndex + 1} · ${topic.industry_impact.title}`, topic_id: topic.topic_id, category: "industry_impact" },
+    { anchor: topic.strategic_recommendation.anchor, title: `专题 ${topicIndex + 1} · ${topic.strategic_recommendation.title}`, topic_id: topic.topic_id, category: "strategic_recommendation" },
   ]);
+  const feedbackActions = weeklyFeedbackActionsMarkup(snapshot);
+  const feedbackDialogs = weeklyFeedbackDialogsMarkup(snapshot, feedbackOptions, feedbackMaxDocxBytes);
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="weekly:artifact_id" content="${escapeHtml(snapshot.artifact_id)}"><meta name="weekly:source_run_id" content="${escapeHtml(snapshot.source_run_id)}"><meta name="weekly:version" content="${escapeHtml(snapshot.version)}"><meta name="weekly:content_sha256" content="${escapeHtml(snapshot.content_sha256)}"><title>${escapeHtml(content.title)} · 周度技术战略洞察</title><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/weekly-insights.css"></head><body class="weekly-page weekly-detail-page weekly-detail-page--v4"><header class="weekly-topbar"><a class="weekly-brand" href="/"><strong>科技情报站</strong><span>HYBRID BRIEFING DESK</span></a><nav><a href="/">每日简报</a><a href="/insights/" aria-current="page">周度洞察</a></nav></header><main class="weekly-shell"><aside class="weekly-toc weekly-toc--v4" aria-label="本期目录"><div class="weekly-rail-actions"><a class="button button--primary" data-word-download href="/api/insights/${escapeHtml(snapshot.artifact_id)}/word">导出 Word (.docx)</a><button class="button" type="button" data-print>打印 / PDF</button><button class="button" type="button" data-feedback-open>提交校准反馈</button></div><p>本期目录</p><button class="weekly-toc__toggle" type="button" data-toc-toggle aria-expanded="false"><span>${escapeHtml(statusLabel)}</span><span>展开</span></button><div class="weekly-toc__links">${nav}</div>${chapterNav}<div class="weekly-toc__meta"><span>${escapeHtml(content.period.label)}</span><span>${escapeHtml(statusLabel)}</span></div></aside><article class="weekly-article"><header class="insight-hero"><p class="eyebrow">周度技术战略洞察 · ${escapeHtml(content.period.label)}</p><h1>${escapeHtml(content.title)}</h1><p>${escapeHtml(content.dek)}</p><div class="insight-meta"><span>观察期 ${escapeHtml(content.period.start)}—${escapeHtml(content.period.end)}</span><span>截至 ${escapeHtml(content.period.as_of)}</span><span>${escapeHtml(statusLabel)}</span></div></header>${content.status === "no_selection" ? `<section class="empty-insight"><span>NO SELECTION</span><h2>本期没有通过证据门槛的技术专题</h2><p>没有为了凑数而发布专题。下一期继续观察。</p></section>` : `${synthesis}${topics}${v4EvidenceSourcesMarkup(content.evidence)}`}<footer class="insight-receipt"><p>批准快照</p><dl><div><dt>Artifact</dt><dd>${escapeHtml(snapshot.artifact_id)}</dd></div><div><dt>Run</dt><dd>${escapeHtml(snapshot.source_run_id)}</dd></div><div><dt>Version</dt><dd>${escapeHtml(snapshot.version)}</dd></div><div><dt>Content hash</dt><dd>${escapeHtml(snapshot.content_sha256)}</dd></div></dl></footer></article></main><dialog class="feedback-dialog" data-feedback-dialog><form method="dialog"><button class="feedback-dialog__close" value="cancel" aria-label="关闭">×</button><p class="eyebrow">章节级校准</p><h2>提交校准反馈</h2><p>反馈绑定本期 artifact、run 与初稿哈希，不会直接修改分析 Skill。</p><label>反馈对应章节<select data-feedback-section><option value="overall">整期</option>${feedbackOptions.map((item) => `<option value="${escapeHtml(item.anchor)}">${escapeHtml(item.title)}</option>`).join("")}</select></label><label>反馈内容<textarea data-feedback-text maxlength="4000" required></textarea></label><label>可选：编辑后的 Word<input type="file" accept=".docx" data-feedback-docx${Number.isSafeInteger(feedbackMaxDocxBytes) && feedbackMaxDocxBytes > 0 ? ` data-max-bytes="${feedbackMaxDocxBytes}"` : ""}></label><output data-feedback-status></output><button class="button button--primary" type="button" data-feedback-submit>提交反馈</button></form></dialog><script src="/weekly-insights.js" defer></script></body></html>`;
 }
 
@@ -870,15 +943,16 @@ function renderWeeklyV4Docx(snapshot, options = {}) {
 }
 
 function renderWeeklyHtml(snapshot, options = {}) {
+  let html;
   if (snapshot.schema_version === "weekly-insight-publication/v4") {
-    const html = renderWeeklyV4Html(snapshot, options);
-    return snapshot.version === "4.1"
+    html = renderWeeklyV4Html(snapshot, options);
+    html = snapshot.version === "4.1"
       ? html.replace("weekly-detail-page--v4\"", "weekly-detail-page--v4 weekly-detail-page--v4-1\"")
       : html;
-  }
-  if (snapshot.schema_version === "weekly-insight-publication/v3") return renderWeeklyV3Html(snapshot);
-  if (snapshot.schema_version === "weekly-insight-publication/v2") return renderWeeklyV2Html(snapshot);
-  return renderWeeklyV1Html(snapshot);
+  } else if (snapshot.schema_version === "weekly-insight-publication/v3") html = renderWeeklyV3Html(snapshot);
+  else if (snapshot.schema_version === "weekly-insight-publication/v2") html = renderWeeklyV2Html(snapshot);
+  else html = renderWeeklyV1Html(snapshot);
+  return modernizeWeeklyFeedbackHtml(html, snapshot, Number(options.feedbackMaxDocxBytes || 0));
 }
 
 function renderWeeklyDocx(snapshot, options = {}) {
