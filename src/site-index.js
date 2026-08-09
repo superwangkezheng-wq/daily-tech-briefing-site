@@ -69,12 +69,24 @@ function applyCategoryLimit(items, limit) {
 
 function buildEnrichmentMap(report) {
   const map = {};
+  const legacy = new Map();
   if (report.enrichment && Array.isArray(report.enrichment.enrichedItems)) {
     report.enrichment.enrichedItems.forEach((e) => {
-      map[e.rank] = e.background || "";
+      const background = e.background || "";
+      const key = e.itemKey || (e.section && Number.isFinite(Number(e.rank))
+        ? `${e.section}:${e.rank}`
+        : "");
+      if (key) {
+        map[key] = background;
+        return;
+      }
+      const rank = Number(e.rank);
+      if (!Number.isFinite(rank)) return;
+      const existing = legacy.get(rank);
+      legacy.set(rank, existing === undefined ? background : null);
     });
   }
-  return map;
+  return { map, legacy };
 }
 
 function buildSummaryNote(report) {
@@ -99,7 +111,7 @@ function distinctLatestSlotSnapshots(snapshots) {
     seen.add(key);
 
     // Apply score sort + filter to each section
-    const enrichmentMap = buildEnrichmentMap(report);
+    const enrichment = buildEnrichmentMap(report);
     const sections = {};
     Object.keys(report.sections).forEach((key) => {
       let items = applyScoreSortAndFilter(report.sections[key], scoreThreshold);
@@ -107,7 +119,7 @@ function distinctLatestSlotSnapshots(snapshots) {
       // Inject enrichment background
       items = items.map((item) => ({
         ...item,
-        background: enrichmentMap[item.rank] || "",
+        background: enrichment.map[`${key}:${item.rank}`] || enrichment.legacy.get(Number(item.rank)) || "",
       }));
       sections[key] = items;
     });
@@ -325,4 +337,5 @@ module.exports = {
   extractSlotLabel,
   extractWindow,
   slotKeyFromLabel,
+  buildEnrichmentMap,
 };

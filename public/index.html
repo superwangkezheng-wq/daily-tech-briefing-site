@@ -3,240 +3,231 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fbf6ee" />
     <title>每日科技情报站</title>
-    <link rel="stylesheet" href="/site.css?v=1.1.3" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/site.css?v=2.0.0" />
   </head>
   <body>
-    <header class="topnav">
-      <div class="container topnav-inner">
-        <div class="logo-wrap">
-          <span class="logo-mark" aria-hidden="true"></span>
-          <span class="logo">每日科技情报站</span>
-          <span id="topbar-meta" class="meta">当前版本 · --</span>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="masthead" href="#main-content" aria-label="返回简报首页">
+          <span class="masthead-text">科技情报站</span>
+          <span class="masthead-sub">HBD</span>
+        </a>
+
+        <div class="header-search-wrap" id="search-wrap">
+          <input
+            class="header-search"
+            id="search-input"
+            type="search"
+            placeholder="搜索情报…"
+            aria-label="搜索科技资讯"
+            autocomplete="off"
+          />
         </div>
 
-        <nav aria-label="主导航">
-          <a href="#top-story">首条焦点</a>
-          <a href="#issue-switch">版本切换</a>
-          <a href="#quick-picks">重点速览</a>
-          <a href="#dispatch-list">正式条目</a>
-          <a href="#feedback">反馈</a>
-        </nav>
+        <a class="weekly-header-link" href="/insights/">周度洞察</a>
 
-        <a class="btn btn-secondary" href="#issue-switch">切换版本</a>
+        <div class="edition-bar" id="edition-bar-desktop" aria-label="版本切换"></div>
+
+        <div class="header-actions">
+          <button class="agent-header-btn" id="btn-agent" type="button" aria-haspopup="dialog">
+            <span class="mcp-badge">MCP</span>
+            <span class="agent-label">Agent 接入</span>
+            <span class="agent-short">接入</span>
+          </button>
+          <button class="header-action-btn" id="btn-feedback" type="button" aria-haspopup="dialog">反馈</button>
+        </div>
       </div>
     </header>
 
-    <main id="content">
-      <section class="section hero" id="top-story">
-        <div class="container hero-split">
-          <div class="hero-copy reveal">
-            <p id="hero-kicker" class="eyebrow">今日首条 · --</p>
-            <span id="hero-slot" class="tag">--</span>
-            <h1 id="hero-title">正在加载</h1>
-            <p id="hero-summary" class="lead">正在整理最新科技资讯。</p>
-            <div class="hero-meta-line">
-              <span id="hero-meta-date" class="meta">--</span>
-              <span id="hero-meta-role" class="meta">首条内容</span>
-              <span id="hero-meta-count" class="meta">--</span>
-            </div>
+    <div class="container mobile-controls">
+      <nav class="mobile-cat-bar" aria-label="分类筛选">
+        <button class="cat-chip" type="button" aria-pressed="true" data-category="all">全部</button>
+        <button class="cat-chip" type="button" aria-pressed="false" data-category="model">模型与算法</button>
+        <button class="cat-chip" type="button" aria-pressed="false" data-category="product">产品与工具</button>
+        <button class="cat-chip" type="button" aria-pressed="false" data-category="industry">产业与商业</button>
+        <button class="cat-chip" type="button" aria-pressed="false" data-category="research">研究与论文</button>
+        <button class="cat-chip" type="button" aria-pressed="false" data-category="opinion">观点与动态</button>
+      </nav>
+      <div class="mobile-edition-bar" id="edition-bar-mobile" aria-label="移动端版本切换"></div>
+    </div>
+
+    <div class="container page-layout">
+      <aside class="left-sidebar" aria-label="内容导航">
+        <div class="sidebar-inner">
+          <div class="sidebar-masthead">
+            科技情报站
+            <span>Hybrid Briefing Desk</span>
           </div>
 
-          <aside class="card hero-panel reveal delay-2" aria-label="当前版本统计信息">
-            <div class="hero-headline">
-              <div>
-                <span class="tag">当前版本</span>
-                <h3>本版统计</h3>
-              </div>
-              <div id="hero-side-status" class="meta">--</div>
-            </div>
-
-            <div class="signal-list">
-              <article class="signal-item">
-                <span class="meta">版本</span>
-                <div>
-                  <p class="signal-title">当前版本</p>
-                  <p id="hero-side-version" class="signal-copy">--</p>
-                </div>
-              </article>
-
-              <article class="signal-item">
-                <span class="meta">时间</span>
-                <div>
-                  <p class="signal-title">生成时间</p>
-                  <p id="hero-side-generated" class="signal-copy">--</p>
-                </div>
-              </article>
-
-              <article class="signal-item">
-                <span class="meta">条目</span>
-                <div>
-                  <p class="signal-title">本次条目</p>
-                  <p id="hero-side-count" class="signal-copy">--</p>
-                </div>
-              </article>
-
-              <article class="signal-item">
-                <span class="meta">日期</span>
-                <div>
-                  <p class="signal-title">日报日期</p>
-                  <p id="hero-side-date" class="signal-copy">--</p>
-                </div>
-              </article>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section" id="issue-switch">
-        <div class="container stack-lg">
-          <div class="row-between reveal">
-            <div class="section-intro">
-              <span class="section-kicker">版本索引</span>
-              <h2>版本切换与历史快照</h2>
-              <p class="section-copy">当前页面直接读取定时任务生成后的日报快照，切换版本只换内容，不跳出阅读流。</p>
-            </div>
-            <button id="snapshot-toggle" class="btn btn-ghost btn-arrow" type="button" aria-expanded="false">
-              展开全部快照
+          <nav class="sidebar-nav" aria-label="分类导航">
+            <button class="nav-item" type="button" aria-pressed="true" data-category="all">
+              <span>今日总览</span><span class="nav-count" id="nav-count-all">0</span>
             </button>
+            <button class="nav-item" type="button" aria-pressed="false" data-category="model">
+              <span>模型与算法</span><span class="nav-count" id="nav-count-model">0</span>
+            </button>
+            <button class="nav-item" type="button" aria-pressed="false" data-category="product">
+              <span>产品与工具</span><span class="nav-count" id="nav-count-product">0</span>
+            </button>
+            <button class="nav-item" type="button" aria-pressed="false" data-category="industry">
+              <span>产业与商业</span><span class="nav-count" id="nav-count-industry">0</span>
+            </button>
+            <button class="nav-item" type="button" aria-pressed="false" data-category="research">
+              <span>研究与论文</span><span class="nav-count" id="nav-count-research">0</span>
+            </button>
+            <button class="nav-item" type="button" aria-pressed="false" data-category="opinion">
+              <span>观点与动态</span><span class="nav-count" id="nav-count-opinion">0</span>
+            </button>
+            <span class="nav-divider" aria-hidden="true"></span>
+            <a class="nav-item weekly-nav-item" href="/insights/">
+              <span>周度战略洞察</span><span class="nav-count">W</span>
+            </a>
+            <button class="nav-item nav-archive" id="archive-toggle" type="button" aria-expanded="false">
+              <span>专题与归档</span><span class="nav-count" id="nav-count-archive">0</span>
+            </button>
+          </nav>
+
+          <div class="archive-panel" id="archive-panel" hidden aria-label="历史快照"></div>
+
+          <dl class="sidebar-signal">
+            <div><dt>版本</dt><dd class="signal-accent" id="sidebar-edition">--</dd></div>
+            <div><dt>条目</dt><dd id="sidebar-count">0 条</dd></div>
+            <div><dt>最高评分</dt><dd class="signal-accent" id="sidebar-score">--</dd></div>
+            <div><dt>日期</dt><dd id="sidebar-date">--</dd></div>
+          </dl>
+        </div>
+      </aside>
+
+      <main class="main-content" id="main-content" tabindex="-1">
+        <a class="weekly-home-entry" href="/insights/">
+          <span class="weekly-home-entry__label">WEEKLY STRATEGIC INTELLIGENCE</span>
+          <strong>周度技术战略洞察</strong>
+          <span>从已验证事实进入机制、产业影响与趋势判断</span>
+          <i aria-hidden="true">→</i>
+        </a>
+        <section class="thirty-strip" aria-labelledby="thirty-title">
+          <div class="thirty-head">
+            <span class="thirty-time">30秒</span>
+            <h1 id="thirty-title">今日信号速读</h1>
           </div>
+          <ol class="thirty-list" id="thirty-list"></ol>
+        </section>
 
-          <div id="slot-switcher" class="switcher" aria-label="版本切换"></div>
-          <div id="snapshot-strip" class="snapshot-strip" aria-label="近期快照"></div>
-          <div id="snapshot-panel" class="snapshot-panel" hidden></div>
-        </div>
-      </section>
-
-      <section class="section" id="quick-picks">
-        <div class="container stack-lg">
-          <div class="row-between reveal">
-            <div class="section-intro section-intro--wide">
-              <span class="section-kicker">重点速览</span>
-              <h2 id="quick-title">重点条目速览</h2>
-              <p id="quick-copy" class="section-copy">--</p>
-            </div>
-            <a class="btn btn-ghost btn-arrow" href="#dispatch-list">进入正式条目</a>
+        <section class="pulse-module" aria-labelledby="pulse-title">
+          <div class="pulse-head">
+            <h2 id="pulse-title">今日脉冲</h2>
+            <button class="pulse-toggle" id="pulse-toggle" type="button" aria-expanded="false">展开</button>
           </div>
-
-          <div id="quick-grid" class="grid-3 quick-grid"></div>
-        </div>
-      </section>
-
-      <section class="section" id="dispatch-list">
-        <div class="container stack-lg">
-          <div class="row-between reveal">
-            <div class="section-intro section-intro--wide">
-              <span class="section-kicker">正文条目</span>
-              <h2>正式条目列表</h2>
-            </div>
-            <div class="page-meta">
-              <span id="page-indicator" class="meta">当前页 1 / 1</span>
-              <span id="total-indicator" class="meta">共 0 条</span>
-            </div>
+          <div class="pulse-viewport" id="pulse-viewport" data-collapsed="true">
+            <div class="pulse-row" id="pulse-row"></div>
           </div>
+        </section>
 
-          <div id="entry-stream" class="entry-stream"></div>
-          <div id="pagination" class="pagination-shell"></div>
+        <div class="stream-status" aria-live="polite">
+          <span id="stream-label">今日总览</span>
+          <span id="stream-count">0 条</span>
         </div>
-      </section>
 
-      <section class="section" id="feedback">
-        <div class="container">
-          <div class="feedback-shell">
-            <div class="feedback-head">
-              <div class="section-intro section-intro--wide">
-                <span class="section-kicker">读者反馈</span>
-                <h2>留下建议，持续优化。</h2>
-                <p class="section-copy">反馈会写入 Obsidian，并按现有策略参与次日 10 点的汇总与飞书推送。</p>
-              </div>
-            </div>
+        <section class="card-grid" id="card-grid" aria-label="科技情报列表"></section>
+        <div class="pagination" id="pagination" aria-label="分页"></div>
+      </main>
+    </div>
 
-            <form id="feedback-form" class="feedback-form">
-              <label class="field">
-                <span>昵称（可选）</span>
-                <input id="visitor-name" name="visitorName" class="input" type="text" maxlength="40" placeholder="例如：产业观察者" />
-              </label>
+    <div class="drawer-overlay" id="drawer-overlay" hidden></div>
 
-              <label class="field">
-                <span>联系方式（可选）</span>
-                <input id="visitor-contact" name="contact" class="input" type="text" maxlength="80" placeholder="飞书 / 邮箱 / 微信备注" />
-              </label>
+    <aside class="drawer" id="feedback-drawer" role="dialog" aria-modal="true" aria-labelledby="feedback-title" aria-hidden="true">
+      <div class="drawer-head">
+        <h2 id="feedback-title">提供反馈</h2>
+        <button class="drawer-close" data-close-drawer type="button">关闭</button>
+      </div>
+      <div class="feedback-success" id="feedback-success" hidden>
+        <h3>感谢你的反馈</h3>
+        <p>编辑部已收到你的建议，我们会持续优化情报质量。</p>
+      </div>
+      <form class="feedback-form" id="feedback-form" novalidate>
+        <label>
+          <span>昵称 <em>可选</em></span>
+          <input id="visitor-name" name="visitorName" type="text" maxlength="40" placeholder="情报观察者" />
+        </label>
+        <label>
+          <span>联系方式 <em>可选</em></span>
+          <input id="visitor-contact" name="contact" type="text" maxlength="80" placeholder="邮箱 / 飞书 / 微信备注" />
+        </label>
+        <label>
+          <span>反馈内容</span>
+          <textarea id="feedback-content" name="content" rows="5" maxlength="1200" placeholder="例如：建议增加开源项目的追踪维度。" required></textarea>
+          <small id="feedback-error" aria-live="polite"></small>
+        </label>
+        <button class="drawer-primary" id="feedback-submit" type="submit">提交反馈</button>
+        <p class="form-status" id="feedback-status" aria-live="polite"></p>
+      </form>
+    </aside>
 
-              <label class="field field-wide">
-                <span>反馈内容</span>
-                <textarea
-                  id="feedback-content"
-                  name="content"
-                  class="textarea"
-                  rows="5"
-                  maxlength="1200"
-                  placeholder="例如：建议把产业影响再拆成预算、产品路线、开发者工作流三个维度。"
-                  required
-                ></textarea>
-              </label>
+    <aside class="drawer agent-drawer" id="agent-drawer" role="dialog" aria-modal="true" aria-labelledby="agent-title" aria-hidden="true">
+      <div class="drawer-head">
+        <h2 id="agent-title">Agent 接入</h2>
+        <button class="drawer-close" data-close-drawer type="button">关闭</button>
+      </div>
+      <div class="agent-content">
+        <p>把每日科技情报作为 MCP 上下文交给其他 Agent，支持按版本读取和主题检索。</p>
+        <div class="agent-status"><span>本机服务</span><strong>可接入</strong></div>
+        <section>
+          <h3>启动 HTTP MCP</h3>
+          <code>MCP_HTTP_TOKEN=本机密钥 npm run mcp:http</code>
+        </section>
+        <section>
+          <h3>默认端点</h3>
+          <code>http://127.0.0.1:4322/mcp</code>
+        </section>
+        <section>
+          <h3>能力</h3>
+          <ul><li>列出日报快照</li><li>读取指定版本</li><li>检索日报条目</li></ul>
+        </section>
+        <button class="drawer-secondary" id="copy-mcp-command" type="button">复制启动命令</button>
+        <span class="copy-status" id="copy-status" aria-live="polite"></span>
+      </div>
+    </aside>
 
-              <div class="feedback-actions">
-                <button class="btn btn-primary" type="submit">提交反馈</button>
-                <p id="feedback-status" class="feedback-status"></p>
-              </div>
-            </form>
-          </div>
+    <nav class="bottom-nav" aria-label="移动端导航">
+      <button type="button" aria-current="page" data-mobile-action="home">简报</button>
+      <button type="button" data-mobile-action="editions">版本</button>
+      <button type="button" data-mobile-action="search">搜索</button>
+      <button type="button" data-mobile-action="agent">接入</button>
+      <button type="button" data-mobile-action="feedback">反馈</button>
+    </nav>
+
+    <template id="story-card-template">
+      <article class="story-card">
+        <div class="story-rule" aria-hidden="true"></div>
+        <div class="story-topline">
+          <span class="story-category">--</span>
+          <span class="story-score" hidden>--</span>
         </div>
-      </section>
-    </main>
-
-    <template id="quick-card-template">
-      <article class="card quick-card reveal">
-        <div class="quick-meta">
-          <span class="quick-source">--</span>
-          <span class="num quick-rank">01</span>
+        <h2 class="story-title">--</h2>
+        <div class="story-meta"><span class="story-source">--</span><span class="story-rank">--</span></div>
+        <p class="story-summary">--</p>
+        <div class="story-details" hidden>
+          <div><strong>产业影响</strong><p class="story-impact">--</p></div>
+          <div class="story-background-wrap" hidden><strong>背景</strong><p class="story-background">--</p></div>
         </div>
-        <h3 class="quick-title-text">--</h3>
-        <p class="quick-summary">--</p>
-        <p class="impact-note quick-impact">--</p>
-        <div class="row-between quick-card__footer">
-          <button class="btn btn-ghost btn-arrow quick-jump" type="button">定位正文</button>
-          <a class="btn btn-ghost btn-arrow quick-link" href="#" target="_blank" rel="noreferrer">原文入口</a>
+        <div class="story-actions">
+          <a class="story-link" href="#" target="_blank" rel="noreferrer">阅读原文</a>
+          <button class="story-toggle" type="button" aria-expanded="false">展开详情</button>
         </div>
       </article>
     </template>
 
-    <template id="entry-template">
-      <article class="card entry-card reveal">
-        <div class="entry-index">
-          <span class="num entry-rank">01</span>
-          <span class="num entry-score" data-level="medium" style="display:none">--</span>
-        </div>
-
-        <div class="entry-body">
-          <div class="entry-header">
-            <div class="entry-header__copy">
-              <span class="entry-source">--</span>
-              <h3 class="entry-title">--</h3>
-            </div>
-            <a class="btn btn-ghost btn-arrow entry-link" href="#" target="_blank" rel="noreferrer">查看原文</a>
-          </div>
-
-          <div class="entry-summary">
-            <div class="entry-summary-block">
-              <strong>摘要</strong>
-              <div class="entry-summary-copy">--</div>
-            </div>
-
-            <div class="entry-summary-block">
-              <strong>产业影响</strong>
-              <div class="entry-impact-copy">--</div>
-            </div>
-          </div>
-
-          <details class="entry-background" hidden>
-            <summary>背景</summary>
-            <p class="entry-background-content">--</p>
-          </details>
-        </div>
-      </article>
-    </template>
-
-    <script src="/site.js?v=1.1.3"></script>
+    <noscript><p class="noscript">请启用 JavaScript 以读取最新日报快照。</p></noscript>
+    <script src="/site.js?v=2.0.0"></script>
   </body>
 </html>

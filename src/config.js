@@ -1,12 +1,16 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const packageJson = require("../package.json");
+const { DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES } = require("./weekly-limits");
 
 const ROOT_DIR = path.join(__dirname, "..");
 const DEFAULT_DATA_DIR = path.join(ROOT_DIR, "data");
 const DEFAULT_ARCHIVE_DIR = path.join(DEFAULT_DATA_DIR, "collections");
 const DEFAULT_FEEDBACK_DIR = path.join(DEFAULT_DATA_DIR, "feedback");
 const DEFAULT_MAINTENANCE_DIR = path.join(DEFAULT_DATA_DIR, "maintenance");
+const DEFAULT_WEEKLY_SOURCE_DIR = path.join(DEFAULT_DATA_DIR, "weekly-insights");
+const DEFAULT_WEEKLY_FEEDBACK_DIR = path.join(DEFAULT_DATA_DIR, "weekly-feedback");
+const DEFAULT_WEEKLY_RELEASE_OVERRIDES_FILE = path.join(DEFAULT_DATA_DIR, "weekly-release-overrides.json");
 const DEFAULT_CACHE_DIR = path.join(ROOT_DIR, ".cache");
 
 function parseEnvValue(raw) {
@@ -52,6 +56,13 @@ function parseInteger(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function parseNonNegativeNumber(value, fallback) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 function parseClockTime(value, fallback) {
   const input = String(value || "").trim();
   const match = input.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
@@ -89,6 +100,11 @@ const feedbackDigestDir = resolveProjectPath(
 );
 const maintenanceDir = resolveProjectPath(process.env.MAINTENANCE_DIR, DEFAULT_MAINTENANCE_DIR);
 const cacheDir = resolveProjectPath(process.env.CACHE_DIR, DEFAULT_CACHE_DIR);
+const weeklySourceDir = resolveProjectPath(process.env.WEEKLY_INSIGHT_SOURCE_DIR, DEFAULT_WEEKLY_SOURCE_DIR);
+const weeklyCacheDir = resolveProjectPath(
+  process.env.WEEKLY_INSIGHT_CACHE_DIR,
+  path.join(cacheDir, "weekly-insights"),
+);
 
 const SITE_CONFIG = {
   rootDir: ROOT_DIR,
@@ -105,6 +121,19 @@ const SITE_CONFIG = {
   reportsIndexFile: resolveProjectPath(process.env.REPORTS_INDEX_FILE, path.join(cacheDir, "snapshots.json")),
   latestIndexFile: resolveProjectPath(process.env.LATEST_INDEX_FILE, path.join(cacheDir, "latest.json")),
   detailDir: resolveProjectPath(process.env.DETAIL_CACHE_DIR, path.join(cacheDir, "snapshot-details")),
+  weeklySourceDir,
+  weeklyCacheDir,
+  weeklyFeedbackDir: resolveProjectPath(process.env.WEEKLY_INSIGHT_FEEDBACK_DIR, DEFAULT_WEEKLY_FEEDBACK_DIR),
+  weeklyReleaseOverridesFile: resolveProjectPath(
+    process.env.WEEKLY_INSIGHT_RELEASE_OVERRIDES_FILE,
+    DEFAULT_WEEKLY_RELEASE_OVERRIDES_FILE,
+  ),
+  weeklyPreviewToken: process.env.WEEKLY_PREVIEW_TOKEN || "",
+  weeklyFeedbackToken: process.env.WEEKLY_FEEDBACK_TOKEN || "",
+  weeklyFeedbackMaxDocxBytes: parseInteger(
+    process.env.WEEKLY_FEEDBACK_MAX_DOCX_BYTES,
+    DEFAULT_WEEKLY_FEEDBACK_DOCX_MAX_BYTES,
+  ),
   opsStatusFile: resolveProjectPath(process.env.OPS_STATUS_FILE, path.join(cacheDir, "ops-status.json")),
   refreshStateFile: resolveProjectPath(process.env.REFRESH_STATE_FILE, path.join(cacheDir, "refresh-state.json")),
   openclawBin: process.env.OPENCLAW_BIN || "openclaw",
@@ -114,12 +143,12 @@ const SITE_CONFIG = {
   feedbackDigestHour: process.env.FEEDBACK_DIGEST_HOUR || "10:15",
   pageSize: Number(process.env.PAGE_SIZE || 6),
   // Horizon-inspired: AI scoring threshold. 0 = no filtering (backwards compatible)
-  aiScoreThreshold: Number(process.env.AI_SCORE_THRESHOLD || 0),
+  aiScoreThreshold: parseNonNegativeNumber(process.env.AI_SCORE_THRESHOLD, 0),
   // Horizon-inspired: per-section category limits after score sort
   categoryGroupLimit: {
-    techNews: Number(process.env.CATEGORY_GROUP_TECHNEWS || 0),
-    videoItems: Number(process.env.CATEGORY_GROUP_VIDEO || 0),
-    aiCreators: Number(process.env.CATEGORY_GROUP_CREATOR || 0),
+    techNews: parseNonNegativeNumber(process.env.CATEGORY_GROUP_TECHNEWS, 0),
+    videoItems: parseNonNegativeNumber(process.env.CATEGORY_GROUP_VIDEO, 0),
+    aiCreators: parseNonNegativeNumber(process.env.CATEGORY_GROUP_CREATOR, 0),
   },
   // Enrichment worker config
   enrichEnabled: String(process.env.ENRICH_ENABLED || "false") === "true",
@@ -211,4 +240,5 @@ module.exports = {
   SCHEDULE_CONFIG,
   REFRESH_SLOTS,
   OPS_CATEGORIES,
+  parseNonNegativeNumber,
 };

@@ -1,5 +1,6 @@
 const { SITE_CONFIG, REFRESH_SLOTS } = require("../src/config");
 const { buildSiteCache } = require("../src/site-index");
+const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
 const { appendOpsLog, updateOpsStatus, todayString } = require("../src/ops-store");
 const { sendFeishuMessage } = require("../src/feishu");
 const { spawn } = require("node:child_process");
@@ -37,16 +38,73 @@ function defaultRetryDelayMs(slot) {
   return slot.retryDelayMs || 300000;
 }
 
+async function bestEffortOpsWrite(operation, context) {
+  try {
+    await operation();
+  } catch (error) {
+    console.error(`[check-refresh] ${context}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv);
   const slot = resolveSlot(args.slot);
   const targetDate = args.date || todayString();
   const retryDelayMs = Number(process.env.REFRESH_RETRY_DELAY_MS || defaultRetryDelayMs(slot));
   const maxAttempts = Number(process.env.REFRESH_MAX_ATTEMPTS || defaultMaxAttempts(slot));
+  try {
+    const weekly = await buildWeeklyInsightCache();
+    if (weekly.errors.length > 0) {
+      await bestEffortOpsWrite(
+        () => appendOpsLog("refresh", "周度洞察扫描异常（日报继续）", [
+          `拒收：${weekly.errors.map((item) => `${item.source_file}: ${item.error}`).join("；")}`,
+        ]),
+        "cannot record weekly scan rejection",
+      );
+    }
+  } catch (error) {
+    await bestEffortOpsWrite(
+      () => appendOpsLog("refresh", "周度洞察扫描异常（日报继续）", [
+        `错误：${error instanceof Error ? error.message : String(error)}`,
+      ]),
+      "cannot record weekly scan error",
+    );
+  }
 
   let found = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    const result = await buildSiteCache();
+    let result;
+    try {
+      result = await buildSiteCache();
+    } catch (error) {
+      const dailyError = error instanceof Error ? error : new Error(String(error));
+      await bestEffortOpsWrite(
+        () => appendOpsLog("refresh", "日报缓存构建失败，继续重试", [
+          `日期：${targetDate}`,
+          `快照：${slot.label}`,
+          `尝试次数：${attempt}/${maxAttempts}`,
+          `错误：${dailyError.message}`,
+        ]),
+        "cannot record daily cache retry",
+      );
+      await bestEffortOpsWrite(
+        () => updateOpsStatus({
+          refresh: {
+            lastCheckedAt: new Date().toISOString(),
+            lastCheckedDate: targetDate,
+            lastCheckedSlot: slot.label,
+            lastResult: "pending",
+            lastFailureReason: dailyError.message,
+          },
+        }),
+        "cannot update daily cache retry status",
+      );
+      if (attempt < maxAttempts) {
+        await sleep(retryDelayMs);
+        continue;
+      }
+      break;
+    }
     const matched = result.snapshots.find(
       (item) => item.date === targetDate && item.slotLabel === slot.label,
     );
@@ -80,6 +138,9 @@ async function main() {
         ], {
           stdio: "ignore",
           detached: true,
+        });
+        enrichChild.once("error", (error) => {
+          void appendOpsLog("refresh", "富化工作进程启动失败", [`错误：${error.message}`]).catch(() => {});
         });
         enrichChild.unref();
       }

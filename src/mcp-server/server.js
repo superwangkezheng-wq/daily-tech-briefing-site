@@ -19,7 +19,7 @@
 const path = require("node:path");
 const fs = require("node:fs");
 const http = require("node:http");
-const url = require("node:url");
+const crypto = require("node:crypto");
 
 // ─── MCP Protocol helpers ───────────────────────────────────────────
 // Minimal MCP stdio implementation — no external SDK dependency
@@ -114,13 +114,17 @@ async function handleHealthStatus(args) {
 }
 
 async function handleFeedbackSearch(args) {
-  const { configMod, reportParser } = loadModules();
+  const { configMod } = loadModules();
   const feedbackDir = configMod.SITE_CONFIG.feedbackDir;
-  const date = args && args.date;
-  if (!date) {
+  const date = String(args?.date || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return { content: [{ type: "text", text: JSON.stringify({ error: "Missing required argument: date (YYYY-MM-DD)" }) }], isError: true };
   }
-  const feedbackPath = path.join(feedbackDir, `${date}.md`);
+  const root = path.resolve(feedbackDir);
+  const feedbackPath = path.resolve(root, `${date}.md`);
+  if (!feedbackPath.startsWith(`${root}${path.sep}`)) {
+    return { content: [{ type: "text", text: JSON.stringify({ error: "Invalid feedback date" }) }], isError: true };
+  }
   if (!fs.existsSync(feedbackPath)) {
     return {
       content: [{ type: "text", text: JSON.stringify({ error: `No feedback found for ${date}` }) }],
@@ -144,6 +148,7 @@ async function handleEnrichTrigger(args) {
     path.join(ROOT_DIR, "scripts", "enrich-worker.js"),
     "--no-search",
   ], { stdio: "ignore", detached: true });
+  child.once("error", () => {});
   child.unref();
   return {
     content: [{ type: "text", text: JSON.stringify({ ok: true, message: "Enrichment worker triggered (async)" }) }],
@@ -204,8 +209,59 @@ function jsonRpcError(id, code, message) {
   return JSON.stringify({ jsonrpc: "2.0", id, error: { code, message } }) + "\n";
 }
 
-function jsonRpcResult(id, result) {
-  return JSON.stringify({ jsonrpc: "2.0", id, result }) + "\n";
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function invalidToolParams(msg) {
+  return !msg.params || typeof msg.params !== "object" || typeof msg.params.name !== "string";
+}
+
+async function processJsonRpc(msg) {
+  if (!msg || typeof msg !== "object" || Array.isArray(msg)) {
+    return { status: 400, payload: { jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid Request" } } };
+  }
+  if (msg.method === "initialize") {
+    return {
+      status: 200,
+      payload: {
+        jsonrpc: "2.0",
+        id: msg.id,
+        result: {
+          protocolVersion: "2024-11-05",
+          serverInfo: { name: "daily-tech-briefing-mcp", version: "1.0.0" },
+          capabilities: { tools: {} },
+        },
+      },
+    };
+  }
+  if (msg.method === "tools/list") {
+    const tools = Object.entries(TOOLS).map(([name, def]) => ({
+      name,
+      description: def.description,
+      inputSchema: def.inputSchema,
+    }));
+    return { status: 200, payload: { jsonrpc: "2.0", id: msg.id, result: { tools } } };
+  }
+  if (msg.method === "tools/call") {
+    if (invalidToolParams(msg)) {
+      return { status: 400, payload: { jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32602, message: "Invalid params: tool name is required" } } };
+    }
+    const tool = TOOLS[msg.params.name];
+    if (!tool) {
+      return { status: 404, payload: { jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: `Unknown tool: ${msg.params.name}` } } };
+    }
+    try {
+      const result = await tool.handler(msg.params.arguments || {});
+      return { status: 200, payload: { jsonrpc: "2.0", id: msg.id, result } };
+    } catch (error) {
+      return { status: 500, payload: { jsonrpc: "2.0", id: msg.id ?? null, error: { code: -32603, message: errorMessage(error) } } };
+    }
+  }
+  if (msg.method === "notifications/initialized") {
+    return null;
+  }
+  return { status: 404, payload: { jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: `Unknown method: ${msg.method}` } } };
 }
 
 // ─── Stdio MCP Server ───────────────────────────────────────────────
@@ -223,54 +279,25 @@ function startStdioServer() {
       return;
     }
 
-    if (msg.method === "initialize") {
-      process.stdout.write(jsonRpcResult(msg.id, {
-        protocolVersion: "2024-11-05",
-        serverInfo: { name: "daily-tech-briefing-mcp", version: "1.0.0" },
-        capabilities: { tools: {} },
-      }));
-      return;
-    }
-
-    if (msg.method === "tools/list") {
-      const tools = Object.entries(TOOLS).map(([name, def]) => ({
-        name,
-        description: def.description,
-        inputSchema: def.inputSchema,
-      }));
-      process.stdout.write(jsonRpcResult(msg.id, { tools }));
-      return;
-    }
-
-    if (msg.method === "tools/call") {
-      const tool = TOOLS[msg.params.name];
-      if (!tool) {
-        process.stdout.write(jsonRpcError(msg.id, -32601, `Unknown tool: ${msg.params.name}`));
-        return;
-      }
-      try {
-        const result = await tool.handler(msg.params.arguments || {});
-        process.stdout.write(jsonRpcResult(msg.id, result));
-      } catch (error) {
-        process.stdout.write(jsonRpcError(msg.id, -32603, error.message));
-      }
-      return;
-    }
-
-    if (msg.method === "notifications/initialized") {
-      return; // no-op
-    }
-
-    // Fallback
-    process.stdout.write(jsonRpcError(msg.id, -32601, `Unknown method: ${msg.method}`));
+    const response = await processJsonRpc(msg);
+    if (response) process.stdout.write(JSON.stringify(response.payload) + "\n");
   });
 }
 
 // ─── HTTP mode (for testing only) ───────────────────────────────────
 
-function startHttpServer(port) {
+function httpTokenMatches(requestToken, expectedToken) {
+  const actual = Buffer.from(String(requestToken || ""));
+  const expected = Buffer.from(String(expectedToken || ""));
+  return actual.length === expected.length && actual.length > 0 && crypto.timingSafeEqual(actual, expected);
+}
+
+function startHttpServer(port, options = {}) {
+  loadModules();
+  const token = String(options.token ?? process.env.MCP_HTTP_TOKEN ?? "").trim();
+  if (!token) throw new Error("MCP_HTTP_TOKEN is required for HTTP MCP mode");
+  const maxBodyBytes = options.maxBodyBytes ?? 1024 * 1024;
   const server = http.createServer(async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "http://localhost:4321");
     res.setHeader("Content-Type", "application/json");
 
     if (req.method !== "POST") {
@@ -279,51 +306,62 @@ function startHttpServer(port) {
       return;
     }
 
-    let body = "";
-    req.on("data", (chunk) => { body += chunk; });
+    if (!String(req.headers["content-type"] || "").toLowerCase().startsWith("application/json")) {
+      res.statusCode = 415;
+      res.end(JSON.stringify({ error: "Content-Type must be application/json" }));
+      return;
+    }
+    const authorization = String(req.headers.authorization || "");
+    const requestToken = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
+    if (!httpTokenMatches(requestToken, token)) {
+      res.statusCode = 401;
+      res.end(JSON.stringify({ error: "Unauthorized" }));
+      return;
+    }
+
+    const chunks = [];
+    let bodyBytes = 0;
+    let ended = false;
+    const rejectBody = (status, message) => {
+      if (ended) return;
+      ended = true;
+      res.statusCode = status;
+      res.end(JSON.stringify({ error: message }));
+      req.destroy();
+    };
+    req.on("data", (chunk) => {
+      bodyBytes += chunk.length;
+      if (bodyBytes > maxBodyBytes) {
+        rejectBody(413, "Request body too large");
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("error", () => rejectBody(400, "Request stream error"));
     req.on("end", async () => {
+      if (ended) return;
+      ended = true;
       let msg;
-      try { msg = JSON.parse(body); } catch {
+      try { msg = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch {
         res.statusCode = 400;
         res.end(JSON.stringify({ error: "Parse error" }));
         return;
       }
-
-      if (msg.method === "tools/list") {
-        const tools = Object.entries(TOOLS).map(([name, def]) => ({
-          name,
-          description: def.description,
-          inputSchema: def.inputSchema,
-        }));
-        res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, result: { tools } }));
+      const response = await processJsonRpc(msg);
+      if (!response) {
+        res.statusCode = 204;
+        res.end();
         return;
       }
-
-      if (msg.method === "tools/call") {
-        const tool = TOOLS[msg.params.name];
-        if (!tool) {
-          res.statusCode = 404;
-          res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Unknown tool" } }));
-          return;
-        }
-        try {
-          const result = await tool.handler(msg.params.arguments || {});
-          res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, result }));
-        } catch (error) {
-          res.statusCode = 500;
-          res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, error: { code: -32603, message: error.message } }));
-        }
-        return;
-      }
-
-      res.statusCode = 404;
-      res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Unknown method" } }));
+      res.statusCode = response.status;
+      res.end(JSON.stringify(response.payload));
     });
   });
 
   server.listen(port, "127.0.0.1", () => {
     console.error(`MCP HTTP test server listening on http://127.0.0.1:${port}`);
   });
+  return server;
 }
 
 // ─── Entry point ────────────────────────────────────────────────────
@@ -342,4 +380,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { TOOLS };
+module.exports = { TOOLS, handleFeedbackSearch, processJsonRpc, startHttpServer, httpTokenMatches };

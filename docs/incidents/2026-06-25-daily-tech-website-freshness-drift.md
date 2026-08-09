@@ -17,7 +17,7 @@ The morning collection completed and pushed through the notification channel, bu
 - The production web service uses `~/Library/Application Support/daily-tech-site/cache`, while local/manual commands use the project `.cache` directory.
 - The 10:15 feedback-health wrapper did not pin itself to the production support cache, so it could read local project status instead of the live site status.
 - The launchd-installed refresh/qmd wrappers directly sourced `.env` files. Runtime `.env` copies carrying macOS provenance metadata can fail under launchd with `operation not permitted`.
-- Production checks verified that the site endpoint returned `200`, but did not verify the age of `/api/snapshots.latest`.
+- Production checks verified that the site endpoint returned `200`, but did not verify the age of `/api/snapshots/latest`.
 
 ## Fix
 

@@ -4,7 +4,14 @@ const fsp = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { SITE_CONFIG } = require("./src/config");
-const { getSnapshotsIndex, getLatestSnapshotMeta, getSnapshotDetail, buildSiteCache } = require("./src/site-index");
+const { getSnapshotsIndex, getLatestSnapshotMeta, getSnapshotDetail } = require("./src/site-index");
+const { buildContentCache } = require("./src/content-index");
+const { getWeeklyInsights, getWeeklyInsight } = require("./src/weekly-insight-index");
+const { buildWeeklyDocxFeedback } = require("./src/weekly-docx-feedback-v2");
+const {
+  commitWeeklyFeedbackOutbox,
+  acknowledgeWeeklyFeedback,
+} = require("./src/weekly-feedback-outbox");
 const { appendOpsLog, readOpsStatus, updateOpsStatus } = require("./src/ops-store");
 const { saveFeedback } = require("./src/feedback-store");
 
@@ -20,6 +27,7 @@ const CONTENT_TYPES = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".ico": "image/x-icon",
+  ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 };
 
 function toPublicSnapshot(snapshot) {
@@ -51,12 +59,14 @@ function sendText(res, statusCode, text) {
   res.end(text);
 }
 
-async function readRequestBody(req) {
+async function readRequestBody(req, maxBytes = 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let raw = "";
+    let bytes = 0;
     req.on("data", (chunk) => {
+      bytes += chunk.length;
       raw += chunk;
-      if (raw.length > 1024 * 1024) {
+      if (bytes > maxBytes) {
         reject(new Error("Payload too large"));
         req.destroy();
       }
@@ -89,6 +99,106 @@ function isLoopbackAddress(address) {
 
 function isLocalMaintenanceRequest(req) {
   return isLoopbackAddress(getRemoteAddress(req));
+}
+
+function isWeeklyPreviewAuthorized(req, searchParams) {
+  if (!SITE_CONFIG.weeklyPreviewToken) return false;
+  const headerToken = String(req.headers["x-weekly-preview-token"] || "");
+  const queryToken = String(searchParams.get("preview_token") || "");
+  return headerToken === SITE_CONFIG.weeklyPreviewToken || queryToken === SITE_CONFIG.weeklyPreviewToken;
+}
+
+function tokenMatches(expected, supplied) {
+  const expectedBytes = Buffer.from(String(expected || ""));
+  const suppliedBytes = Buffer.from(String(supplied || ""));
+  return expectedBytes.length > 0 && expectedBytes.length === suppliedBytes.length
+    && crypto.timingSafeEqual(expectedBytes, suppliedBytes);
+}
+
+function isWeeklyFeedbackAuthorized(req) {
+  return tokenMatches(SITE_CONFIG.weeklyFeedbackToken, req.headers["x-weekly-feedback-token"]);
+}
+
+function toPublicWeeklyDetail(detail) {
+  if (!detail) return detail;
+  return {
+    schema_version: detail.schema_version,
+    artifact_id: detail.artifact_id,
+    source_run_id: detail.source_run_id,
+    version: detail.version,
+    content_sha256: detail.content_sha256,
+    publication: {
+      public_enabled: detail.publication?.public_enabled === true,
+      visibility: detail.publication?.visibility,
+    },
+    content: detail.content,
+    manifest: {
+      content_schema_version: detail.manifest.content_schema_version || detail.schema_version,
+      artifact_id: detail.manifest.artifact_id,
+      source_run_id: detail.manifest.source_run_id,
+      version: detail.manifest.version,
+      content_sha256: detail.manifest.content_sha256,
+      section_anchors: detail.manifest.section_anchors,
+      period: detail.manifest.period,
+      title: detail.manifest.title,
+      status: detail.manifest.status,
+      issue_kind: detail.manifest.issue_kind,
+      selected_theses: detail.manifest.selected_theses,
+      selected_topics: detail.manifest.selected_topics,
+    },
+  };
+}
+
+function toPublicWeeklyIndex(index) {
+  return {
+    generated_at: index.generated_at,
+    count: index.count,
+    insights: index.insights.map((item) => ({
+      content_schema_version: item.content_schema_version || "weekly-insight-publication/v1",
+      artifact_id: item.artifact_id,
+      source_run_id: item.source_run_id,
+      version: item.version,
+      content_sha256: item.content_sha256,
+      section_anchors: item.section_anchors,
+      reader_sections: item.reader_sections,
+      publication: {
+        public_enabled: item.publication?.public_enabled === true,
+        visibility: item.publication?.visibility,
+      },
+      period: item.period,
+      title: item.title,
+      dek: item.dek,
+      status: item.status,
+      issue_kind: item.issue_kind,
+      selected_theses: item.selected_theses,
+      selected_topics: item.selected_topics,
+      committed_at: item.committed_at,
+    })),
+  };
+}
+
+async function sendFile(res, filePath, contentType, downloadName) {
+  try {
+    const stat = await fsp.stat(filePath);
+    const headers = {
+      "Content-Type": contentType,
+      "Content-Length": stat.size,
+      "Cache-Control": "private, no-store, max-age=0",
+    };
+    if (downloadName) headers["Content-Disposition"] = `attachment; filename="${downloadName}"`;
+    res.writeHead(200, headers);
+    const stream = fs.createReadStream(filePath);
+    stream.once("error", (error) => {
+      if (!res.headersSent) {
+        sendText(res, 404, "Not Found");
+      } else {
+        res.destroy(error);
+      }
+    });
+    stream.pipe(res);
+  } catch (error) {
+    sendText(res, 404, "Not Found");
+  }
 }
 
 function sanitizeStaticPath(urlPath) {
@@ -183,6 +293,111 @@ async function handleApi(req, res, pathname, searchParams) {
     });
   }
 
+  if (req.method === "GET" && pathname === "/api/insights") {
+    const includeUnpublished = isWeeklyPreviewAuthorized(req, searchParams);
+    const index = await getWeeklyInsights({ includeUnpublished });
+    return sendJson(res, 200, toPublicWeeklyIndex(index));
+  }
+
+  const weeklyMatch = pathname.match(/^\/api\/insights\/([a-z0-9][a-z0-9-]{2,99})(?:\/(word|feedback|feedback-ack))?$/);
+  if (weeklyMatch) {
+    const artifactId = weeklyMatch[1];
+    const action = weeklyMatch[2] || "detail";
+    const includeUnpublished = isWeeklyPreviewAuthorized(req, searchParams);
+    const detail = await getWeeklyInsight(artifactId, { includeUnpublished });
+    if (!detail) return sendJson(res, 404, { error: "Weekly insight not found" });
+
+    if (req.method === "GET" && action === "detail") {
+      return sendJson(res, 200, toPublicWeeklyDetail(detail));
+    }
+    if (req.method === "GET" && action === "word") {
+      return sendFile(
+        res,
+        path.join(detail.artifact_dir, `${artifactId}.docx`),
+        CONTENT_TYPES[".docx"],
+        `${artifactId}.docx`,
+      );
+    }
+    if (req.method === "POST" && action === "feedback") {
+      if (!isWeeklyFeedbackAuthorized(req)) return sendJson(res, 404, { error: "Weekly insight not found" });
+      try {
+        const maxBodyBytes = Math.ceil(SITE_CONFIG.weeklyFeedbackMaxDocxBytes * 1.5) + 64 * 1024;
+        const rawBody = await readRequestBody(req, maxBodyBytes);
+        const body = rawBody ? JSON.parse(rawBody) : {};
+        const encoded = String(body.editedDocxBase64 || "").trim();
+        if (!encoded || !/^[A-Za-z0-9+/=\r\n]+$/.test(encoded)) {
+          return sendJson(res, 400, { error: "编辑后的 Word 编码无效" });
+        }
+        const humanDocx = Buffer.from(encoded, "base64");
+        if (humanDocx.length > SITE_CONFIG.weeklyFeedbackMaxDocxBytes) {
+          return sendJson(res, 400, { error: "编辑后的 Word 超过 8 MiB 上限" });
+        }
+        const systemDocx = await fsp.readFile(path.join(detail.artifact_dir, `${artifactId}.docx`));
+        const diff = buildWeeklyDocxFeedback({
+          snapshot: detail,
+          systemDocx,
+          humanDocx,
+          feedbackId: String(body.feedbackId || ""),
+        });
+        const committed = await commitWeeklyFeedbackOutbox({
+          root: SITE_CONFIG.weeklyFeedbackDir,
+          snapshot: detail,
+          systemDocx,
+          humanDocx,
+          ...diff,
+        });
+        return sendJson(res, committed.status === "committed" ? 201 : 200, {
+          ok: true,
+          receipt: {
+            status: committed.status,
+            feedback_id: diff.adapter.feedback_id,
+            artifact_id: detail.artifact_id,
+            source_run_id: detail.source_run_id,
+            version: detail.version,
+            draft_content_sha256: detail.content_sha256,
+            outbox_bundle_sha256: committed.manifest.bundle_sha256,
+            section_anchors: diff.section_anchors,
+            feedback_areas: diff.feedback_areas,
+            calibration_status: "pending_review",
+          },
+        });
+      } catch (error) {
+        if (error.expose === true) return sendJson(res, 400, { error: error.message });
+        console.error("Weekly Word feedback failed", error);
+        return sendJson(res, 500, { error: "Word 反馈处理失败，请稍后重试" });
+      }
+    }
+    if (req.method === "POST" && action === "feedback-ack") {
+      if (!isWeeklyFeedbackAuthorized(req)) return sendJson(res, 404, { error: "Weekly insight not found" });
+      try {
+        const rawBody = await readRequestBody(req, 256 * 1024);
+        const body = rawBody ? JSON.parse(rawBody) : {};
+        const feedbackId = String(body.feedbackId || "");
+        if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(feedbackId)) {
+          const error = new Error("Invalid feedback_id");
+          error.expose = true;
+          throw error;
+        }
+        const ack = await acknowledgeWeeklyFeedback({
+          root: SITE_CONFIG.weeklyFeedbackDir,
+          artifactId,
+          feedbackId,
+          bundleSha256: String(body.bundleSha256 || ""),
+          receipt: body.wbrReceipt,
+        });
+        return sendJson(res, ack.status === "acknowledged" ? 201 : 200, {
+          ok: true,
+          receipt: { status: ack.status, artifact_id: artifactId, feedback_id: feedbackId },
+        });
+      } catch (error) {
+        if (error.expose === true) return sendJson(res, 400, { error: error.message });
+        console.error("Weekly feedback acknowledgement failed", error);
+        return sendJson(res, 500, { error: "WBR 回执处理失败，请稍后重试" });
+      }
+    }
+    return sendJson(res, 405, { error: "Method not allowed" });
+  }
+
   if (req.method === "GET" && pathname === "/api/snapshots") {
     const index = await getSnapshotsIndex();
     const latest = await getLatestSnapshotMeta();
@@ -216,7 +431,7 @@ async function handleApi(req, res, pathname, searchParams) {
     if (!isLocalMaintenanceRequest(req) || !isMaintenanceAuthorized(req, searchParams)) {
       return sendJson(res, 401, { error: "Unauthorized" });
     }
-    const result = await buildSiteCache();
+    const result = await buildContentCache();
     return sendJson(res, 200, result);
   }
 
@@ -308,6 +523,14 @@ function createServer() {
       if (requestUrl.pathname.startsWith("/api/")) {
         return await handleApi(req, res, requestUrl.pathname, requestUrl.searchParams);
       }
+      const detailMatch = requestUrl.pathname.match(/^\/insights\/([a-z0-9][a-z0-9-]{2,99})\/?$/);
+      if (detailMatch) {
+        const detail = await getWeeklyInsight(detailMatch[1], {
+          includeUnpublished: isWeeklyPreviewAuthorized(req, requestUrl.searchParams),
+        });
+        if (!detail) return sendText(res, 404, "Not Found");
+        return sendFile(res, path.join(detail.artifact_dir, "index.html"), CONTENT_TYPES[".html"]);
+      }
       return await serveStatic(req, res, requestUrl.pathname, requestUrl.searchParams);
     } catch (error) {
       return sendJson(res, 500, {
@@ -326,6 +549,8 @@ if (require.main === module) {
     console.log(`Reports: ${SITE_CONFIG.archiveDir}`);
     console.log(`Feedback: ${SITE_CONFIG.feedbackDir}`);
     console.log(`Maintenance: ${SITE_CONFIG.maintenanceDir}`);
+    console.log(`Weekly insight source: ${SITE_CONFIG.weeklySourceDir}`);
+    console.log(`Weekly insight cache: ${SITE_CONFIG.weeklyCacheDir}`);
   });
 }
 

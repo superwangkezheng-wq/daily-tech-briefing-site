@@ -687,12 +687,14 @@ This Phase B artifact does not enable real sources, Internet egress, credentials
 
 ## Real-Profile Canary: Phase C Verification (v1.2.67)
 
-Phase C adds the only approved candidate for a future real-source read-only
-evaluation: `openai-news-rss-v1`, fixed to OpenAI News RSS. A missing release
-artifact causes the runtime to block before it invokes Docker or egress. The
-artifact must carry hashes for adversarial simulation, the architecture audit,
-and CodeRabbit review; it is intentionally absent while the production audit
-remains unapproved.
+This subsection records the v1.2.67 pre-canary state: Phase C added the only
+approved candidate for a future real-source read-only evaluation,
+`openai-news-rss-v1`, fixed to OpenAI News RSS. At that point a missing release
+artifact blocked the runtime before it invoked Docker or egress. The artifact
+had to carry hashes for adversarial simulation, the architecture audit, and
+CodeRabbit review; no real request was authorized at that v1.2.67 checkpoint.
+The separately labelled v1.2.68 result below records the later one-shot
+canary; neither checkpoint authorizes recurring collection or production use.
 
 The worker and proxy run in isolated scratch containers. The worker is
 internal-only; the proxy alone has an egress bridge. One-use lease material is
