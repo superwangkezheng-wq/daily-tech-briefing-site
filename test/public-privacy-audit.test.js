@@ -5,7 +5,7 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 
-const { findInternalMediaInPublicRoot } = require("../scripts/audit-public-package");
+const { findInternalMediaInPublicRoot, weeklyPrivacyAuditFinding } = require("../scripts/audit-public-package");
 const { canonicalSha256 } = require("../src/weekly-insight-contract");
 
 const BUNDLE_LAYOUT = [
@@ -162,6 +162,17 @@ test("public package audit fails closed when the weekly source is absent or has 
   assert.throws(
     () => findInternalMediaInPublicRoot({ publicDir, weeklySourceDir: emptySourceDir }),
     /weekly source.*bundle-manifest\.json/i,
+  );
+});
+
+test("top-level public audit reports an invalid weekly source as a finding", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-source-audit-finding-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const publicDir = path.join(root, "public");
+  await fs.mkdir(publicDir, { recursive: true });
+  assert.deepEqual(
+    weeklyPrivacyAuditFinding({ publicDir, weeklySourceDir: path.join(root, "missing") }),
+    ["weekly source validation failed: weekly source: does not exist"],
   );
 });
 

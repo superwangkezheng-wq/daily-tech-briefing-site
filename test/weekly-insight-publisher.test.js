@@ -27,7 +27,7 @@ function xmlTextContent(xml) {
     .replace(/&apos;/g, "'")
     .replace(/&amp;/g, "&");
   return xmlElements(xml, "w:t")
-    .map((element) => decode(element.replace(/^<w:t\\b[^>]*>|<\/w:t>$/g, "")))
+    .map((element) => decode(element.replace(/^<w:t\b[^>]*>|<\/w:t>$/g, "")))
     .join("");
 }
 

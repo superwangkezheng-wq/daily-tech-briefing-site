@@ -187,7 +187,15 @@ async function sendFile(res, filePath, contentType, downloadName) {
     };
     if (downloadName) headers["Content-Disposition"] = `attachment; filename="${downloadName}"`;
     res.writeHead(200, headers);
-    fs.createReadStream(filePath).pipe(res);
+    const stream = fs.createReadStream(filePath);
+    stream.once("error", (error) => {
+      if (!res.headersSent) {
+        sendText(res, 404, "Not Found");
+      } else {
+        res.destroy(error);
+      }
+    });
+    stream.pipe(res);
   } catch (error) {
     sendText(res, 404, "Not Found");
   }

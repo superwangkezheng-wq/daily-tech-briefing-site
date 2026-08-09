@@ -2,7 +2,8 @@ async function settle(name, operation) {
   try {
     return { name, ok: true, value: await operation() };
   } catch (error) {
-    return { name, ok: false, error: error.message || String(error) };
+    const message = error instanceof Error ? error.message : String(error);
+    return { name, ok: false, error: message || "Unknown cache build failure" };
   }
 }
 

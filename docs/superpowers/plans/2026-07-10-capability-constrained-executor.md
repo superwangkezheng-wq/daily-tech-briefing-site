@@ -243,7 +243,7 @@ Probe mode `sleep` exceeds a one-second profile timeout. Assert `capability_time
 
 - [x] **Step 4: Add output-limit test, run RED, implement, run GREEN**
 
-Probe mode `output` writes a unique marker beyond an 64-byte output limit. Assert `capability_output_limit_exceeded` and marker absence from serialized receipt.
+Probe mode `output` writes a unique marker beyond a 64-byte output limit. Assert `capability_output_limit_exceeded` and marker absence from serialized receipt.
 
 - [x] **Step 5: Run all executor integration tests**
 

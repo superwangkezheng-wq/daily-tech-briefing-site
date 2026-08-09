@@ -18,7 +18,6 @@
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
-const http = require("node:http");
 const https = require("node:https");
 const { SITE_CONFIG } = require("../src/config");
 const { listReportSnapshots, parseReportFile } = require("../src/report-parser");
@@ -26,7 +25,7 @@ const { listReportSnapshots, parseReportFile } = require("../src/report-parser")
 // Patterns for terms worth enriching
 const ACRONYM_RE = /\b([A-Z][A-Z0-9]{2,}(?:\.[A-Z0-9]+)?)\b/g;
 // Company/project names preceding key phrases
-const ENTITY_RE = /(?:[A-Z][a-z]+(?:[A-Z][a-z]+)+|Open[A-Z][a-z]+)/g;
+const ENTITY_RE = /((?:[A-Z][a-z]+(?:[A-Z][a-z]+)+|Open(?:[A-Z][a-z]+|AI)))/g;
 
 // Skip common tech terms that don't need enrichment
 const SKIP_ACRONYMS = new Set([
@@ -53,30 +52,82 @@ function extractTerms(text) {
   return [...terms].slice(0, 5); // limit to top 5
 }
 
-async function webSearchBackground(term, timeoutMs = 5000) {
+async function webSearchBackground(term, timeoutMs = 5000, options = {}) {
   // Uses DuckDuckGo lite search (no API key needed)
   // Returns a short plain-text summary or null
   const url = `https://lite.duckduckgo.com/lite/?q=${encodeURIComponent(term + " technology")}`;
-  return new Promise((resolve) => {
-    const req = https.get(url, { timeout: timeoutMs }, (res) => {
-      let data = "";
-      res.on("data", (chunk) => { data += chunk; });
-      res.on("end", () => {
-        // Extract first result snippet
-        const snippetMatch = data.match(/class="result-snippet">([^<]+)</);
-        if (snippetMatch) {
-          resolve(snippetMatch[1].trim());
-        } else {
-          resolve(null);
+  const maxBytes = options.maxBytes ?? 512 * 1024;
+  const maxRedirects = options.maxRedirects ?? 3;
+  const deadline = Date.now() + timeoutMs;
+
+  const request = (target, redirectsLeft) => new Promise((resolve) => {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      resolve(null);
+      return;
+    }
+    let settled = false;
+    const finish = (value) => {
+      if (!settled) {
+        settled = true;
+        resolve(value);
+      }
+    };
+    const req = https.get(target, { timeout: remainingMs }, (res) => {
+      const status = res.statusCode || 0;
+      const location = res.headers.location;
+      if (status >= 300 && status < 400 && location && redirectsLeft > 0) {
+        res.resume();
+        let redirect;
+        try {
+          redirect = new URL(location, target);
+        } catch {
+          finish(null);
+          return;
         }
+        if (redirect.protocol !== "https:") {
+          finish(null);
+          return;
+        }
+        request(redirect, redirectsLeft - 1).then(finish);
+        return;
+      }
+      if (status !== 200) {
+        res.resume();
+        finish(null);
+        return;
+      }
+      const chunks = [];
+      let bytes = 0;
+      res.on("data", (chunk) => {
+        bytes += chunk.length;
+        if (bytes > maxBytes) {
+          req.destroy();
+          finish(null);
+          return;
+        }
+        chunks.push(chunk);
+      });
+      res.on("end", () => {
+        if (settled) return;
+        const data = Buffer.concat(chunks).toString("utf8");
+        const snippetMatch = data.match(/class="result-snippet">([^<]+)</);
+        finish(snippetMatch ? snippetMatch[1].trim() : null);
       });
     });
-    req.on("timeout", () => { req.destroy(); resolve(null); });
-    req.on("error", () => resolve(null));
+    req.on("timeout", () => {
+      req.destroy();
+      finish(null);
+    });
+    req.on("error", () => finish(null));
   });
+  return request(url, maxRedirects);
 }
 
 async function enrichReport(reportPath, options = {}) {
+  if (!String(reportPath).endsWith(".md")) {
+    throw new Error("Enrichment input must be a Markdown report (.md)");
+  }
   const enrichPath = reportPath.replace(/\.md$/, ".enrich");
   // Idempotent: skip if already enriched
   if (fs.existsSync(enrichPath)) return null;
@@ -85,13 +136,11 @@ async function enrichReport(reportPath, options = {}) {
   if (!report) return null;
 
   const allItems = [
-    ...(report.sections.techNews || []),
-    ...(report.sections.videoItems || []),
-    ...(report.sections.aiCreators || []),
+    ...Object.entries(report.sections).flatMap(([section, items]) => (items || []).map((item) => ({ section, item }))),
   ];
 
   const enrichedItems = [];
-  for (const item of allItems) {
+  for (const { section, item } of allItems) {
     const text = `${item.title} ${item.summary} ${item.impact}`;
     const terms = extractTerms(text);
     if (terms.length === 0) continue;
@@ -106,7 +155,9 @@ async function enrichReport(reportPath, options = {}) {
     }
 
     enrichedItems.push({
+      section,
       rank: item.rank,
+      itemKey: `${section}:${item.rank}`,
       background,
       terms,
     });

@@ -175,7 +175,7 @@ npm run digest -- --no-push
 npm run enrich            # Enrich reports with background context (local-only, no web search)
 npm run enrich:search     # Enrich reports with web search background
 npm run mcp               # Start MCP server (stdio) for AI assistant integration
-npm run mcp:http          # Start MCP server (HTTP, 127.0.0.1:4322) for testing
+MCP_HTTP_TOKEN=... npm run mcp:http  # Start authenticated local HTTP MCP (127.0.0.1:4322) for testing
 npm run run:tunnel:quick  # Temporary Cloudflare URL
 npm run run:tunnel        # Named Cloudflare Tunnel, requires .env.tunnel
 ```

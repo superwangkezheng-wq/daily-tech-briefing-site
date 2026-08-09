@@ -141,7 +141,13 @@ Consequently, HTTPS path-prefix enforcement is intentionally unavailable in Phas
 3. Resolve with the proxy-owned resolver only. The worker-provided resolver, host mapping, and DNS option are ignored.
 4. Reject a resolution with no result or any result that is loopback, private, link-local, multicast, unspecified, reserved, carrier-grade NAT, or otherwise non-global.
 5. Pin the approved resolved address for the dial. Do not perform a second uncontrolled lookup at connection time.
-6. For HTTPS, set SNI to the normalized allowed authority and let the worker validate the server certificate normally. No MITM CA is installed.
+6. For HTTPS CONNECT, authorize the normalized CONNECT authority and let the worker set SNI and validate the server certificate normally. No MITM CA is installed. The proxy cannot inspect the TLS ClientHello and therefore cannot enforce SNI in this architecture.
+
+The Phase B CONNECT tunnel is not an SNI-enforcement mechanism. Any future
+profile that requires a CONNECT-authority-to-SNI binding needs a separately
+reviewed TLS-aware boundary that can validate that binding; if ECH or another
+TLS behavior prevents validation, the profile must fail closed. Do not enable a
+real egress profile on the strength of the current TCP CONNECT proxy alone.
 
 The prototype has a deliberately separate fixture profile type whose authority is a local Docker service name on `oc-egress-proxy-out`. That exception is structurally unavailable to a future real egress profile; production DNS rules never accept the fixture network or private addresses.
 

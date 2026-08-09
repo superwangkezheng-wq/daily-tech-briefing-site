@@ -56,6 +56,13 @@ function parseInteger(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function parseNonNegativeNumber(value, fallback) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 function parseClockTime(value, fallback) {
   const input = String(value || "").trim();
   const match = input.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
@@ -136,12 +143,12 @@ const SITE_CONFIG = {
   feedbackDigestHour: process.env.FEEDBACK_DIGEST_HOUR || "10:15",
   pageSize: Number(process.env.PAGE_SIZE || 6),
   // Horizon-inspired: AI scoring threshold. 0 = no filtering (backwards compatible)
-  aiScoreThreshold: Number(process.env.AI_SCORE_THRESHOLD || 0),
+  aiScoreThreshold: parseNonNegativeNumber(process.env.AI_SCORE_THRESHOLD, 0),
   // Horizon-inspired: per-section category limits after score sort
   categoryGroupLimit: {
-    techNews: Number(process.env.CATEGORY_GROUP_TECHNEWS || 0),
-    videoItems: Number(process.env.CATEGORY_GROUP_VIDEO || 0),
-    aiCreators: Number(process.env.CATEGORY_GROUP_CREATOR || 0),
+    techNews: parseNonNegativeNumber(process.env.CATEGORY_GROUP_TECHNEWS, 0),
+    videoItems: parseNonNegativeNumber(process.env.CATEGORY_GROUP_VIDEO, 0),
+    aiCreators: parseNonNegativeNumber(process.env.CATEGORY_GROUP_CREATOR, 0),
   },
   // Enrichment worker config
   enrichEnabled: String(process.env.ENRICH_ENABLED || "false") === "true",
@@ -233,4 +240,5 @@ module.exports = {
   SCHEDULE_CONFIG,
   REFRESH_SLOTS,
   OPS_CATEGORIES,
+  parseNonNegativeNumber,
 };

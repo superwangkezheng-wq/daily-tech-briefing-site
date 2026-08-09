@@ -142,12 +142,28 @@ async function getWeeklyInsight(artifactId, options = {}) {
   const normalizedId = String(artifactId || "").trim();
   if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(normalizedId)) return null;
   const publishRoot = path.resolve(options.publishRoot || SITE_CONFIG.weeklyCacheDir);
+  const indexPath = path.join(publishRoot, "index.json");
+  if (!fs.existsSync(indexPath)) {
+    if (options.buildIfMissing === false) return null;
+    await buildWeeklyInsightCache({ sourceDir: options.sourceDir, publishRoot });
+  }
+  let index;
+  try {
+    index = await readJson(indexPath);
+  } catch {
+    return null;
+  }
+  if ((index.deferred || []).some((entry) => entry.artifact_id === normalizedId)) return null;
+  const indexed = (index.insights || []).find((entry) => entry.artifact_id === normalizedId);
+  if (!indexed) return null;
+  if (!options.includeUnpublished && indexed.publication?.public_enabled !== true) return null;
   const artifactDir = path.join(publishRoot, normalizedId);
   try {
     const [manifest, snapshot] = await Promise.all([
       readJson(path.join(artifactDir, "manifest.json")),
       readJson(path.join(artifactDir, "content.json")),
     ]);
+    if (manifest.content_sha256 !== indexed.content_sha256) return null;
     if (!options.includeUnpublished && manifest.publication?.public_enabled !== true) return null;
     return { ...snapshot, manifest, artifact_dir: artifactDir };
   } catch (error) {

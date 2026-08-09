@@ -4,7 +4,7 @@ const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
 const { evaluateWeeklyRelease } = require("../src/weekly-publication-schedule");
-const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
+const { buildWeeklyInsightCache, getWeeklyInsight } = require("../src/weekly-insight-index");
 const { publishWeeklySnapshot } = require("../src/weekly-insight-publisher");
 const { createWeeklyV3Snapshot, createWeeklyV4Snapshot } = require("./helpers/weekly-fixture");
 
@@ -74,7 +74,11 @@ test("v4 releases only a complete three-to-five-topic issue after the existing w
     now: new Date("2026-08-03T02:30:00.000Z"),
   });
   assert.equal(rejected.errors.length, 1);
-  assert.match(rejected.errors[0].error, /complete|release.eligible|topic.preview|public/i);
+  assert.equal(rejected.errors[0].source_file, "incomplete.json");
+  assert.equal(
+    rejected.errors[0].error,
+    "v4 topic_preview and empty_preview cannot be public; a complete_issue is required",
+  );
   await assert.rejects(fs.stat(path.join(root, "rejected-cache", incomplete.artifact_id)), { code: "ENOENT" });
 
   const emptySourceDir = path.join(root, "empty-source");
@@ -168,6 +172,11 @@ test("a deferred issue is removed from the rebuilt index even when an older arti
   assert.equal((await fs.stat(path.join(publishRoot, snapshot.artifact_id))).isDirectory(), true);
   const index = JSON.parse(await fs.readFile(path.join(publishRoot, "index.json"), "utf8"));
   assert.equal(index.count, 0);
+  assert.equal(
+    await getWeeklyInsight(snapshot.artifact_id, { publishRoot, includeUnpublished: true }),
+    null,
+    "a deferred artifact directory must not bypass the rebuilt index",
+  );
 });
 
 test("existing scanner reads an audited per-issue release override sidecar", async (t) => {

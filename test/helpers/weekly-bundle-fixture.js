@@ -63,7 +63,7 @@ async function writeV41BundleManifest(bundleRoot, snapshot, options = {}) {
       sha256 = canonicalSha256Buffer(payload);
       sizeBytes = payload.length;
     } catch (error) {
-      if (error.code !== "EISDIR") throw error;
+      if (error.code !== "EISDIR" && error.code !== "ENOENT") throw error;
     }
     entries.push({
       path: media.asset_ref,

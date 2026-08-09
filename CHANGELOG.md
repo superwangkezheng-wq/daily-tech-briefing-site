@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased documentation boundary
+
+- References to the external OpenClaw Phase C v1.2.67/v1.2.68 canary in the architecture record are evidence checkpoints, not Daily Tech site releases or production approval. They do not authorize this repository to initiate collection, publish content, or change the existing daily/weekly release gates.
+
 ## 1.2.66 - 2026-07-11
 
 - Recorded the completed Phase B controlled-egress policy-proxy as a local, fixture-only shadow prototype. Its two Docker bridges are both internal: the worker is attached only to `worker-internal`, the proxy is dual-homed on `worker-internal` and `proxy-out`, and the fixture is attached only to `proxy-out`. There are no host ports, mounts, devices, privileged mode, custom DNS, `--add-host`, or shell execution.

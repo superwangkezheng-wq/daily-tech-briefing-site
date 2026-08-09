@@ -226,6 +226,7 @@
     updateCodexTemplate();
     codexDialog?.querySelector("[data-codex-feedback-copy]")?.addEventListener("click", async () => {
       const status = codexDialog.querySelector("[data-codex-feedback-status]");
+      if (!status || !codexTemplate) return;
       try {
         if (!navigator.clipboard?.writeText) throw new Error("当前浏览器无法使用剪贴板。");
         await navigator.clipboard.writeText(codexTemplate.value);

@@ -15,7 +15,8 @@ function removeBookmarkedRegion(documentXml, anchor) {
   const startPattern = new RegExp(`<w:bookmarkStart\\b[^>]*\\bw:id="([^"]+)"[^>]*\\bw:name="${name}"[^>]*/>`);
   const start = startPattern.exec(documentXml);
   assert.ok(start, `fixture must contain bookmark ${anchor}`);
-  const paragraphStart = documentXml.lastIndexOf("<w:p", start.index);
+  const paragraphMatches = [...documentXml.slice(0, start.index).matchAll(/<w:p(?:\s[^>]*)?>/g)];
+  const paragraphStart = paragraphMatches.at(-1)?.index ?? -1;
   const endPattern = new RegExp(`<w:bookmarkEnd\\b[^>]*\\bw:id="${start[1]}"[^>]*/>`);
   const end = endPattern.exec(documentXml.slice(start.index + start[0].length));
   assert.ok(end, `fixture must contain bookmark end ${anchor}`);

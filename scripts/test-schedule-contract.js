@@ -96,6 +96,10 @@ assert.match(qmdRefreshTemplate, /<key>BUN_INSTALL<\/key>\s*<string>__HOME_DIR__
 assert.match(qmdRefreshTemplate, /<key>WorkingDirectory<\/key>\s*<string>__SUPPORT_DIR__<\/string>/);
 
 const installer = readText(path.join(ROOT_DIR, "scripts/install-launchd.sh"));
+assert.match(installer, /^#!\/bin\/zsh/m);
+assert.match(installer, /cat > "\$support_site_wrapper" <<'SH'\n#!\/bin\/zsh/);
+assert.match(installer, /cat > "\$support_refresh_wrapper" <<'SH'\n#!\/bin\/zsh/);
+assert.match(installer, /cat > "\$support_tunnel_wrapper" <<'SH'\n#!\/bin\/zsh/);
 assert.match(installer, /DAILY_COLLECTION_SLOTS:-morning/);
 assert.match(installer, /INSTALL_AFTERNOON_REFRESH:-0/);
 assert.match(installer, /INSTALL_EVENING_REFRESH:-0/);
@@ -114,7 +118,7 @@ assert.match(healthWrapper, /export OPS_STATUS_FILE="\$\{OPS_STATUS_FILE:-\$supp
 const qmdWrapper = readText(path.join(ROOT_DIR, "scripts/run-qmd-refresh.sh"));
 assert.match(qmdWrapper, /load_env_file "\$project_dir\/\.env"/);
 assert.match(qmdWrapper, /load_env_file "\$support_dir\/site\.env"/);
-assert.doesNotMatch(qmdWrapper, /source "\$project_dir\/\.env"/);
+assert.doesNotMatch(qmdWrapper, /(?:source|\.)\s+"\$project_dir\/\.env"/);
 
 const oneNGuide = readText(path.join(ROOT_DIR, "docs/1n-system-guide.md"));
 assert.match(oneNGuide, /Fresh subsystem status files are the business truth/);

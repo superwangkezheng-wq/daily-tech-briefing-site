@@ -416,19 +416,40 @@ function setCategory(category) {
 function openDrawer(drawer, trigger) {
   if (!drawer) return;
   closeDrawer(false);
+  if (drawer === elements.feedbackDrawer) {
+    elements.feedbackForm.reset();
+    elements.feedbackSuccess.hidden = true;
+    elements.feedbackForm.hidden = false;
+    elements.feedbackError.textContent = "";
+    elements.feedbackStatus.textContent = "";
+    elements.feedbackSubmit.disabled = false;
+  }
   state.activeDrawer = drawer;
   state.drawerTrigger = trigger || document.activeElement;
   elements.overlay.hidden = false;
   drawer.dataset.open = "true";
   drawer.setAttribute("aria-hidden", "false");
+  setPageInert(true);
   document.body.style.overflow = "hidden";
   drawer.querySelector("button, input, textarea")?.focus();
+}
+
+function setPageInert(inert) {
+  [
+    document.querySelector(".site-header"),
+    document.querySelector(".mobile-controls"),
+    document.querySelector(".page-layout"),
+    document.querySelector(".bottom-nav"),
+  ].filter(Boolean).forEach((element) => {
+    element.inert = inert;
+  });
 }
 
 function closeDrawer(restoreFocus = true) {
   if (!state.activeDrawer) return;
   state.activeDrawer.removeAttribute("data-open");
   state.activeDrawer.setAttribute("aria-hidden", "true");
+  setPageInert(false);
   elements.overlay.hidden = true;
   document.body.style.overflow = "";
   const trigger = state.drawerTrigger;
@@ -520,6 +541,9 @@ document.getElementById("btn-agent").addEventListener("click", (event) => openDr
 document.getElementById("btn-feedback").addEventListener("click", (event) => openDrawer(elements.feedbackDrawer, event.currentTarget));
 document.querySelectorAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", () => closeDrawer()));
 elements.overlay.addEventListener("click", () => closeDrawer());
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.activeDrawer) closeDrawer();
+});
 elements.feedbackForm.addEventListener("submit", submitFeedback);
 elements.feedbackContent.addEventListener("input", () => {
   elements.feedbackError.textContent = "";

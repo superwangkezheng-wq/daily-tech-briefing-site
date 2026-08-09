@@ -255,6 +255,21 @@ function findInternalMediaInPublicRoot({ publicDir, weeklySourceDir }) {
   return findings;
 }
 
+function weeklyPrivacyAuditFinding(options) {
+  try {
+    return findInternalMediaInPublicRoot(options);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return [`weekly source validation failed: ${message}`];
+  }
+}
+
+function hasWeeklyBundleManifest(weeklySourceDir) {
+  if (!fs.existsSync(weeklySourceDir)) return false;
+  return regularFilesUnder(weeklySourceDir, [], { context: "weekly source" })
+    .some((filePath) => path.basename(filePath) === "bundle-manifest.json");
+}
+
 function runAudit() {
   const findings = [];
   for (const filePath of trackedFiles()) {
@@ -273,10 +288,18 @@ function runAudit() {
   }
   const configuredWeeklySourceDir = process.env.WEEKLY_INSIGHT_SOURCE_DIR;
   const defaultWeeklySourceDir = path.join(ROOT_DIR, "data/weekly-insights");
-  if (configuredWeeklySourceDir || fs.existsSync(defaultWeeklySourceDir)) {
-    findings.push(...findInternalMediaInPublicRoot({
+  const weeklySourceDir = path.resolve(configuredWeeklySourceDir || defaultWeeklySourceDir);
+  try {
+    if (hasWeeklyBundleManifest(weeklySourceDir)) {
+      findings.push(...weeklyPrivacyAuditFinding({
+        publicDir: path.join(ROOT_DIR, "public"),
+        weeklySourceDir,
+      }));
+    }
+  } catch (error) {
+    findings.push(...weeklyPrivacyAuditFinding({
       publicDir: path.join(ROOT_DIR, "public"),
-      weeklySourceDir: path.resolve(configuredWeeklySourceDir || defaultWeeklySourceDir),
+      weeklySourceDir,
     }));
   }
   return findings;
@@ -294,4 +317,4 @@ if (require.main === module) {
   console.log("public package privacy audit ok");
 }
 
-module.exports = { findInternalMediaInPublicRoot, runAudit };
+module.exports = { findInternalMediaInPublicRoot, weeklyPrivacyAuditFinding, hasWeeklyBundleManifest, runAudit };
