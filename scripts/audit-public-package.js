@@ -48,19 +48,18 @@ const BUNDLE_ENTRY_FIELDS = new Set(["path", "role", "sha256", "size_bytes"]);
 const BUNDLE_MEDIA_ENTRY_FIELDS = new Set([
   ...BUNDLE_ENTRY_FIELDS, "mime_type", "width", "height", "rights_scope",
 ]);
-const BUNDLE_LAYOUT = [
+const BUNDLE_CORE_ENTRIES = [
   ["weekly-analysis-candidate.json", "analysis_candidate"],
   ["projection-approval.json", "candidate_approval"],
   ["publication-media-policy.json", "media_policy"],
   ["weekly-insight-publication-v4.json", "reader_snapshot"],
-  ["media/agentforger-csrf-comparison.png", "reader_media"],
-  ["media/agent-control-chain.png", "reader_media"],
-  ["media/agent-control-chain.svg", "editable_export"],
-  ["media/agent-control-chain.drawio", "editable_source"],
+];
+const BUNDLE_SUPPORT_ENTRIES = [
   ["visual_asset_plan.json", "visual_plan"],
   ["visual_asset_log.md", "visual_qa_record"],
   ["editorial-review.md", "editorial_qa_record"],
 ];
+const BUNDLE_EDITABLE_SOURCE_EXTENSIONS = new Set([".drawio", ".dot"]);
 
 function shouldSkipDir(relativePath) {
   return [...SKIP_DIRS].some((dir) => relativePath === dir || relativePath.startsWith(`${dir}${path.sep}`));
@@ -149,6 +148,61 @@ function isSafeBundlePath(value) {
   );
 }
 
+function requireBundleLayoutEntry(entries, index, entryPath, role) {
+  const entry = entries[index];
+  if (entry?.path !== entryPath || entry?.role !== role) {
+    throw new Error(`Invalid weekly bundle manifest entry ${index} layout`);
+  }
+  return index + 1;
+}
+
+function validateBundleEntryLayout(entries) {
+  let index = 0;
+  for (const [entryPath, role] of BUNDLE_CORE_ENTRIES) {
+    index = requireBundleLayoutEntry(entries, index, entryPath, role);
+  }
+
+  const mediaBases = new Set();
+  while (entries[index]?.role === "reader_media") {
+    const entry = entries[index];
+    if (!entry.path.startsWith("media/") || !entry.path.endsWith(".png")) {
+      throw new Error(`Invalid weekly bundle manifest entry ${index} reader media path`);
+    }
+    const basePath = entry.path.slice(0, -".png".length);
+    if (!basePath || mediaBases.has(basePath)) {
+      throw new Error(`Invalid weekly bundle manifest entry ${index} reader media path`);
+    }
+    mediaBases.add(basePath);
+    index += 1;
+  }
+  if (!mediaBases.size) throw new Error("Invalid weekly bundle manifest reader media entries");
+
+  const editableBases = new Set();
+  while (entries[index]?.role === "editable_export") {
+    const exported = entries[index];
+    const basePath = exported.path?.endsWith(".svg")
+      ? exported.path.slice(0, -".svg".length)
+      : "";
+    const source = entries[index + 1];
+    const sourceExtension = path.posix.extname(source?.path || "");
+    if (
+      !mediaBases.has(basePath) || editableBases.has(basePath) ||
+      source?.role !== "editable_source" ||
+      !BUNDLE_EDITABLE_SOURCE_EXTENSIONS.has(sourceExtension) ||
+      source.path.slice(0, -sourceExtension.length) !== basePath
+    ) {
+      throw new Error(`Invalid weekly bundle manifest entry ${index} editable pair`);
+    }
+    editableBases.add(basePath);
+    index += 2;
+  }
+
+  for (const [entryPath, role] of BUNDLE_SUPPORT_ENTRIES) {
+    index = requireBundleLayoutEntry(entries, index, entryPath, role);
+  }
+  if (index !== entries.length) throw new Error("Invalid weekly bundle manifest entry layout");
+}
+
 function validatePrivacyManifest(manifest, manifestPath) {
   assertExactFields(manifest, BUNDLE_MANIFEST_FIELDS, "root");
   if (
@@ -159,7 +213,7 @@ function validatePrivacyManifest(manifest, manifestPath) {
     manifest.snapshot_path !== "weekly-insight-publication-v4.json" ||
     typeof manifest.public_enabled !== "boolean" ||
     typeof manifest.release_eligible !== "boolean" ||
-    !Array.isArray(manifest.entries) || manifest.entries.length !== BUNDLE_LAYOUT.length ||
+    !Array.isArray(manifest.entries) || !manifest.entries.length ||
     !/^[0-9a-f]{64}$/.test(String(manifest.bundle_entries_sha256 || "")) ||
     canonicalSha256(manifest.entries) !== manifest.bundle_entries_sha256
   ) {
@@ -167,19 +221,19 @@ function validatePrivacyManifest(manifest, manifestPath) {
   }
 
   const bundleRoot = path.dirname(manifestPath);
+  const entryPaths = new Set();
   for (const [index, entry] of manifest.entries.entries()) {
-    const expected = BUNDLE_LAYOUT[index];
     const context = `entry ${index}`;
     const fields = entry?.role === "reader_media" ? BUNDLE_MEDIA_ENTRY_FIELDS : BUNDLE_ENTRY_FIELDS;
     assertExactFields(entry, fields, context);
     if (
-      entry.path !== expected[0] || entry.role !== expected[1] ||
-      !isSafeBundlePath(entry.path) ||
+      !isSafeBundlePath(entry.path) || entry.path === "bundle-manifest.json" || entryPaths.has(entry.path) ||
       !/^[0-9a-f]{64}$/.test(String(entry.sha256 || "")) ||
       !Number.isSafeInteger(entry.size_bytes) || entry.size_bytes < 0
     ) {
       throw new Error(`Invalid weekly bundle manifest ${context} receipt`);
     }
+    entryPaths.add(entry.path);
     if (entry.role === "reader_media" && (
       entry.mime_type !== "image/png" ||
       !Number.isSafeInteger(entry.width) || entry.width <= 0 ||
@@ -197,6 +251,7 @@ function validatePrivacyManifest(manifest, manifestPath) {
     const sha256 = crypto.createHash("sha256").update(payload).digest("hex");
     if (sha256 !== entry.sha256) throw new Error(`Invalid weekly bundle manifest ${context} byte receipt`);
   }
+  validateBundleEntryLayout(manifest.entries);
   const actualPaths = regularFilesUnder(bundleRoot, [], { context: "weekly bundle" })
     .map((filePath) => path.relative(bundleRoot, filePath).split(path.sep).join("/"))
     .sort();

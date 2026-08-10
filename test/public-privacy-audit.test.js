@@ -22,9 +22,35 @@ const BUNDLE_LAYOUT = [
   ["editorial-review.md", "editorial_qa_record"],
 ];
 
-async function writeBundle(sourceDir, { privateBytes, publicBytes = Buffer.from("public media") }) {
+const W32_DYNAMIC_LAYOUT = [
+  ["weekly-analysis-candidate.json", "analysis_candidate"],
+  ["projection-approval.json", "candidate_approval"],
+  ["publication-media-policy.json", "media_policy"],
+  ["weekly-insight-publication-v4.json", "reader_snapshot"],
+  ["media/physical-ai-loop.png", "reader_media"],
+  ["media/agent-operating-layer.png", "reader_media"],
+  ["media/skill-optimization-loop.png", "reader_media"],
+  ["media/inference-stack-paths.png", "reader_media"],
+  ["media/physical-ai-loop.svg", "editable_export"],
+  ["media/physical-ai-loop.dot", "editable_source"],
+  ["media/agent-operating-layer.svg", "editable_export"],
+  ["media/agent-operating-layer.dot", "editable_source"],
+  ["media/skill-optimization-loop.svg", "editable_export"],
+  ["media/skill-optimization-loop.dot", "editable_source"],
+  ["media/inference-stack-paths.svg", "editable_export"],
+  ["media/inference-stack-paths.dot", "editable_source"],
+  ["visual_asset_plan.json", "visual_plan"],
+  ["visual_asset_log.md", "visual_qa_record"],
+  ["editorial-review.md", "editorial_qa_record"],
+];
+
+async function writeBundle(sourceDir, {
+  privateBytes,
+  publicBytes = Buffer.from("public media"),
+  layout = BUNDLE_LAYOUT,
+}) {
   const entries = [];
-  for (const [entryPath, role] of BUNDLE_LAYOUT) {
+  for (const [entryPath, role] of layout) {
     const payload = role === "reader_media"
       ? (entryPath.includes("comparison") ? privateBytes : publicBytes)
       : Buffer.from(`${role}:${entryPath}`);
@@ -97,6 +123,29 @@ test("public package audit permits public_allowed weekly media bytes", async (t)
     privateBytes: Buffer.from("different private bytes"),
     publicBytes,
   });
+
+  assert.deepEqual(findInternalMediaInPublicRoot({ publicDir, weeklySourceDir: sourceDir }), []);
+});
+
+test("public package audit accepts a four-topic SVG/DOT weekly bundle", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-public-dynamic-media-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const publicDir = path.join(root, "public");
+  const sourceDir = path.join(root, "weekly-source");
+  await Promise.all([
+    fs.mkdir(publicDir, { recursive: true }),
+    fs.mkdir(sourceDir, { recursive: true }),
+  ]);
+
+  const manifest = await writeBundle(sourceDir, {
+    privateBytes: Buffer.from("private bytes that are not part of this public bundle"),
+    layout: W32_DYNAMIC_LAYOUT,
+  });
+  for (const entry of manifest.entries.filter((item) => item.role === "reader_media")) {
+    const destination = path.join(publicDir, entry.path);
+    await fs.mkdir(path.dirname(destination), { recursive: true });
+    await fs.copyFile(path.join(sourceDir, entry.path), destination);
+  }
 
   assert.deepEqual(findInternalMediaInPublicRoot({ publicDir, weeklySourceDir: sourceDir }), []);
 });
