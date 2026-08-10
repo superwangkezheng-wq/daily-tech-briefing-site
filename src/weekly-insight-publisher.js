@@ -35,15 +35,8 @@ const BUNDLE_SUPPORT_ENTRIES = [
   ["editorial-review.md", "editorial_qa_record"],
 ];
 const BUNDLE_SNAPSHOT_PATH = "weekly-insight-publication-v4.json";
-const BUNDLE_V1_ENTRIES = [
-  ...BUNDLE_CORE_ENTRIES,
-  [BUNDLE_SNAPSHOT_PATH, "reader_snapshot"],
-  ["media/agentforger-csrf-comparison.png", "reader_media"],
-  ["media/agent-control-chain.png", "reader_media"],
-  ["media/agent-control-chain.svg", "editable_export"],
-  ["media/agent-control-chain.drawio", "editable_source"],
-  ...BUNDLE_SUPPORT_ENTRIES,
-];
+const BUNDLE_EDITABLE_EXPORT_SUFFIX = ".svg";
+const BUNDLE_EDITABLE_SOURCE_SUFFIXES = new Set([".drawio", ".dot"]);
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
@@ -388,6 +381,92 @@ function isSafeBundlePath(value) {
   return parts.every((part) => part && part !== "." && part !== "..");
 }
 
+function requireBundleEntry(entries, index, entryPath, role) {
+  const entry = entries[index];
+  if (entry?.path !== entryPath || entry?.role !== role) {
+    throw new Error("Invalid weekly bundle manifest entry order");
+  }
+  return index + 1;
+}
+
+function validateV41BundleEntryOrder(entries, snapshot) {
+  let index = 0;
+  for (const [entryPath, role] of BUNDLE_CORE_ENTRIES) {
+    index = requireBundleEntry(entries, index, entryPath, role);
+  }
+  index = requireBundleEntry(entries, index, BUNDLE_SNAPSHOT_PATH, "reader_snapshot");
+  for (const media of snapshot.content.media) {
+    index = requireBundleEntry(entries, index, media.asset_ref, "reader_media");
+  }
+  for (const media of snapshot.content.media) {
+    if (media.kind !== "architecture") continue;
+    const basePath = media.asset_ref.slice(0, -".png".length);
+    index = requireBundleEntry(entries, index, `${basePath}${BUNDLE_EDITABLE_EXPORT_SUFFIX}`, "editable_export");
+    const source = entries[index];
+    if (
+      source?.role !== "editable_source" ||
+      !BUNDLE_EDITABLE_SOURCE_SUFFIXES.has(path.posix.extname(source.path)) ||
+      source.path.slice(0, -path.posix.extname(source.path).length) !== basePath
+    ) {
+      throw new Error("Invalid weekly bundle manifest entry order");
+    }
+    index += 1;
+  }
+  for (const [entryPath, role] of BUNDLE_SUPPORT_ENTRIES) {
+    index = requireBundleEntry(entries, index, entryPath, role);
+  }
+  if (index !== entries.length) throw new Error("Invalid weekly bundle manifest entry order");
+}
+
+async function listWeeklyBundleTree(root, expectedDirectories, relativeDirectory = "") {
+  const directory = path.join(root, relativeDirectory);
+  const items = await fsp.readdir(directory, { withFileTypes: true });
+  const files = [];
+  const directories = [];
+  for (const item of items) {
+    const relativePath = relativeDirectory
+      ? path.posix.join(relativeDirectory, item.name)
+      : item.name;
+    const candidate = path.join(root, relativePath);
+    const stat = await fsp.lstat(candidate);
+    if (stat.isSymbolicLink()) throw new Error("Invalid weekly bundle manifest file set");
+    if (stat.isDirectory()) {
+      if (!expectedDirectories.has(relativePath)) {
+        throw new Error("Invalid weekly bundle manifest file set");
+      }
+      directories.push(relativePath);
+      const nested = await listWeeklyBundleTree(root, expectedDirectories, relativePath);
+      files.push(...nested.files);
+      directories.push(...nested.directories);
+      continue;
+    }
+    if (!stat.isFile()) throw new Error("Invalid weekly bundle manifest file set");
+    files.push(relativePath);
+  }
+  return { files, directories };
+}
+
+async function validateWeeklyBundleFileSet(root, entryPaths) {
+  const expectedFiles = new Set(["bundle-manifest.json", ...entryPaths]);
+  const expectedDirectories = new Set();
+  for (const relativePath of expectedFiles) {
+    let directory = path.posix.dirname(relativePath);
+    while (directory && directory !== ".") {
+      expectedDirectories.add(directory);
+      directory = path.posix.dirname(directory);
+    }
+  }
+  const actual = await listWeeklyBundleTree(root, expectedDirectories);
+  if (
+    actual.files.length !== expectedFiles.size ||
+    actual.directories.length !== expectedDirectories.size ||
+    actual.files.some((relativePath) => !expectedFiles.has(relativePath)) ||
+    actual.directories.some((relativePath) => !expectedDirectories.has(relativePath))
+  ) {
+    throw new Error("Invalid weekly bundle manifest file set");
+  }
+}
+
 async function resolveWeeklyBundleRoot(options = {}) {
   if (!options.mediaBundleRoot) throw new Error("Weekly private bundle root is required");
   const configuredRoot = path.resolve(options.mediaBundleRoot);
@@ -518,14 +597,8 @@ async function validateWeeklyBundleManifest(snapshot, options = {}) {
     if (roleCounts.get(role) !== 1) throw new Error(`Invalid weekly bundle manifest authority role count: ${role}`);
   }
 
-  if (
-    entries.length !== BUNDLE_V1_ENTRIES.length ||
-    BUNDLE_V1_ENTRIES.some(([entryPath, role], index) => (
-      entries[index]?.path !== entryPath || entries[index]?.role !== role
-    ))
-  ) {
-    throw new Error("Invalid weekly bundle manifest entry order");
-  }
+  validateV41BundleEntryOrder(entries, snapshot);
+  await validateWeeklyBundleFileSet(root, seenPaths);
   if (options.sourcePath) {
     const configuredSourcePath = path.resolve(options.sourcePath);
     let sourceStat;

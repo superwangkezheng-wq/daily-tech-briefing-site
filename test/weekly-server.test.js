@@ -15,6 +15,7 @@ const { createValidPng } = require("./helpers/image-fixture");
 const { writeV41BundleManifest } = require("./helpers/weekly-bundle-fixture");
 const { createZip, readZipEntries } = require("../src/ooxml");
 const { buildWeeklyInsightCache } = require("../src/weekly-insight-index");
+const { publishWeeklySnapshot } = require("../src/weekly-insight-publisher");
 const { createServer, SITE_CONFIG } = require("../server");
 
 test("weekly routes enforce per-request preview authorization and keep feedback private", async (t) => {
@@ -118,27 +119,30 @@ test("weekly routes enforce per-request preview authorization and keep feedback 
       },
     },
   });
-  await fs.mkdir(path.join(SITE_CONFIG.weeklySourceDir, "media"), { recursive: true });
+  const internalV41BundleRoot = path.join(root, "internal-v4-1-bundle");
+  const internalV41BundleMediaDir = path.join(internalV41BundleRoot, "media");
+  await fs.mkdir(internalV41BundleMediaDir, { recursive: true });
   await Promise.all([
     fs.writeFile(
-      path.join(SITE_CONFIG.weeklySourceDir, "media", "agentforger-csrf-comparison.png"),
+      path.join(internalV41BundleMediaDir, "agentforger-csrf-comparison.png"),
       internalV41Image,
     ),
     fs.writeFile(
-      path.join(SITE_CONFIG.weeklySourceDir, "media", "agent-control-chain.png"),
+      path.join(internalV41BundleMediaDir, "agent-control-chain.png"),
       internalV41Image,
     ),
     fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "internal.json"), JSON.stringify(internal)),
     fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "internal-v3.json"), JSON.stringify(internalV3)),
     fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "internal-v4.json"), JSON.stringify(internalV4)),
-    fs.writeFile(
-      path.join(SITE_CONFIG.weeklySourceDir, "weekly-insight-publication-v4.json"),
-      JSON.stringify(internalV41),
-    ),
     fs.writeFile(path.join(SITE_CONFIG.weeklySourceDir, "public.json"), JSON.stringify(publicSnapshot)),
   ]);
-  await writeV41BundleManifest(SITE_CONFIG.weeklySourceDir, internalV41, {
+  await writeV41BundleManifest(internalV41BundleRoot, internalV41, {
     snapshotPath: "weekly-insight-publication-v4.json",
+  });
+  await publishWeeklySnapshot(internalV41, {
+    publishRoot: SITE_CONFIG.weeklyCacheDir,
+    mediaBundleRoot: internalV41BundleRoot,
+    sourcePath: path.join(internalV41BundleRoot, "weekly-insight-publication-v4.json"),
   });
   await buildWeeklyInsightCache();
 

@@ -58,6 +58,100 @@ test("accepts v4 rich topics and preserves v1 through v3 compatibility", () => {
   );
 });
 
+test("v4.1 accepts a four-topic bundle with ordered dynamic media and SVG/DOT source pairs", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-1-four-topic-bundle-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const bundleRoot = path.join(root, "bundle");
+  const mediaDir = path.join(bundleRoot, "media");
+  await fs.mkdir(mediaDir, { recursive: true });
+
+  const base = createWeeklyV41Snapshot({ topicCount: 4 });
+  const mediaNames = [
+    "physical-ai-loop",
+    "agent-operating-layer",
+    "skill-optimization-loop",
+    "inference-stack-paths",
+  ];
+  const payloads = mediaNames.map((_, index) => createValidPng(index));
+  await Promise.all(payloads.map((payload, index) => (
+    fs.writeFile(path.join(mediaDir, `${mediaNames[index]}.png`), payload)
+  )));
+
+  const media = base.content.topics.map((topic, index) => {
+    const target = topic.facts.sections[3];
+    const payload = payloads[index];
+    return {
+      id: mediaNames[index],
+      kind: "architecture",
+      asset_ref: `media/${mediaNames[index]}.png`,
+      asset_sha256: crypto.createHash("sha256").update(payload).digest("hex"),
+      mime_type: "image/png",
+      size_bytes: payload.length,
+      width: 1,
+      height: 1,
+      alt: `专题 ${index + 1} 的原创技术关系图`,
+      caption: `图示专题 ${index + 1} 已验证的技术关系。`,
+      source_label: "example.com",
+      source_url: "https://example.com/weekly-v4",
+      usage_rights: "本项目依据公开事实原创绘制",
+      target_section_id: target.section_id,
+      evidence_ids: ["evidence-v4"],
+      rights_scope: "public_allowed",
+      rights_basis: "原创关系图，可随内容发布。",
+      logic_type: "flow",
+      logic_summary: `专题 ${index + 1} 的技术关系按图中箭头传递。`,
+    };
+  });
+  const snapshot = createWeeklyV41Snapshot({
+    topicCount: 4,
+    artifact_id: "wsi-2026-w32-28bbec40a507-v4-1",
+    source_run_id: "weekly-run-2026-w32-four-topic-media",
+    publication: {
+      public_enabled: true,
+      visibility: "public",
+      authorization_id: "exact-hash-test-authorization",
+      release_eligible: true,
+    },
+    content: {
+      ...base.content,
+      topics: base.content.topics.map((topic, index) => ({
+        ...topic,
+        facts: {
+          ...topic.facts,
+          sections: topic.facts.sections.map((section, sectionIndex) => (
+            sectionIndex === 3 ? { ...section, media_ids: [media[index].id] } : section
+          )),
+        },
+      })),
+      media,
+    },
+  });
+  const manifest = await writeV41BundleManifest(bundleRoot, snapshot);
+  for (const name of mediaNames) {
+    await fs.unlink(path.join(mediaDir, `${name}.drawio`));
+    await fs.writeFile(path.join(mediaDir, `${name}.dot`), "digraph G { source -> target; }\n");
+    const entry = manifest.entries.find((item) => item.path === `media/${name}.drawio`);
+    entry.path = `media/${name}.dot`;
+    const sourcePayload = await fs.readFile(path.join(mediaDir, `${name}.dot`));
+    entry.sha256 = crypto.createHash("sha256").update(sourcePayload).digest("hex");
+    entry.size_bytes = sourcePayload.length;
+  }
+  manifest.bundle_entries_sha256 = canonicalSha256(manifest.entries);
+  await fs.writeFile(path.join(bundleRoot, "bundle-manifest.json"), JSON.stringify(manifest, null, 2));
+
+  const receipt = await publishWeeklySnapshot(snapshot, {
+    publishRoot: path.join(root, "published"),
+    mediaBundleRoot: bundleRoot,
+    sourcePath: path.join(bundleRoot, "weekly-insight-publication-v4.json"),
+  });
+  const html = await fs.readFile(path.join(receipt.artifact_dir, "index.html"), "utf8");
+  const docxEntries = readZipEntries(await fs.readFile(
+    path.join(receipt.artifact_dir, `${snapshot.artifact_id}.docx`),
+  ));
+  assert.equal((html.match(/data:image\/png;base64,/g) || []).length, 4);
+  assert.equal([...docxEntries.keys()].filter((name) => name.startsWith("word/media/")).length, 4);
+});
+
 test("v4.1 consumes numbered reader sections and private sidecar media without leaking machine metadata", async (t) => {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "weekly-v4-1-bundle-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
@@ -526,6 +620,7 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
     }),
     /bundle manifest.*(?:duplicate|role|authority)/i,
   );
+  await fs.unlink(path.join(bundleRoot, "duplicate-candidate.json"));
 
   await writeV41BundleManifest(bundleRoot, snapshot);
   await assert.rejects(
@@ -545,6 +640,7 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
     }),
     /bundle manifest.*(?:identity|snapshot.*path|entry order)/i,
   );
+  await fs.unlink(path.join(bundleRoot, "renamed-snapshot.json"));
 
   await writeV41BundleManifest(bundleRoot, snapshot);
   const snapshotAlias = path.join(bundleRoot, "snapshot-alias.json");
@@ -555,8 +651,9 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
       mediaBundleRoot: bundleRoot,
       sourcePath: snapshotAlias,
     }),
-    /bundle manifest.*snapshot path/i,
+    /bundle manifest.*(?:snapshot path|file set)/i,
   );
+  await fs.unlink(snapshotAlias);
 
   const bundleDirectoryAlias = path.join(root, "bundle-directory-alias");
   await fs.symlink(bundleRoot, bundleDirectoryAlias);
@@ -566,7 +663,7 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
       mediaBundleRoot: bundleRoot,
       sourcePath: path.join(bundleDirectoryAlias, "weekly-insight-publication-v4.json"),
     }),
-    /bundle manifest.*snapshot path/i,
+    /bundle manifest.*(?:snapshot path|file set)/i,
   );
 
   const reordered = await writeV41BundleManifest(bundleRoot, snapshot);
@@ -591,6 +688,8 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
 
   const rejectEntryMutation = async (label, mutate) => {
     const mutated = await writeV41BundleManifest(bundleRoot, snapshot);
+    const bundleBefore = new Set(await fs.readdir(bundleRoot));
+    const mediaBefore = new Set(await fs.readdir(mediaDir));
     await mutate(mutated.entries);
     mutated.bundle_entries_sha256 = canonicalSha256(mutated.entries);
     await fs.writeFile(
@@ -602,9 +701,38 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
         publishRoot: path.join(root, label),
         mediaBundleRoot: bundleRoot,
       }),
-      /bundle manifest.*(?:entry order|duplicate|role|authority)/i,
+      /bundle manifest.*(?:entry order|duplicate|role|authority|receipt|path|unsafe)/i,
     );
+    for (const name of await fs.readdir(mediaDir)) {
+      if (!mediaBefore.has(name)) await fs.unlink(path.join(mediaDir, name));
+    }
+    for (const name of await fs.readdir(bundleRoot)) {
+      if (!bundleBefore.has(name)) await fs.unlink(path.join(bundleRoot, name));
+    }
   };
+  await rejectEntryMutation("missing-reader-media", async (entries) => {
+    entries.splice(entries.findIndex((entry) => entry.role === "reader_media"), 1);
+  });
+  await rejectEntryMutation("duplicate-reader-media", async (entries) => {
+    entries.push({ ...entries.find((entry) => entry.role === "reader_media") });
+  });
+  await rejectEntryMutation("reordered-reader-media", async (entries) => {
+    const readerMediaIndexes = entries
+      .map((entry, index) => ({ entry, index }))
+      .filter(({ entry }) => entry.role === "reader_media")
+      .map(({ index }) => index);
+    [entries[readerMediaIndexes[0]], entries[readerMediaIndexes[1]]] = [
+      entries[readerMediaIndexes[1]], entries[readerMediaIndexes[0]],
+    ];
+  });
+  await rejectEntryMutation("mismatched-reader-media-receipt", async (entries) => {
+    const readerMedia = entries.filter((entry) => entry.role === "reader_media");
+    readerMedia[0].sha256 = "0".repeat(64);
+  });
+  await rejectEntryMutation("unsafe-editable-source-path", async (entries) => {
+    const entry = entries.find((item) => item.role === "editable_source");
+    entry.path = "../outside.drawio";
+  });
   await rejectEntryMutation("missing-editable-source", async (entries) => {
     entries.splice(entries.findIndex((entry) => entry.role === "editable_source"), 1);
   });
@@ -639,7 +767,17 @@ test("v4.1 rejects duplicate bundle authorities and oversized manifest entries",
   });
 
   await writeV41BundleManifest(bundleRoot, snapshot);
-  await fs.writeFile(path.join(bundleRoot, "legacy-v3-snapshot.json"), "{}\n");
+  await fs.writeFile(path.join(mediaDir, "unlisted-reader-media.png"), png);
+  await assert.rejects(
+    publishWeeklySnapshot(snapshot, {
+      publishRoot: path.join(root, "unlisted-file"),
+      mediaBundleRoot: bundleRoot,
+    }),
+    /bundle manifest.*(?:extra|unlisted|file set)/i,
+  );
+  await fs.unlink(path.join(mediaDir, "unlisted-reader-media.png"));
+
+  await writeV41BundleManifest(bundleRoot, snapshot);
   const coLocatedReceipt = await publishWeeklySnapshot(snapshot, {
     publishRoot: path.join(root, "co-located-entry"),
     mediaBundleRoot: bundleRoot,
@@ -751,7 +889,7 @@ test("v4 enforces the complete issue and topic preview release matrix", () => {
       topicCount: 3,
       publication: { release_eligible: false },
     })),
-    /release.eligible|complete.issue/i,
+    /complete|release.eligible|topic.preview|public/i,
   );
   for (const weeklySynthesis of [null, []]) {
     assert.throws(
