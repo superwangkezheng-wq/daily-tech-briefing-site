@@ -1,0 +1,142 @@
+{
+  "approved_candidate_sha256": "09c9648210beabad290f846333936f514c4744fdce14ea0291eada00f3789d61",
+  "artifact_id": "wsi-2026-w32-790396d2254e-v4-1",
+  "bundle_entries_sha256": "fc96c51641eff4900c2e139838adadd3d5fc96243dbf488ba670e7c98f771119",
+  "content_sha256": "790396d2254e0c2720225c6d04b306bd92ba487684b0ac4b4fd63a83343cae5f",
+  "entries": [
+    {
+      "path": "weekly-analysis-candidate.json",
+      "role": "analysis_candidate",
+      "sha256": "77fc2ffe5b291c9b954ce15012181ef242868f9f9b14e07d686f4775b5a075b3",
+      "size_bytes": 65800
+    },
+    {
+      "path": "projection-approval.json",
+      "role": "candidate_approval",
+      "sha256": "15603a8dd73579cb5337f8dd71dff4f4a05eab74b8ccb52f9aec99a08b89857a",
+      "size_bytes": 384
+    },
+    {
+      "path": "publication-media-policy.json",
+      "role": "media_policy",
+      "sha256": "17c7c3767804e66b35fb56863677a99a1cf6d099665e26f2f14cb3ea44e58365",
+      "size_bytes": 5520
+    },
+    {
+      "path": "weekly-insight-publication-v4.json",
+      "role": "reader_snapshot",
+      "sha256": "ab179b6d46d0a319b28de3adbf59861179e368f9effebca6fb0bdb698af3fa1c",
+      "size_bytes": 55831
+    },
+    {
+      "height": 463,
+      "mime_type": "image/png",
+      "path": "media/physical-ai-loop.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "5692b22292384725c7fc9f3c180d6145763a228553a81fd9496270e90a509060",
+      "size_bytes": 161441,
+      "width": 3205
+    },
+    {
+      "height": 584,
+      "mime_type": "image/png",
+      "path": "media/agent-operating-layer.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "897bb0db7c2116863edb19ec96c6968ef0b77d0e8f65b0dd3433ea08480273aa",
+      "size_bytes": 195012,
+      "width": 3852
+    },
+    {
+      "height": 555,
+      "mime_type": "image/png",
+      "path": "media/skill-optimization-loop.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "720845052a7ad88e635381000f0baa3852e577ca10cb83a474ebb95beda5223d",
+      "size_bytes": 155053,
+      "width": 2726
+    },
+    {
+      "height": 1171,
+      "mime_type": "image/png",
+      "path": "media/inference-stack-paths.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "8982439ad343a52cdb61847721dc471868cf27bed93e8d7da4436d6c2f51ac8e",
+      "size_bytes": 185898,
+      "width": 1224
+    },
+    {
+      "path": "media/physical-ai-loop.svg",
+      "role": "editable_export",
+      "sha256": "b31f1797dcce27da13782d2b3628c9b5590d322407ec96175a8f107dedc22280",
+      "size_bytes": 7180
+    },
+    {
+      "path": "media/physical-ai-loop.dot",
+      "role": "editable_source",
+      "sha256": "3548756d645ab8087b43d3cc4557e5de471ebc74ecd3fb11ef0b586a32ec427c",
+      "size_bytes": 1145
+    },
+    {
+      "path": "media/agent-operating-layer.svg",
+      "role": "editable_export",
+      "sha256": "bad298f7ebdc4bfa6a9fafa2db7a8c835ff6a89f33414d76082087fbde75b6f1",
+      "size_bytes": 9146
+    },
+    {
+      "path": "media/agent-operating-layer.dot",
+      "role": "editable_source",
+      "sha256": "578c407bca0ee58178e707544bb166477cb6de2b557bd48bc74215f46d15d39a",
+      "size_bytes": 1354
+    },
+    {
+      "path": "media/skill-optimization-loop.svg",
+      "role": "editable_export",
+      "sha256": "0a34ffaf352a77d98746d567b0cd0a56bb4ebbaf433b29ca3eb752c0c660d757",
+      "size_bytes": 7242
+    },
+    {
+      "path": "media/skill-optimization-loop.dot",
+      "role": "editable_source",
+      "sha256": "ed069d2082c379ebe804603ac84f7a5735141425e53edcd7683e00c44c848c19",
+      "size_bytes": 1118
+    },
+    {
+      "path": "media/inference-stack-paths.svg",
+      "role": "editable_export",
+      "sha256": "89bdb2628c34102fda3973c2e1fc5169d4dc61e5bbcaba2bee20417e55f2dd79",
+      "size_bytes": 7924
+    },
+    {
+      "path": "media/inference-stack-paths.dot",
+      "role": "editable_source",
+      "sha256": "856a27e154f903104479210e0ce8f373be839715c62b9c42f840ea36e35eb14f",
+      "size_bytes": 1260
+    },
+    {
+      "path": "visual_asset_plan.json",
+      "role": "visual_plan",
+      "sha256": "d825822218525c3040044e6ab81fbbed19ea049264da9de051b2b2ba0b13465e",
+      "size_bytes": 2485
+    },
+    {
+      "path": "visual_asset_log.md",
+      "role": "visual_qa_record",
+      "sha256": "c4d88f173c5ad11df8623da42ba4d327c52b2d0ceba707dc637b574cad85cbf3",
+      "size_bytes": 438
+    },
+    {
+      "path": "editorial-review.md",
+      "role": "editorial_qa_record",
+      "sha256": "9404eee05e9beef23881629a42a5b5bc6ac014ceab5c3c68a6ced9a9ba5972aa",
+      "size_bytes": 1567
+    }
+  ],
+  "public_enabled": true,
+  "release_eligible": true,
+  "schema_version": "weekly-insight-private-bundle/v1",
+  "snapshot_path": "weekly-insight-publication-v4.json"
+}

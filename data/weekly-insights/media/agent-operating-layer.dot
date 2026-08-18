@@ -1,0 +1,18 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.3", nodesep="0.34", ranksep="0.58", fontname="PingFang SC", label="云端 Agent 的运行底座与能力包", labelloc=t, fontsize=26, fontcolor="#17211d"];
+  node [shape=rect, style="rounded,filled", fontname="PingFang SC", fontsize=15, color="#9db3aa", penwidth=1.3, fillcolor="#f6f8f7", fontcolor="#17211d", margin="0.2,0.14"];
+  edge [fontname="PingFang SC", fontsize=12, color="#4a7867", penwidth=1.7, arrowsize=0.75, fontcolor="#345848"];
+  task [label="任务与代码库"];
+  package [label="Agent Plugins 1.0.0\nplugin.json + Skills + MCP", fillcolor="#e3f0ea"];
+  env [label="可复现开发环境\n依赖、凭据、网络策略、构建工具"];
+  durable [label="持久执行\n检查点、重试、休眠恢复、分支隔离"];
+  verify [label="可核验产物\n测试、日志、截图、PR"];
+  govern [label="企业控制\n版本、权限、审计与撤销", fillcolor="#fff6e5", color="#d9b56d"];
+  task -> package [label="装载能力"];
+  package -> env [label="进入运行环境"];
+  env -> durable [label="长时执行"];
+  durable -> verify [label="返回证据"];
+  govern -> package [label="准入", dir=both, constraint=false];
+  govern -> env [label="边界", dir=both, constraint=false];
+  govern -> durable [label="运行策略", dir=both, constraint=false];
+}

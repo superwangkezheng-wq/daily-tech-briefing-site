@@ -1,0 +1,62 @@
+{
+  "assets": [
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/physical-ai-loop.svg",
+      "editable_source": "media/physical-ai-loop.dot",
+      "media_id": "physical-ai-loop",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/physical-ai-loop.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
+      "target_section_id": "physical-loop",
+      "tool": "deep-research-visuals:graphviz"
+    },
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/agent-operating-layer.svg",
+      "editable_source": "media/agent-operating-layer.dot",
+      "media_id": "agent-operating-layer",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/agent-operating-layer.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://cursor.com/blog/cloud-agent-lessons",
+      "target_section_id": "agent-runtime-architecture",
+      "tool": "deep-research-visuals:graphviz"
+    },
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/skill-optimization-loop.svg",
+      "editable_source": "media/skill-optimization-loop.dot",
+      "media_id": "skill-optimization-loop",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/skill-optimization-loop.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://github.com/microsoft/SkillOpt",
+      "target_section_id": "skill-loop-architecture",
+      "tool": "deep-research-visuals:graphviz"
+    },
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/inference-stack-paths.svg",
+      "editable_source": "media/inference-stack-paths.dot",
+      "media_id": "inference-stack-paths",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/inference-stack-paths.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
+      "target_section_id": "inference-architecture",
+      "tool": "deep-research-visuals:graphviz"
+    }
+  ],
+  "period": {
+    "end": "2026-08-09",
+    "start": "2026-08-03"
+  },
+  "schema_version": "weekly-insight-visual-plan/v1",
+  "source_first": true
+}

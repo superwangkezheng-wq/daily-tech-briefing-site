@@ -1,0 +1,1028 @@
+{
+  "approval": {
+    "approval_id": "codex-editorial-review-2026-w32-first-real",
+    "approved_at": "2026-08-10T09:24:00+08:00",
+    "status": "approved"
+  },
+  "approved_candidate_sha256": "09c9648210beabad290f846333936f514c4744fdce14ea0291eada00f3789d61",
+  "artifact_id": "wsi-2026-w32-790396d2254e-v4-1",
+  "content": {
+    "dek": "本期选择四个可以独立成立的技术专题：具身模型的任务闭环、云端 Agent 运行底座、Skill 验证门控优化，以及推理基础设施的两条工程路线。事实、判断和建议分开呈现。",
+    "evidence": [
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-google-er2",
+        "note": "Google 于 2026-07-30 发布 Gemini Robotics ER 2。该高层具身推理模型把低层 VLA 或导航 API 作为工具，通过连续视频跟踪任务进度、识别关键时刻并在失败后重试；官方报告进度分类准确率 57.4%，关键时刻识别准确率 91.3%、平均绝对时间误差 0.96 秒，并称其在自建工具编排评测中的执行速度约为 ER 1.6 的 4 倍。",
+        "published_at": "2026-07-30",
+        "publisher": "blog.google",
+        "role": "source_out",
+        "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
+        "title": "blog.google"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-er2-safety",
+        "note": "Gemini Robotics ER 2 的公开材料同时披露了真实 VLA、仿真 VLA、人工遥控三种编排评测，以及安全指令遵循和人员接近测试；这些是厂商评测，尚不能替代第三方长期现场数据。",
+        "published_at": "2026-07-30",
+        "publisher": "deepmind.google",
+        "role": "source_out",
+        "source_url": "https://deepmind.google/models/gemini-robotics/",
+        "title": "deepmind.google"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-lenovo-stack",
+        "note": "联想公开的全栈 Token 方案包含天禧 AI、万全异构智算方案、擎天智能体解决方案、AI Foundry、百应人工智能即服务和 AI 全周期服务，可作为本期业务映射对象。",
+        "published_at": "2026-06-25",
+        "publisher": "brand.lenovo.com.cn",
+        "role": "source_out",
+        "source_url": "https://brand.lenovo.com.cn/brand/ppn03959.html",
+        "title": "brand.lenovo.com.cn"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-cursor-cloud-lessons",
+        "note": "Cursor 于 2026-06-02 披露，云端 Agent 输出质量的关键是完整开发环境；其运行层使用独立虚拟机、持久工作流、检查点与恢复，并将 Agent、机器和会话状态解耦。文中称内部超过 40% 的 PR 来自云端 Agent。",
+        "published_at": "2026-06-02",
+        "publisher": "cursor.com",
+        "role": "source_out",
+        "source_url": "https://cursor.com/blog/cloud-agent-lessons",
+        "title": "cursor.com"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-agent-plugins",
+        "note": "Vercel 于 2026-08-06 发布 Agent Plugins 1.0.0：用 plugin.json、固定目录和版本化 schema 打包 Agent Skills 与 MCP 服务器；规范定义可移植的发现和装载合同，同时保留客户端扩展，不承诺所有客户端行为一致。",
+        "published_at": "2026-08-06",
+        "publisher": "vercel.com",
+        "role": "source_out",
+        "source_url": "https://vercel.com/blog/introducing-agent-plugins",
+        "title": "vercel.com"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-agent-plugins-spec",
+        "note": "Agent Plugins 1.0.0 规范要求清单、固定组件位置、根目录路径约束与客户端一致性检查；当前状态标记为 Working Draft。",
+        "published_at": "2026-08-06",
+        "publisher": "agent-plugins.org",
+        "role": "source_out",
+        "source_url": "https://agent-plugins.org/specification",
+        "title": "agent-plugins.org"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-github-plugin-support",
+        "note": "GitHub Copilot CLI 文档已给出 plugin.json 参考，并允许通过规范 schema 选择 Agent Plugins 1.0.0 语义，表明该格式已进入至少一个主流客户端的实现文档。",
+        "published_at": "2026-08-07",
+        "publisher": "docs.github.com",
+        "role": "source_out",
+        "source_url": "https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference",
+        "title": "docs.github.com"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-skillopt",
+        "note": "Microsoft SkillOpt 把自然语言 Skill 作为可优化状态：固定目标模型和执行工具链，利用任务轨迹提出有限增删改，并只在留出验证集改进时接受候选，最终输出版本化 best_skill.md。",
+        "published_at": "2026-05-29",
+        "publisher": "github.com",
+        "role": "source_out",
+        "source_url": "https://github.com/microsoft/SkillOpt",
+        "title": "github.com"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-skillopt-paper",
+        "note": "SkillOpt 论文报告技能可在模型、执行框架和相邻任务间迁移，并给出多个基准增益；这些结果来自研究基准，不能直接推断企业任务收益，部署仍需本地回放与人工批准。",
+        "published_at": "2026-05-29",
+        "publisher": "arxiv.org",
+        "role": "source_out",
+        "source_url": "https://arxiv.org/abs/2605.23904",
+        "title": "arxiv.org"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-prime-general-agent",
+        "note": "Prime Intellect 于 2026-05-18 开源 General Agent 环境：合成器生成任务、求解器估计通过率，只有落入预设难度区间的任务进入语料；首版披露 4,504 个任务、1,040 个领域和 8,000 多个工具。",
+        "published_at": "2026-05-18",
+        "publisher": "primeintellect.ai",
+        "role": "source_out",
+        "source_url": "https://www.primeintellect.ai/blog/general-agent",
+        "title": "primeintellect.ai"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-amd-taalas",
+        "note": "AMD 于 2026-08-07 宣布收购 Taalas，称其技术将通过模型与芯片联合设计补充 AMD 推理路线，以提高特定推理工作负载的性能与效率；公开材料未给出可独立复现的产品基准。",
+        "published_at": "2026-08-07",
+        "publisher": "ir.amd.com",
+        "role": "source_out",
+        "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
+        "title": "ir.amd.com"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-qualcomm-modular",
+        "note": "Qualcomm 于 2026-06-24 宣布收购 Modular，目标是用统一软件层跨 CPU、GPU、NPU 和定制 ASIC 运行模型，减少逐加速器重写，并把性能功耗优化覆盖到端、边、云。交易当时仍需监管批准。",
+        "published_at": "2026-06-24",
+        "publisher": "qualcomm.com",
+        "role": "source_out",
+        "source_url": "https://www.qualcomm.com/news/releases/2026/06/qualcomm-to-acquire-modular",
+        "title": "qualcomm.com"
+      },
+      {
+        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "id": "ev-cambricon-v4",
+        "note": "寒武纪披露以 vLLM、Triton、NeuWare、Torch-MLU-Ops 和 BangC 完成 DeepSeek-V4 Day 0 适配，并针对新结构编写融合算子、热点 Kernel、混合并行和低精度量化；该材料证明适配路径，不提供跨平台同口径基准。",
+        "published_at": "2026-04-24",
+        "publisher": "developer.cambricon.com",
+        "role": "source_in",
+        "source_url": "https://developer.cambricon.com/index/article/details.html?id=12",
+        "title": "developer.cambricon.com"
+      }
+    ],
+    "issue_kind": "complete_issue",
+    "media": [
+      {
+        "alt": "自然语言目标经高层具身推理、低层控制、视频结果判断后继续编排的闭环",
+        "asset_ref": "media/physical-ai-loop.png",
+        "asset_sha256": "5692b22292384725c7fc9f3c180d6145763a228553a81fd9496270e90a509060",
+        "caption": "高层模型把低层控制接口作为工具，持续读取视频判断进度和关键时刻，再决定重试、修正或切换下一步。",
+        "evidence_ids": [
+          "ev-google-er2",
+          "ev-er2-safety"
+        ],
+        "height": 463,
+        "id": "physical-ai-loop",
+        "kind": "architecture",
+        "logic_summary": "目标和连续视频进入高层具身推理，高层模型调用低层 VLA 或控制 API；执行视频返回进度与关键时刻判断，系统据此重试、修正或进入下一步。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Google 公开模型和评测材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 161441,
+        "source_label": "WBR 基于 Google Gemini Robotics ER 2 公开材料原创绘制",
+        "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
+        "target_section_id": "physical-loop",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 3205
+      },
+      {
+        "alt": "任务通过 Agent 能力包进入可复现环境和持久执行并返回可核验产物的运行底座",
+        "asset_ref": "media/agent-operating-layer.png",
+        "asset_sha256": "897bb0db7c2116863edb19ec96c6968ef0b77d0e8f65b0dd3433ea08480273aa",
+        "caption": "能力包负责装载规则与工具，可复现环境和持久工作流负责长时执行，版本、权限、审计和撤销贯穿全程。",
+        "evidence_ids": [
+          "ev-cursor-cloud-lessons",
+          "ev-agent-plugins",
+          "ev-agent-plugins-spec"
+        ],
+        "height": 584,
+        "id": "agent-operating-layer",
+        "kind": "architecture",
+        "logic_summary": "能力装载、环境准备、持久执行和产物验证按任务流连接；企业版本、权限、审计和撤销同时约束能力包、环境和运行过程。",
+        "logic_type": "stack",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Cursor 工程材料和 Agent Plugins 公开规范。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 195012,
+        "source_label": "WBR 基于 Cursor 与 Agent Plugins 公开材料原创绘制",
+        "source_url": "https://cursor.com/blog/cloud-agent-lessons",
+        "target_section_id": "agent-runtime-architecture",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 3852
+      },
+      {
+        "alt": "当前 Skill 经过任务回放、有限编辑和留出集门禁后发布或拒绝的循环",
+        "asset_ref": "media/skill-optimization-loop.png",
+        "asset_sha256": "720845052a7ad88e635381000f0baa3852e577ca10cb83a474ebb95beda5223d",
+        "caption": "真实任务先形成候选改动，独立验证没有提升就保留旧版，通过后才发布新 Skill。",
+        "evidence_ids": [
+          "ev-skillopt",
+          "ev-prime-general-agent"
+        ],
+        "height": 555,
+        "id": "skill-optimization-loop",
+        "kind": "architecture",
+        "logic_summary": "当前 Skill 在真实任务上产生轨迹，优化器提出有限修改；候选必须通过留出集验证，否则保留旧版，通过后形成版本化发布。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Microsoft SkillOpt 和 Prime Intellect 公开研究材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 155053,
+        "source_label": "WBR 基于 Microsoft SkillOpt 公开论文与代码原创绘制",
+        "source_url": "https://github.com/microsoft/SkillOpt",
+        "target_section_id": "skill-loop-architecture",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 2726
+      },
+      {
+        "alt": "真实推理负载分向横向跨硬件软件与纵向模型专用芯片并由共同指标验收",
+        "asset_ref": "media/inference-stack-paths.png",
+        "asset_sha256": "8982439ad343a52cdb61847721dc471868cf27bed93e8d7da4436d6c2f51ac8e",
+        "caption": "多模型多平台负载优先验证横向软件复用，稳定高量负载可评估模型与芯片联合设计，两条路线使用同一任务口径验收。",
+        "evidence_ids": [
+          "ev-amd-taalas",
+          "ev-qualcomm-modular",
+          "ev-cambricon-v4"
+        ],
+        "height": 1171,
+        "id": "inference-stack-paths",
+        "kind": "architecture",
+        "logic_summary": "真实负载按模型数量、硬件数量和稳定性分向横向可移植软件或纵向专用化，并以任务质量、延迟、吞吐、能耗和迁移成本共同验收。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 AMD、Qualcomm 与寒武纪公开材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 185898,
+        "source_label": "WBR 基于 AMD、Qualcomm 与寒武纪公开材料原创绘制",
+        "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
+        "target_section_id": "inference-architecture",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 1224
+      }
+    ],
+    "period": {
+      "as_of": "2026-08-10T08:42:00+08:00",
+      "end": "2026-08-09",
+      "label": "2026 W32",
+      "start": "2026-08-03"
+    },
+    "selected_topics": 4,
+    "status": "complete",
+    "title": "周度技术战略洞察｜2026 W32",
+    "topics": [
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_physical_ai_progress_loop_what_changed",
+              "evidence_ids": [
+                "ev-google-er2"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "Google 在 7 月 30 日发布 Gemini Robotics ER 2，并于 8 月 3 日进入本周采集。它位于高层任务编排位置：接收自然语言、视频、音频或文本，把 VLA 模型、导航接口和用户自定义函数作为工具，再把动作交给低层控制系统执行。",
+                "开发者可以通过 Gemini API 和 Google AI Studio 调用该模型，Gemini Enterprise Agent Platform 当时为私有预览。官方同时提供 Spot、Apollo 2 和 Franka F3 Duo 等演示，覆盖单机器人任务和多机器人协作。"
+              ],
+              "role": "what_changed",
+              "section_id": "physical-release",
+              "sequence_label": "①",
+              "title": "Gemini Robotics ER 2 接手高层任务编排"
+            },
+            {
+              "anchor": "thesis_physical_ai_progress_loop_how_it_works",
+              "evidence_ids": [
+                "ev-google-er2",
+                "ev-er2-safety"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "physical-ai-loop"
+              ],
+              "paragraphs": [
+                "模型在动作进行时持续读取视频，不必等待整段流程结束。每一帧可被归入 0%—20%、20%—40% 等五个进度区间；模型还会寻找倒水结束、灯泡拧紧等关键时刻，用于决定继续、重试、修正或切换下一步。",
+                "这条链路把目标理解、高层规划、低层执行和结果判断放入同一循环。低层控制器仍负责具体运动，确定性的安全停机、人员接近检测和人工接管没有被语言模型取代。"
+              ],
+              "role": "how_it_works",
+              "section_id": "physical-loop",
+              "sequence_label": "②",
+              "title": "连续视频把执行结果送回任务编排"
+            },
+            {
+              "anchor": "thesis_physical_ai_progress_loop_benchmark",
+              "evidence_ids": [
+                "ev-google-er2",
+                "ev-er2-safety"
+              ],
+              "items": [],
+              "kind": "benchmark",
+              "media_ids": [],
+              "paragraphs": [
+                "Google 报告进度分类准确率为 57.4%。关键时刻识别准确率为 91.3%，平均绝对时间误差为 0.96 秒；官方称其在自建工具编排评测中的执行速度约为 ER 1.6 的 4 倍。工具编排还分别使用真实 VLA、仿真 VLA 和人工遥控三种控制方式进行比较。",
+                "这些数字采用 Google 自建任务、模型和对比口径。公开页面没有给出跨厂商机器人、长期工厂运行或全部长尾故障的数据，不能直接换算为客户现场的完整任务成功率。"
+              ],
+              "role": "benchmark",
+              "section_id": "physical-benchmarks",
+              "sequence_label": "③",
+              "title": "官方评测给出进度识别和关键时刻数据"
+            },
+            {
+              "anchor": "thesis_physical_ai_progress_loop_evidence_and_limits",
+              "evidence_ids": [
+                "ev-google-er2",
+                "ev-er2-safety"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "机器人要使用这套能力，必须开放可调用的控制接口，并能把连续视频稳定送入模型。任务还要有可判定的完成条件，否则进度分类无法告诉系统何时停止。",
+                "57.4% 的进度分类准确率也说明该能力尚未解决所有执行判断。遮挡、反光、多人协作、设备差异和网络抖动都会增加误判，工业现场仍需要仿真复测、确定性联锁和人工接管。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "physical-limits",
+              "sequence_label": "④",
+              "title": "落地仍取决于控制接口、低时延和安全边界"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_physical_ai_progress_loop_what_changed",
+              "first_section_id": "physical-release",
+              "reader_texts": [
+                "VLA：视觉—语言—动作模型，把图像和指令转换为机器人动作。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_physical_ai_progress_loop_what_changed",
+              "explanation": "视觉—语言—动作模型，把图像和指令转换为机器人动作。",
+              "first_section_id": "physical-release",
+              "reader_text": "VLA：视觉—语言—动作模型，把图像和指令转换为机器人动作。",
+              "term": "VLA"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_physical_ai_progress_loop_finding_1",
+              "evidence_ids": [
+                "ev-google-er2"
+              ],
+              "finding_id": "finding-physical-1",
+              "paragraphs": [
+                "具身模型已经能规划动作，但多步骤任务的难点常在执行之后：系统需要知道当前进行到哪里、是否失败、何时停止。连续视频和关键时刻识别使这类判断可以被单独评测和优化。",
+                "现在值得关注，是因为高层模型、低层控制 API 和流式视频接口已经能在同一系统中运行，过去由固定流程或人工承担的结果核验开始进入模型编排层。"
+              ],
+              "title": "1、任务完成判断成为具身系统的独立能力"
+            },
+            {
+              "anchor": "thesis_physical_ai_progress_loop_finding_2",
+              "evidence_ids": [
+                "ev-google-er2",
+                "ev-er2-safety"
+              ],
+              "finding_id": "finding-physical-2",
+              "paragraphs": [
+                "不同机器人擅长的动作和地形不同。高层模型提供共同的任务语义后，可以安排移动、抓取和人机协作，但交接是否成功仍取决于每台设备暴露的控制接口、状态定义和安全规则。"
+              ],
+              "title": "2、多机器人协作先考验统一语义和交接规则"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_physical_ai_progress_loop_industry",
+          "evidence_ids": [
+            "ev-google-er2",
+            "ev-er2-safety"
+          ],
+          "headline": "机器人价值将更多由完整任务成功率决定",
+          "items": [
+            "重点观察第三方完整任务复测，而不是演示数量。",
+            "重点记录故障恢复、人工接管和跨本体适配周期。"
+          ],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "具身模型把感知、规划和结果核验串入一个循环后，采购比较会逐步超出单项识别准确率，转向完整任务成功率、失败恢复时间、人工接管率和安全停机表现。机器人本体、边缘计算、仿真评测和行业集成因此需要共同交付。",
+            "近期受益者是拥有真实任务数据、控制接口和仿真环境的平台。限制也很清楚：厂商评测尚未覆盖跨本体长期运行，57.4% 的进度分类仍有明显误差；高风险场景不会只凭模型判断放开执行。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 01/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_physical_ai_progress_loop_recommendation",
+          "evidence_ids": [
+            "ev-google-er2",
+            "ev-lenovo-stack"
+          ],
+          "headline": "先建设机器人任务验证能力，再决定进入哪些行业场景",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "联想可基于边缘计算、工作站和服务器搭建小规模验证环境，优先选择可复现、可停机、可人工接管的任务，用同一任务测试不同模型和机器人本体，并统一记录任务成功率、故障恢复率、编排时延、人工接管率及失败原因。",
+            "先验证计算、视频链路、模型编排和低层控制能否稳定协同；在机器人本体伙伴、现场数据和安全责任边界尚未明确前，以联合验证能力为主，不提前包装成通用机器人解决方案。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-physical-ai-progress-loop",
+        "title": "机器人开始在执行过程中判断任务是否完成",
+        "topic_id": "topic-physical-ai-progress-loop"
+      },
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_agent_operating_layer_what_changed",
+              "evidence_ids": [
+                "ev-cursor-cloud-lessons"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "Cursor 在 6 月公布云端 Agent 工程经验，并于 8 月 3 日进入本周采集。其云端 Agent 运行在独立虚拟机中，拥有依赖、网络和构建工具，可以并行工作、跨天执行并产出测试、日志、截图和 PR。",
+                "Cursor 称内部超过 40% 的 PR 来自云端 Agent。团队把 Agent 循环迁到持久工作流系统，并将 Agent、机器和会话状态拆开管理，使机器可以休眠、恢复或更换，长任务不必依赖一台持续在线的虚拟机。"
+              ],
+              "role": "what_changed",
+              "section_id": "agent-environment",
+              "sequence_label": "①",
+              "title": "Cursor 把开发环境列为 Agent 输出质量的首要条件"
+            },
+            {
+              "anchor": "thesis_agent_operating_layer_case_study",
+              "evidence_ids": [
+                "ev-agent-plugins",
+                "ev-agent-plugins-spec",
+                "ev-github-plugin-support"
+              ],
+              "items": [],
+              "kind": "case_study",
+              "media_ids": [],
+              "paragraphs": [
+                "8 月 6 日发布的 Agent Plugins 1.0.0 规定了一个可检查的文件目录：根目录使用 plugin.json 声明名称和版本，Skills 放在固定位置，MCP 服务器配置使用 mcp.json，客户端专属内容进入命名空间扩展目录。",
+                "规范解决的是发现和装载，不替客户端统一模型、权限或执行结果。规范页面仍标记为 Working Draft，但 GitHub Copilot CLI 已在正式文档中给出相应 schema 和清单字段。"
+              ],
+              "role": "case_study",
+              "section_id": "agent-plugin-standard",
+              "sequence_label": "②",
+              "title": "Agent Plugins 1.0.0 统一能力包的目录和清单"
+            },
+            {
+              "anchor": "thesis_agent_operating_layer_how_it_works",
+              "evidence_ids": [
+                "ev-cursor-cloud-lessons",
+                "ev-agent-plugins",
+                "ev-agent-plugins-spec"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "agent-operating-layer"
+              ],
+              "paragraphs": [
+                "插件把规则、工具和配置带入 Agent；可复现环境负责依赖、凭据、网络和构建工具；持久工作流负责检查点、重试、休眠恢复和分支隔离。最终交付物通过测试、日志、截图或 PR 供人验收。",
+                "Agent Plugins 规范要求插件路径留在插件根目录内，并允许客户端对清单和组件做一致性检查。客户端仍自行决定权限、网络访问、执行记录和停用方式；1.0.0 没有统一这些运行策略。"
+              ],
+              "role": "how_it_works",
+              "section_id": "agent-runtime-architecture",
+              "sequence_label": "③",
+              "title": "能力装载与长时执行由两套机制配合"
+            },
+            {
+              "anchor": "thesis_agent_operating_layer_evidence_and_limits",
+              "evidence_ids": [
+                "ev-cursor-cloud-lessons",
+                "ev-agent-plugins-spec",
+                "ev-github-plugin-support"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "Cursor 的 PR 比例来自自身代码库、工具链和审查流程。传统企业的多仓库依赖、内网制品库、合规审批和旧系统测试会增加环境构建成本。",
+                "Agent Plugins 的跨客户端价值还要看一致性测试：同一插件能否被不同客户端正确发现，权限能否按预期限制，失败后是否可撤销。任何一项不一致，都可能把一次安装变成新的供应链风险。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "agent-runtime-limits",
+              "sequence_label": "④",
+              "title": "公开数据证明工程可行，不代表企业可直接复制"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_agent_operating_layer_what_changed",
+              "first_section_id": "agent-environment",
+              "reader_texts": [
+                "PR：代码修改提交给团队审查、通过后再合并的请求。"
+              ]
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_agent_operating_layer_case_study",
+              "first_section_id": "agent-plugin-standard",
+              "reader_texts": [
+                "MCP：模型上下文协议，用统一接口把 Agent 接到外部工具和数据。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_agent_operating_layer_what_changed",
+              "explanation": "代码修改提交给团队审查、通过后再合并的请求。",
+              "first_section_id": "agent-environment",
+              "reader_text": "PR：代码修改提交给团队审查、通过后再合并的请求。",
+              "term": "PR"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_agent_operating_layer_case_study",
+              "explanation": "模型上下文协议，用统一接口把 Agent 接到外部工具和数据。",
+              "first_section_id": "agent-plugin-standard",
+              "reader_text": "MCP：模型上下文协议，用统一接口把 Agent 接到外部工具和数据。",
+              "term": "MCP"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_agent_operating_layer_finding_1",
+              "evidence_ids": [
+                "ev-cursor-cloud-lessons"
+              ],
+              "finding_id": "finding-agent-runtime-1",
+              "paragraphs": [
+                "短任务可以容忍缺少一个依赖或一次网络失败，跨小时、跨天任务会把这些小差异累积成错误输出。完整环境、检查点和恢复机制因此直接影响任务成功率。",
+                "这一问题现在变得突出，是因为 Agent 已经能并行执行复杂任务，企业开始把它放入真实代码库和工作流，而不是只在聊天窗口里生成片段。"
+              ],
+              "title": "1、模型越能长期工作，环境差异越容易决定结果"
+            },
+            {
+              "anchor": "thesis_agent_operating_layer_finding_2",
+              "evidence_ids": [
+                "ev-agent-plugins",
+                "ev-agent-plugins-spec",
+                "ev-github-plugin-support"
+              ],
+              "finding_id": "finding-agent-runtime-2",
+              "paragraphs": [
+                "统一目录降低了重复适配成本，也提高了插件传播速度。企业需要知道插件来自哪里、包含哪些 Skill 和工具、申请什么权限、部署了哪个版本，以及出现问题后如何停用和回滚。"
+              ],
+              "title": "2、开放能力包需要企业级准入和撤销"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_agent_operating_layer_industry",
+          "evidence_ids": [
+            "ev-cursor-cloud-lessons",
+            "ev-agent-plugins",
+            "ev-agent-plugins-spec",
+            "ev-github-plugin-support"
+          ],
+          "headline": "Agent 平台竞争将延伸到环境、插件和运行治理",
+          "items": [
+            "规范采用量要与跨客户端一致性一起看。",
+            "PR 占比不能替代企业任务成功率和审查成本。"
+          ],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "云端 Agent 供应商需要同时交付环境构建、持久执行、能力分发和结果验证。模型接口仍重要，但客户会更多比较环境上线时间、任务恢复率、插件兼容率和权限审计。",
+            "插件规范降低了技能与工具重复包装的成本，也会带来新的供应链审查。能够把终端、云资源、Agent 平台和服务治理连在一起的厂商更有机会承接企业级部署。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 02/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_agent_operating_layer_recommendation",
+          "evidence_ids": [
+            "ev-cursor-cloud-lessons",
+            "ev-agent-plugins",
+            "ev-lenovo-stack"
+          ],
+          "headline": "把 Agent 能力包、运行环境和产物验收纳入同一交付清单",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "擎天、AI Foundry 和百应先建立少量经过验证的插件与 Skill 能力包，统一管理来源、版本、权限、适用客户端及回滚方式；只有在目标客户端和隔离环境完成重放验证后，才进入客户方案。",
+            "交付验收同时覆盖环境构建、长任务恢复、越权阻断和最终产物通过率，并保留每个能力包的测试与失败记录，以区分模型、环境和插件问题，而不是以插件数量作为能力目标。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-agent-operating-layer",
+        "title": "云端 Agent 需要自己的运行底座和能力包",
+        "topic_id": "topic-agent-operating-layer"
+      },
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_skill_validation_loop_what_changed",
+              "evidence_ids": [
+                "ev-skillopt",
+                "ev-skillopt-paper"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "Microsoft 开源的 SkillOpt 固定目标模型、工具链和任务接口，只修改自然语言 Skill。每一轮先让目标模型执行一批任务，保存消息、工具调用、验证结果和得分，再由优化模型提出有限的增加、删除或替换。",
+                "候选 Skill 不会直接替换当前版本。系统在独立留出任务上复测，只有结果优于当前最好版本才接受，并把最终文件保存为 best_skill.md。"
+              ],
+              "role": "what_changed",
+              "section_id": "skillopt-method",
+              "sequence_label": "①",
+              "title": "SkillOpt 把自然语言规则作为可优化状态"
+            },
+            {
+              "anchor": "thesis_skill_validation_loop_case_study",
+              "evidence_ids": [
+                "ev-skillopt",
+                "ev-skillopt-paper"
+              ],
+              "items": [],
+              "kind": "case_study",
+              "media_ids": [],
+              "paragraphs": [
+                "SkillOpt 论文覆盖问答、数学、电子表格、工具调用和具身任务等基准。研究者报告，部分 Skill 可从较大模型迁移到较小模型，也可在 Codex 与 Claude Code 等不同执行工具链之间使用。",
+                "这些数字来自固定基准和研究配置。企业任务中的数据权限、人工审批和长期目标漂移并未被这些实验覆盖，迁移前仍要使用本地任务复测。"
+              ],
+              "role": "case_study",
+              "section_id": "skillopt-transfer",
+              "sequence_label": "②",
+              "title": "研究报告给出跨模型和跨工具链迁移结果"
+            },
+            {
+              "anchor": "thesis_skill_validation_loop_how_it_works",
+              "evidence_ids": [
+                "ev-skillopt",
+                "ev-prime-general-agent"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "skill-optimization-loop"
+              ],
+              "paragraphs": [
+                "优化循环由当前 Skill、任务回放、成功与失败复盘、有限编辑、留出集验证和版本发布组成。候选没有达到门槛时保留旧版；通过后才进入下一轮真实任务。",
+                "这套机制把用户反馈与正式方法更新分开。单次修改可以触发候选，但不能跳过代表性回放、能力退化检查和人工批准。"
+              ],
+              "role": "how_it_works",
+              "section_id": "skill-loop-architecture",
+              "sequence_label": "③",
+              "title": "失败反馈先进入候选，再经过验证门"
+            },
+            {
+              "anchor": "thesis_skill_validation_loop_evidence_and_limits",
+              "evidence_ids": [
+                "ev-prime-general-agent",
+                "ev-skillopt-paper"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "General Agent 展示了另一块基础设施：合成器生成任务，求解器以多次运行估计通过率，只有难度落入目标区间的任务才被接受。它说明评测任务本身也可以被版本化和扩充。",
+                "风险同样明确。评分器若偏离真实业务，优化器会稳定地提升错误指标；任务集过窄会导致过拟合；客户反馈还涉及隐私、授权和时效，不能自动汇总成长期规则。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "skill-loop-limits",
+              "sequence_label": "④",
+              "title": "任务集和评分器决定优化方向"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_skill_validation_loop_what_changed",
+              "first_section_id": "skillopt-method",
+              "reader_texts": [
+                "Skill：写给 Agent 的一组可复用任务规则、步骤和工具说明。"
+              ]
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_skill_validation_loop_how_it_works",
+              "first_section_id": "skill-loop-architecture",
+              "reader_texts": [
+                "留出集：不参与候选生成、只用于独立复测的一组任务。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_skill_validation_loop_what_changed",
+              "explanation": "写给 Agent 的一组可复用任务规则、步骤和工具说明。",
+              "first_section_id": "skillopt-method",
+              "reader_text": "Skill：写给 Agent 的一组可复用任务规则、步骤和工具说明。",
+              "term": "Skill"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_skill_validation_loop_how_it_works",
+              "explanation": "不参与候选生成、只用于独立复测的一组任务。",
+              "first_section_id": "skill-loop-architecture",
+              "reader_text": "留出集：不参与候选生成、只用于独立复测的一组任务。",
+              "term": "留出集"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_skill_validation_loop_finding_1",
+              "evidence_ids": [
+                "ev-skillopt"
+              ],
+              "finding_id": "finding-skill-1",
+              "paragraphs": [
+                "Skill 本身是文本，但它会改变 Agent 的选题、工具使用和输出。为每次更新记录任务、差异、得分和回滚点，可以避免把一次成功案例直接写成长期方法。"
+              ],
+              "title": "1、方法更新可以像软件版本一样验收和回滚"
+            },
+            {
+              "anchor": "thesis_skill_validation_loop_finding_2",
+              "evidence_ids": [
+                "ev-skillopt-paper",
+                "ev-prime-general-agent"
+              ],
+              "finding_id": "finding-skill-2",
+              "paragraphs": [
+                "优化器可以快速提出候选，是否有用取决于回放任务能否代表真实工作、评分器能否识别质量和边界。企业积累的最终稿、验收记录和失败案例因此比更长的 Prompt 更有价值。",
+                "现在值得重视，是因为 Agent 已经进入重复性的专业工作，任务结果开始可以保存、比较和回放，为方法迭代提供了过去没有的数据基础。"
+              ],
+              "title": "2、真正稀缺的是代表性任务和可信评分"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_skill_validation_loop_industry",
+          "evidence_ids": [
+            "ev-skillopt",
+            "ev-skillopt-paper",
+            "ev-prime-general-agent"
+          ],
+          "headline": "Agent 服务将增加方法版本、评测集和反馈治理",
+          "items": [
+            "观察独立任务提升，不只看训练批次得分。",
+            "记录被拒绝的候选和能力退化，避免重复踩坑。"
+          ],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "企业购买 Agent 服务时，除了模型和工具，还会要求方法版本、任务回放、回归结果和回滚记录。拥有真实任务与最终人工结果的服务商可以形成持续改进，但前提是把原始反馈、候选规则和正式发布严格分开。",
+            "短期压力落在评测建设：不同客户的目标、数据权限和审查口径差异很大，通用基准不能替代客户自己的最终稿和验收结果。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 03/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_skill_validation_loop_recommendation",
+          "evidence_ids": [
+            "ev-skillopt",
+            "ev-lenovo-stack"
+          ],
+          "headline": "把客户最终稿和验收结果沉淀为受控回放集",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "擎天、百应和 AI 全周期服务可将客户确认的最终材料、任务调整和失败记录绑定到具体 Agent 与 Skill 版本，先进入待复核账本，再沉淀为标准回放任务，并区分原始反馈、候选规则和正式 Skill。",
+            "Skill 迭代只做有限修改，并同时验证目标任务提升和既有能力是否退化；未经独立复测和人工批准不进入正式交付，每次发布均保留适用任务、停止条件和可回滚旧版本。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-skill-validation-loop",
+        "title": "Skill 的更新开始接受独立任务验证",
+        "topic_id": "topic-skill-validation-loop"
+      },
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_inference_two_paths_what_changed",
+              "evidence_ids": [
+                "ev-amd-taalas"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "AMD 在 8 月 7 日宣布收购 Taalas。公告称，Taalas 的模型与芯片联合设计技术将补充 AMD 的 AI 路线，目标是提高推理性能和效率。",
+                "公告没有提供可独立复现的产品型号、量产时间和同口径基准。因此目前能确认的是 AMD 增加了专用推理技术储备，尚不能确认它对通用 GPU 业务的替代范围。"
+              ],
+              "role": "what_changed",
+              "section_id": "inference-taalas",
+              "sequence_label": "①",
+              "title": "AMD 收购 Taalas 补充模型与芯片联合设计"
+            },
+            {
+              "anchor": "thesis_inference_two_paths_case_study",
+              "evidence_ids": [
+                "ev-qualcomm-modular"
+              ],
+              "items": [],
+              "kind": "case_study",
+              "media_ids": [],
+              "paragraphs": [
+                "Qualcomm 在 6 月宣布收购 Modular，计划把其统一计算平台用于 CPU、GPU、NPU 和定制 ASIC。官方目标是减少开发者为每类加速器重写模型和运行时的工作，并把优化覆盖到终端、边缘和数据中心。",
+                "这条路线关注可移植性和开发效率。交易公告仍需监管批准，厂商关于性能功耗和总拥有成本的表述也需要客户任务复测。"
+              ],
+              "role": "case_study",
+              "section_id": "inference-portable",
+              "sequence_label": "②",
+              "title": "Qualcomm 用 Modular 强化跨硬件软件层"
+            },
+            {
+              "anchor": "thesis_inference_two_paths_how_it_works",
+              "evidence_ids": [
+                "ev-amd-taalas",
+                "ev-qualcomm-modular",
+                "ev-cambricon-v4"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "inference-stack-paths"
+              ],
+              "paragraphs": [
+                "横向软件栈适合模型多、硬件多、更新频繁的负载，重点是统一编译、运行时和算子接口。纵向专用化适合结构稳定、调用量大的模型，目标是用联合设计换取更高效率和更短时延。",
+                "寒武纪对 DeepSeek-V4 的 Day 0 适配说明，通用加速器仍需要 vLLM、Triton、融合算子、混合并行和量化协同。可移植抽象并不会自动消除底层优化。"
+              ],
+              "role": "how_it_works",
+              "section_id": "inference-architecture",
+              "sequence_label": "③",
+              "title": "两条路线面向不同工作负载"
+            },
+            {
+              "anchor": "thesis_inference_two_paths_evidence_and_limits",
+              "evidence_ids": [
+                "ev-amd-taalas",
+                "ev-qualcomm-modular",
+                "ev-cambricon-v4"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "三家公司的公开材料采用不同模型、硬件和目标，不能把厂商数字直接排成一张性能榜。选型至少要固定任务质量，再比较首个 Token 延迟（TTFT）、持续吞吐（TPS）、P99、能耗、新模型适配周期和迁移人天。",
+                "专用芯片面临模型结构变化和供给风险；横向软件可能损失部分峰值性能。两条路线可以在同一平台中并存，由调度层按工作负载路由。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "inference-limits",
+              "sequence_label": "④",
+              "title": "同口径客户任务才能比较真实收益"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_case_study",
+              "first_section_id": "inference-portable",
+              "reader_texts": [
+                "NPU：面向神经网络运算的专用处理器。",
+                "ASIC：为特定用途设计的专用集成电路。"
+              ]
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
+              "first_section_id": "inference-limits",
+              "reader_texts": [
+                "TTFT：从发出请求到模型生成第一个 Token 的时间。",
+                "TPS：模型稳定生成时每秒输出的 Token 数。",
+                "P99：99% 请求都不会超过的延迟上界，用来观察少数慢请求。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_case_study",
+              "explanation": "面向神经网络运算的专用处理器。",
+              "first_section_id": "inference-portable",
+              "reader_text": "NPU：面向神经网络运算的专用处理器。",
+              "term": "NPU"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_case_study",
+              "explanation": "为特定用途设计的专用集成电路。",
+              "first_section_id": "inference-portable",
+              "reader_text": "ASIC：为特定用途设计的专用集成电路。",
+              "term": "ASIC"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
+              "explanation": "从发出请求到模型生成第一个 Token 的时间。",
+              "first_section_id": "inference-limits",
+              "reader_text": "TTFT：从发出请求到模型生成第一个 Token 的时间。",
+              "term": "TTFT"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
+              "explanation": "模型稳定生成时每秒输出的 Token 数。",
+              "first_section_id": "inference-limits",
+              "reader_text": "TPS：模型稳定生成时每秒输出的 Token 数。",
+              "term": "TPS"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
+              "explanation": "99% 请求都不会超过的延迟上界，用来观察少数慢请求。",
+              "first_section_id": "inference-limits",
+              "reader_text": "P99：99% 请求都不会超过的延迟上界，用来观察少数慢请求。",
+              "term": "P99"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_inference_two_paths_finding_1",
+              "evidence_ids": [
+                "ev-amd-taalas",
+                "ev-qualcomm-modular"
+              ],
+              "finding_id": "finding-inference-1",
+              "paragraphs": [
+                "多模型、多平台和频繁更新的业务更看重软件复用；结构稳定、调用量大的业务更可能承受专用化投入。把两类负载混在一个总分中，会掩盖迁移成本和有效期。"
+              ],
+              "title": "1、推理架构需要先按负载分路"
+            },
+            {
+              "anchor": "thesis_inference_two_paths_finding_2",
+              "evidence_ids": [
+                "ev-cambricon-v4",
+                "ev-amd-taalas",
+                "ev-qualcomm-modular"
+              ],
+              "finding_id": "finding-inference-2",
+              "paragraphs": [
+                "寒武纪的公开路径包含框架、编译、算子、并行和量化。新芯片能运行模型只是起点，稳定延迟、吞吐和故障处理仍要靠软件工程。",
+                "本周两项收购信号表明，头部芯片厂商一边增加推理专用化技术，一边补强跨硬件软件层；路线分化本身比短期胜负更值得跟踪。"
+              ],
+              "title": "2、软件适配仍是芯片价值兑现的前提"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_inference_two_paths_industry",
+          "evidence_ids": [
+            "ev-amd-taalas",
+            "ev-qualcomm-modular",
+            "ev-cambricon-v4"
+          ],
+          "headline": "推理市场会形成按负载路由的多技术组合",
+          "items": [
+            "以任务质量为前提，再比较 TTFT、TPS、P99 和能耗。",
+            "把新模型适配周期和迁移人天纳入总拥有成本。"
+          ],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "通用加速器、跨硬件软件和模型专用芯片会在一段时间内并存。平台价值更多体现在能否用同一任务口径选择硬件、迁移模型并持续优化，而不是拥有最多的芯片型号。",
+            "专用芯片供应商需要证明模型更新后的有效期和供给能力；横向软件供应商需要证明抽象层不会吞噬性能。仅凭收购公告或 Day 0 运行不能判断 CUDA 整体生态已经被削弱。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 04/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_inference_two_paths_recommendation",
+          "evidence_ids": [
+            "ev-amd-taalas",
+            "ev-qualcomm-modular",
+            "ev-cambricon-v4",
+            "ev-lenovo-stack"
+          ],
+          "headline": "万全异构智算方案按工作负载建立两层推理验证路线",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "万全异构智算方案可将客户负载分为两类：对模型和平台变化快的负载，重点验证统一编译、算子和运行时的迁移效率；对稳定高量负载，再评估专用芯片或软硬件深度联合优化的性能与能效收益，避免过早投入专用化。",
+            "两类路线统一以 TTFT、TPS、P99、Token 能耗、模型适配周期和迁移人天进行验证；模型辅助生成的算子、编译配置和调度策略也需经过正确性、性能回归和稳定性门禁后，才能进入客户生产环境。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-inference-two-paths",
+        "title": "推理平台同时押注跨硬件软件和模型专用芯片",
+        "topic_id": "topic-inference-two-paths"
+      }
+    ]
+  },
+  "content_sha256": "790396d2254e0c2720225c6d04b306bd92ba487684b0ac4b4fd63a83343cae5f",
+  "publication": {
+    "authorization_id": "wbr-public-release-2026-w32-790396d2254e",
+    "public_enabled": true,
+    "release_eligible": true,
+    "visibility": "public"
+  },
+  "schema_version": "weekly-insight-publication/v4",
+  "source_run_id": "wbr-codex-manual-2026-W32-first-real",
+  "version": "4.1"
+}

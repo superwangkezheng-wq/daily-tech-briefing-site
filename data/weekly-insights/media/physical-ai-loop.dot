@@ -1,0 +1,15 @@
+digraph G {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.25", nodesep="0.38", ranksep="0.55", fontname="PingFang SC", label="具身模型的任务闭环", labelloc=t, fontsize=26, fontcolor="#17211d"];
+  node [shape=rect, style="rounded,filled", fontname="PingFang SC", fontsize=16, color="#9db3aa", penwidth=1.4, fillcolor="#f5f8f6", fontcolor="#17211d", margin="0.22,0.16"];
+  edge [fontname="PingFang SC", fontsize=12, color="#4a7867", penwidth=1.8, arrowsize=0.8, fontcolor="#345848"];
+  request [label="自然语言目标\n与连续视频"];
+  reason [label="高层具身推理\n空间判断与步骤编排", fillcolor="#e3f0ea"];
+  act [label="VLA / 导航 / 机械臂 API\n执行具体动作"];
+  observe [label="进度分类与关键时刻识别\n判断完成、失败或偏差", fillcolor="#fff6e5", color="#d9b56d"];
+  correct [label="重试、修正或切换下一步\n必要时请求人工确认"];
+  request -> reason [label="输入"];
+  reason -> act [label="调用工具"];
+  act -> observe [label="视频反馈"];
+  observe -> correct [label="结果判断"];
+  correct -> reason [label="继续编排", constraint=false];
+}

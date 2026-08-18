@@ -1,0 +1,99 @@
+{
+  "editable_asset_policy": {
+    "delivery_scope": "approved_bundle_only",
+    "public_route_enabled": false
+  },
+  "media": [
+    {
+      "alt": "自然语言目标经高层具身推理、低层控制、视频结果判断后继续编排的闭环",
+      "asset_ref": "media/physical-ai-loop.png",
+      "caption": "高层模型把低层控制接口作为工具，持续读取视频判断进度和关键时刻，再决定重试、修正或切换下一步。",
+      "evidence_ids": [
+        "ev-google-er2",
+        "ev-er2-safety"
+      ],
+      "id": "physical-ai-loop",
+      "kind": "architecture",
+      "logic_summary": "目标和连续视频进入高层具身推理，高层模型调用低层 VLA 或控制 API；执行视频返回进度与关键时刻判断，系统据此重试、修正或进入下一步。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 Google 公开模型和评测材料。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 Google Gemini Robotics ER 2 公开材料原创绘制",
+      "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
+      "src": "",
+      "target_section_id": "physical-loop",
+      "thesis_id": "thesis-physical-ai-progress-loop",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    },
+    {
+      "alt": "任务通过 Agent 能力包进入可复现环境和持久执行并返回可核验产物的运行底座",
+      "asset_ref": "media/agent-operating-layer.png",
+      "caption": "能力包负责装载规则与工具，可复现环境和持久工作流负责长时执行，版本、权限、审计和撤销贯穿全程。",
+      "evidence_ids": [
+        "ev-cursor-cloud-lessons",
+        "ev-agent-plugins",
+        "ev-agent-plugins-spec"
+      ],
+      "id": "agent-operating-layer",
+      "kind": "architecture",
+      "logic_summary": "能力装载、环境准备、持久执行和产物验证按任务流连接；企业版本、权限、审计和撤销同时约束能力包、环境和运行过程。",
+      "logic_type": "stack",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 Cursor 工程材料和 Agent Plugins 公开规范。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 Cursor 与 Agent Plugins 公开材料原创绘制",
+      "source_url": "https://cursor.com/blog/cloud-agent-lessons",
+      "src": "",
+      "target_section_id": "agent-runtime-architecture",
+      "thesis_id": "thesis-agent-operating-layer",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    },
+    {
+      "alt": "当前 Skill 经过任务回放、有限编辑和留出集门禁后发布或拒绝的循环",
+      "asset_ref": "media/skill-optimization-loop.png",
+      "caption": "真实任务先形成候选改动，独立验证没有提升就保留旧版，通过后才发布新 Skill。",
+      "evidence_ids": [
+        "ev-skillopt",
+        "ev-prime-general-agent"
+      ],
+      "id": "skill-optimization-loop",
+      "kind": "architecture",
+      "logic_summary": "当前 Skill 在真实任务上产生轨迹，优化器提出有限修改；候选必须通过留出集验证，否则保留旧版，通过后形成版本化发布。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 Microsoft SkillOpt 和 Prime Intellect 公开研究材料。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 Microsoft SkillOpt 公开论文与代码原创绘制",
+      "source_url": "https://github.com/microsoft/SkillOpt",
+      "src": "",
+      "target_section_id": "skill-loop-architecture",
+      "thesis_id": "thesis-skill-validation-loop",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    },
+    {
+      "alt": "真实推理负载分向横向跨硬件软件与纵向模型专用芯片并由共同指标验收",
+      "asset_ref": "media/inference-stack-paths.png",
+      "caption": "多模型多平台负载优先验证横向软件复用，稳定高量负载可评估模型与芯片联合设计，两条路线使用同一任务口径验收。",
+      "evidence_ids": [
+        "ev-amd-taalas",
+        "ev-qualcomm-modular",
+        "ev-cambricon-v4"
+      ],
+      "id": "inference-stack-paths",
+      "kind": "architecture",
+      "logic_summary": "真实负载按模型数量、硬件数量和稳定性分向横向可移植软件或纵向专用化，并以任务质量、延迟、吞吐、能耗和迁移成本共同验收。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 AMD、Qualcomm 与寒武纪公开材料。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 AMD、Qualcomm 与寒武纪公开材料原创绘制",
+      "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
+      "src": "",
+      "target_section_id": "inference-architecture",
+      "thesis_id": "thesis-inference-two-paths",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    }
+  ],
+  "version": "4.1"
+}
