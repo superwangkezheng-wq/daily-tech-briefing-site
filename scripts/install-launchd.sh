@@ -69,13 +69,17 @@ if [[ -f "$project_dir/.env.tunnel" ]]; then
   chmod 600 "$support_tunnel_env"
 fi
 
-mkdir -p "$support_runtime_dir"
-/usr/bin/rsync -a --delete \
-  --exclude '.git' \
-  --exclude 'node_modules' \
-  --exclude '.cache' \
-  "$project_dir/" "$support_runtime_dir/"
-rm -f "$support_runtime_dir/.env"
+if [[ -L "$support_runtime_dir" ]]; then
+  printf "runtime sync skipped: %s is a symlink to a published release; publish flow owns release content\n" "$support_runtime_dir"
+else
+  mkdir -p "$support_runtime_dir"
+  /usr/bin/rsync -a --delete \
+    --exclude '.git' \
+    --exclude 'node_modules' \
+    --exclude '.cache' \
+    "$project_dir/" "$support_runtime_dir/"
+  rm -f "$support_runtime_dir/.env"
+fi
 
 escape_sed() {
   printf '%s' "$1" | sed 's/[\/&]/\\&/g'
