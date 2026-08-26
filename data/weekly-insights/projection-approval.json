@@ -1,9 +1,9 @@
 {
-  "approval_id": "codex-editorial-review-2026-w32-first-real",
-  "approval_source_ref": "codex://threads/wbr-first-real-run",
-  "approved_at": "2026-08-10T09:24:00+08:00",
+  "approval_id": "codex-editorial-review-2026-w34-manual",
+  "approval_source_ref": "codex://threads/019fa78f-6f2d-70e3-9020-c4a350f9d987#w34-manual-run",
+  "approved_at": "2026-08-24T10:05:30+08:00",
   "approved_by": "Codex manual Adapter",
-  "approved_candidate_sha256": "09c9648210beabad290f846333936f514c4744fdce14ea0291eada00f3789d61",
-  "approver_id": "codex:wbr-first-real-run",
+  "approved_candidate_sha256": "7d234e1bce414a1be18e5c7d9869e2935aed3556efffab8e2749c7e15a9824bd",
+  "approver_id": "codex:wbr-manual-run",
   "status": "approved"
 }

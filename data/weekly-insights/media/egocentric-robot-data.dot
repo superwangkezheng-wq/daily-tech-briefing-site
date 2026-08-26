@@ -1,0 +1,19 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="人类操作数据进入机器人任务验证"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  capture [label="头部、腕部与姿态采集", fillcolor="#ffffff", color="#cbd5e1"];
+  privacy [label="去标识与权利核验", fillcolor="#ffffff", color="#cbd5e1"];
+  annotation [label="动作、物体与任务标注", fillcolor="#ffffff", color="#cbd5e1"];
+  training [label="机器人模型训练", fillcolor="#ffffff", color="#cbd5e1"];
+  simulation [label="仿真回放与筛选", fillcolor="#ffffff", color="#cbd5e1"];
+  robot [label="真机任务与人工接管", fillcolor="#ffffff", color="#cbd5e1"];
+  ledger [label="成功、失败与数据版本", fillcolor="#ffffff", color="#cbd5e1"];
+  capture -> privacy [label="处理", color="#2563eb", fontcolor="#475569"];
+  privacy -> annotation [label="放行", color="#2563eb", fontcolor="#475569"];
+  annotation -> training [label="训练数据", color="#2563eb", fontcolor="#475569"];
+  training -> simulation [label="候选策略", color="#2563eb", fontcolor="#475569"];
+  simulation -> robot [label="筛选", color="#2563eb", fontcolor="#475569"];
+  robot -> ledger [label="记录", color="#2563eb", fontcolor="#475569"];
+  ledger -> annotation [label="补充失败样本", color="#2563eb", fontcolor="#475569"];
+}

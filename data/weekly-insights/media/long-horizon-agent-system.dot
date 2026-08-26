@@ -1,0 +1,19 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="长时程 Agent 的运行循环"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  task [label="任务目标与当前状态", fillcolor="#ffffff", color="#cbd5e1"];
+  agent [label="主 Agent", fillcolor="#ffffff", color="#cbd5e1"];
+  tools [label="代码、工具与环境", fillcolor="#ffffff", color="#cbd5e1"];
+  feedback [label="测试和行动结果", fillcolor="#ffffff", color="#cbd5e1"];
+  memory [label="持久状态与实验记录", fillcolor="#ffffff", color="#cbd5e1"];
+  supervisor [label="停滞识别与方向调整", fillcolor="#ffffff", color="#cbd5e1"];
+  accept [label="合格产物", fillcolor="#ffffff", color="#cbd5e1"];
+  task -> agent [label="载入", color="#2563eb", fontcolor="#475569"];
+  agent -> tools [label="执行", color="#2563eb", fontcolor="#475569"];
+  tools -> feedback [label="返回", color="#2563eb", fontcolor="#475569"];
+  feedback -> memory [label="记录", color="#2563eb", fontcolor="#475569"];
+  memory -> agent [label="继续", color="#2563eb", fontcolor="#475569"];
+  supervisor -> agent [label="纠偏", color="#2563eb", fontcolor="#475569"];
+  feedback -> accept [label="通过门槛", color="#2563eb", fontcolor="#475569"];
+}

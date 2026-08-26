@@ -1,0 +1,19 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="AI 原生软件交付的版本化产物链"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  intent [label="需求与约束", fillcolor="#ffffff", color="#cbd5e1"];
+  spec [label="规格与计划", fillcolor="#ffffff", color="#cbd5e1"];
+  skills [label="版本化 Skill", fillcolor="#ffffff", color="#cbd5e1"];
+  build [label="代码与测试", fillcolor="#ffffff", color="#cbd5e1"];
+  behavior [label="行为测试与审查", fillcolor="#ffffff", color="#cbd5e1"];
+  deploy [label="发布与运行", fillcolor="#ffffff", color="#cbd5e1"];
+  incident [label="事故与反馈", fillcolor="#ffffff", color="#cbd5e1"];
+  intent -> spec [label="批准", color="#2563eb", fontcolor="#475569"];
+  spec -> skills [label="约束", color="#2563eb", fontcolor="#475569"];
+  skills -> build [label="执行", color="#2563eb", fontcolor="#475569"];
+  build -> behavior [label="验证", color="#2563eb", fontcolor="#475569"];
+  behavior -> deploy [label="放行", color="#2563eb", fontcolor="#475569"];
+  deploy -> incident [label="观测", color="#2563eb", fontcolor="#475569"];
+  incident -> intent [label="形成新需求", color="#2563eb", fontcolor="#475569"];
+}

@@ -1,38 +1,28 @@
 {
   "approval": {
-    "approval_id": "codex-editorial-review-2026-w32-first-real",
-    "approved_at": "2026-08-10T09:24:00+08:00",
+    "approval_id": "codex-editorial-review-2026-w34-manual",
+    "approved_at": "2026-08-24T10:05:30+08:00",
     "status": "approved"
   },
-  "approved_candidate_sha256": "09c9648210beabad290f846333936f514c4744fdce14ea0291eada00f3789d61",
-  "artifact_id": "wsi-2026-w32-790396d2254e-v4-1",
+  "approved_candidate_sha256": "7d234e1bce414a1be18e5c7d9869e2935aed3556efffab8e2749c7e15a9824bd",
+  "artifact_id": "wsi-2026-w34-e867f8f39679-v4-1",
   "content": {
-    "dek": "本期选择四个可以独立成立的技术专题：具身模型的任务闭环、云端 Agent 运行底座、Skill 验证门控优化，以及推理基础设施的两条工程路线。事实、判断和建议分开呈现。",
+    "dek": "本期选择四个有明确当周触发和多源背景支撑的专题：长时程 Agent 运行系统、AI 原生软件交付、全栈推理优化与机器人操作数据。事实、关键发现、产业影响和战略建议分开呈现。",
     "evidence": [
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-google-er2",
-        "note": "Google 于 2026-07-30 发布 Gemini Robotics ER 2。该高层具身推理模型把低层 VLA 或导航 API 作为工具，通过连续视频跟踪任务进度、识别关键时刻并在失败后重试；官方报告进度分类准确率 57.4%，关键时刻识别准确率 91.3%、平均绝对时间误差 0.96 秒，并称其在自建工具编排评测中的执行速度约为 ER 1.6 的 4 倍。",
-        "published_at": "2026-07-30",
-        "publisher": "blog.google",
-        "role": "source_out",
-        "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
-        "title": "blog.google"
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-nvidia-avo",
+        "note": "NVIDIA 公开 AVO 长时程 Agent 架构、七天 GPU Kernel 优化实验和 ARC-AGI-3 公共集结果。",
+        "published_at": "2026-08-21",
+        "publisher": "developer.nvidia.com",
+        "role": "source_in",
+        "source_url": "https://developer.nvidia.com/blog/nvidia-avo-reaches-100-on-arc-agi-3-demonstrating-a-frontier-level-general-purpose-architecture-for-long-horizon-autonomous-agents/",
+        "title": "developer.nvidia.com"
       },
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-er2-safety",
-        "note": "Gemini Robotics ER 2 的公开材料同时披露了真实 VLA、仿真 VLA、人工遥控三种编排评测，以及安全指令遵循和人员接近测试；这些是厂商评测，尚不能替代第三方长期现场数据。",
-        "published_at": "2026-07-30",
-        "publisher": "deepmind.google",
-        "role": "source_out",
-        "source_url": "https://deepmind.google/models/gemini-robotics/",
-        "title": "deepmind.google"
-      },
-      {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "accessed_at": "2026-08-24T10:05:30+08:00",
         "id": "ev-lenovo-stack",
-        "note": "联想公开的全栈 Token 方案包含天禧 AI、万全异构智算方案、擎天智能体解决方案、AI Foundry、百应人工智能即服务和 AI 全周期服务，可作为本期业务映射对象。",
+        "note": "联想公开材料列出万全异构智算方案、擎天、AI Foundry、百应和 AI 全周期服务等中国区业务能力。",
         "published_at": "2026-06-25",
         "publisher": "brand.lenovo.com.cn",
         "role": "source_out",
@@ -40,312 +30,301 @@
         "title": "brand.lenovo.com.cn"
       },
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-cursor-cloud-lessons",
-        "note": "Cursor 于 2026-06-02 披露，云端 Agent 输出质量的关键是完整开发环境；其运行层使用独立虚拟机、持久工作流、检查点与恢复，并将 Agent、机器和会话状态解耦。文中称内部超过 40% 的 PR 来自云端 Agent。",
-        "published_at": "2026-06-02",
-        "publisher": "cursor.com",
-        "role": "source_out",
-        "source_url": "https://cursor.com/blog/cloud-agent-lessons",
-        "title": "cursor.com"
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-anthropic-sdlc",
+        "note": "Anthropic 发布 AI 原生软件开发生命周期实践，使用版本化意图、规格、计划、Skill、测试和审查记录串联六个阶段。",
+        "published_at": "2026-08-21",
+        "publisher": "claude.com",
+        "role": "source_in",
+        "source_url": "https://claude.com/blog/the-ai-native-sdlc-playbook",
+        "title": "claude.com"
       },
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-agent-plugins",
-        "note": "Vercel 于 2026-08-06 发布 Agent Plugins 1.0.0：用 plugin.json、固定目录和版本化 schema 打包 Agent Skills 与 MCP 服务器；规范定义可移植的发现和装载合同，同时保留客户端扩展，不承诺所有客户端行为一致。",
-        "published_at": "2026-08-06",
-        "publisher": "vercel.com",
-        "role": "source_out",
-        "source_url": "https://vercel.com/blog/introducing-agent-plugins",
-        "title": "vercel.com"
-      },
-      {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-agent-plugins-spec",
-        "note": "Agent Plugins 1.0.0 规范要求清单、固定组件位置、根目录路径约束与客户端一致性检查；当前状态标记为 Working Draft。",
-        "published_at": "2026-08-06",
-        "publisher": "agent-plugins.org",
-        "role": "source_out",
-        "source_url": "https://agent-plugins.org/specification",
-        "title": "agent-plugins.org"
-      },
-      {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-github-plugin-support",
-        "note": "GitHub Copilot CLI 文档已给出 plugin.json 参考，并允许通过规范 schema 选择 Agent Plugins 1.0.0 语义，表明该格式已进入至少一个主流客户端的实现文档。",
-        "published_at": "2026-08-07",
-        "publisher": "docs.github.com",
-        "role": "source_out",
-        "source_url": "https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference",
-        "title": "docs.github.com"
-      },
-      {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-skillopt",
-        "note": "Microsoft SkillOpt 把自然语言 Skill 作为可优化状态：固定目标模型和执行工具链，利用任务轨迹提出有限增删改，并只在留出验证集改进时接受候选，最终输出版本化 best_skill.md。",
-        "published_at": "2026-05-29",
-        "publisher": "github.com",
-        "role": "source_out",
-        "source_url": "https://github.com/microsoft/SkillOpt",
-        "title": "github.com"
-      },
-      {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-skillopt-paper",
-        "note": "SkillOpt 论文报告技能可在模型、执行框架和相邻任务间迁移，并给出多个基准增益；这些结果来自研究基准，不能直接推断企业任务收益，部署仍需本地回放与人工批准。",
-        "published_at": "2026-05-29",
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-agent-skills-study",
+        "note": "Agent Skills 研究基于 8,135 次试验，分析 Skill 生效机制、检索扩展和失败条件。",
+        "published_at": "2026-08-14",
         "publisher": "arxiv.org",
         "role": "source_out",
-        "source_url": "https://arxiv.org/abs/2605.23904",
+        "source_url": "https://arxiv.org/abs/2608.14036",
         "title": "arxiv.org"
       },
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-prime-general-agent",
-        "note": "Prime Intellect 于 2026-05-18 开源 General Agent 环境：合成器生成任务、求解器估计通过率，只有落入预设难度区间的任务进入语料；首版披露 4,504 个任务、1,040 个领域和 8,000 多个工具。",
-        "published_at": "2026-05-18",
-        "publisher": "primeintellect.ai",
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-behavioral-tests",
+        "note": "行为测试论文提出从动作序列、受控环境变化和多 Agent 互动评估 Agent 的实际策略。",
+        "published_at": "2026-05-31",
+        "publisher": "arxiv.org",
         "role": "source_out",
-        "source_url": "https://www.primeintellect.ai/blog/general-agent",
-        "title": "primeintellect.ai"
+        "source_url": "https://arxiv.org/abs/2608.18081",
+        "title": "arxiv.org"
       },
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-amd-taalas",
-        "note": "AMD 于 2026-08-07 宣布收购 Taalas，称其技术将通过模型与芯片联合设计补充 AMD 推理路线，以提高特定推理工作负载的性能与效率；公开材料未给出可独立复现的产品基准。",
-        "published_at": "2026-08-07",
-        "publisher": "ir.amd.com",
-        "role": "source_out",
-        "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
-        "title": "ir.amd.com"
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-liquid-dspark",
+        "note": "Liquid AI 发布三组 DSpark 草稿模型及 H100、M4 Max 与工具调用测试数据。",
+        "published_at": "2026-08-20",
+        "publisher": "huggingface.co",
+        "role": "source_in",
+        "source_url": "https://huggingface.co/blog/LiquidAI/lfm25-dspark",
+        "title": "huggingface.co"
       },
       {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
-        "id": "ev-qualcomm-modular",
-        "note": "Qualcomm 于 2026-06-24 宣布收购 Modular，目标是用统一软件层跨 CPU、GPU、NPU 和定制 ASIC 运行模型，减少逐加速器重写，并把性能功耗优化覆盖到端、边、云。交易当时仍需监管批准。",
-        "published_at": "2026-06-24",
-        "publisher": "qualcomm.com",
-        "role": "source_out",
-        "source_url": "https://www.qualcomm.com/news/releases/2026/06/qualcomm-to-acquire-modular",
-        "title": "qualcomm.com"
-      },
-      {
-        "accessed_at": "2026-08-10T08:42:00+08:00",
+        "accessed_at": "2026-08-24T10:05:30+08:00",
         "id": "ev-cambricon-v4",
-        "note": "寒武纪披露以 vLLM、Triton、NeuWare、Torch-MLU-Ops 和 BangC 完成 DeepSeek-V4 Day 0 适配，并针对新结构编写融合算子、热点 Kernel、混合并行和低精度量化；该材料证明适配路径，不提供跨平台同口径基准。",
+        "note": "寒武纪公开 DeepSeek-V4 Day 0 适配路径，覆盖框架、Triton 算子开发语言、Agent 辅助迁移、低精度与分布式推理优化。",
         "published_at": "2026-04-24",
         "publisher": "developer.cambricon.com",
-        "role": "source_in",
+        "role": "source_out",
         "source_url": "https://developer.cambricon.com/index/article/details.html?id=12",
         "title": "developer.cambricon.com"
+      },
+      {
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-lightwheel-open100k",
+        "note": "Lightwheel 发布 EgoSuite-Open100K，标注规模为 100,000 小时、15,000 多个任务和场景。",
+        "published_at": "2026-08-20",
+        "publisher": "huggingface.co",
+        "role": "source_in",
+        "source_url": "https://huggingface.co/collections/LightwheelAI/egosuite-open100k",
+        "title": "huggingface.co"
+      },
+      {
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-lightwheel-egopro",
+        "note": "EgoPro 数据卡披露 10,000 小时头部与腕部同步视频、3D 手部姿态、去标识与知情同意处理。",
+        "published_at": "2026-08-22",
+        "publisher": "huggingface.co",
+        "role": "source_in",
+        "source_url": "https://huggingface.co/datasets/LightwheelAI/EgoPro",
+        "title": "huggingface.co"
+      },
+      {
+        "accessed_at": "2026-08-24T10:05:30+08:00",
+        "id": "ev-lightwheel-egosuite",
+        "note": "EgoSuite 产品材料解释第一视角、接触与工具使用信号和多种采集设备的关系。",
+        "published_at": "2025-12-04",
+        "publisher": "lightwheel.ai",
+        "role": "source_out",
+        "source_url": "https://www.lightwheel.ai/egosuite",
+        "title": "lightwheel.ai"
       }
     ],
     "issue_kind": "complete_issue",
     "media": [
       {
-        "alt": "自然语言目标经高层具身推理、低层控制、视频结果判断后继续编排的闭环",
-        "asset_ref": "media/physical-ai-loop.png",
-        "asset_sha256": "5692b22292384725c7fc9f3c180d6145763a228553a81fd9496270e90a509060",
-        "caption": "高层模型把低层控制接口作为工具，持续读取视频判断进度和关键时刻，再决定重试、修正或切换下一步。",
+        "alt": "长时程 Agent 读取任务状态，调用工具，保存反馈并由监督器纠偏，最终通过验收门槛",
+        "asset_ref": "media/long-horizon-agent-system.png",
+        "asset_sha256": "1444c97caa2235ec83a221801522506fca52fcf43ee88ac38cc8950b417be1cf",
+        "caption": "持久状态保留每轮证据，监督器处理停滞，工具结果决定任务继续、调整或验收。",
         "evidence_ids": [
-          "ev-google-er2",
-          "ev-er2-safety"
+          "ev-nvidia-avo"
         ],
-        "height": 463,
-        "id": "physical-ai-loop",
+        "height": 516,
+        "id": "long-horizon-agent-system",
         "kind": "architecture",
-        "logic_summary": "目标和连续视频进入高层具身推理，高层模型调用低层 VLA 或控制 API；执行视频返回进度与关键时刻判断，系统据此重试、修正或进入下一步。",
+        "logic_summary": "任务状态进入主 Agent，工具与环境返回结果；持久状态承接下一轮，监督器在停滞时纠偏，通过验证门槛后形成产物。",
         "logic_type": "flow",
         "mime_type": "image/png",
-        "rights_basis": "WBR 原创图形与文字；事实依据为 Google 公开模型和评测材料。",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 NVIDIA AVO 公开材料。",
         "rights_scope": "public_allowed",
-        "size_bytes": 161441,
-        "source_label": "WBR 基于 Google Gemini Robotics ER 2 公开材料原创绘制",
-        "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
-        "target_section_id": "physical-loop",
+        "size_bytes": 108677,
+        "source_label": "WBR 基于 NVIDIA AVO 公开材料原创绘制",
+        "source_url": "https://developer.nvidia.com/blog/nvidia-avo-reaches-100-on-arc-agi-3-demonstrating-a-frontier-level-general-purpose-architecture-for-long-horizon-autonomous-agents/",
+        "target_section_id": "agent-avo-loop",
         "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
-        "width": 3205
+        "width": 2205
       },
       {
-        "alt": "任务通过 Agent 能力包进入可复现环境和持久执行并返回可核验产物的运行底座",
-        "asset_ref": "media/agent-operating-layer.png",
-        "asset_sha256": "897bb0db7c2116863edb19ec96c6968ef0b77d0e8f65b0dd3433ea08480273aa",
-        "caption": "能力包负责装载规则与工具，可复现环境和持久工作流负责长时执行，版本、权限、审计和撤销贯穿全程。",
+        "alt": "需求、规格、Skill、代码、行为测试和发布记录按批准关系连接，并由运行反馈形成下一轮需求",
+        "asset_ref": "media/ai-native-sdlc.png",
+        "asset_sha256": "423a69f3442a58a57eda86e95b0fa75e7628ef021fbd388f2da56da070453690",
+        "caption": "每个阶段提交可读产物，批准结果触发下一步，生产反馈回到新的需求与约束。",
         "evidence_ids": [
-          "ev-cursor-cloud-lessons",
-          "ev-agent-plugins",
-          "ev-agent-plugins-spec"
+          "ev-anthropic-sdlc"
         ],
-        "height": 584,
-        "id": "agent-operating-layer",
+        "height": 373,
+        "id": "ai-native-sdlc",
         "kind": "architecture",
-        "logic_summary": "能力装载、环境准备、持久执行和产物验证按任务流连接；企业版本、权限、审计和撤销同时约束能力包、环境和运行过程。",
-        "logic_type": "stack",
-        "mime_type": "image/png",
-        "rights_basis": "WBR 原创图形与文字；事实依据为 Cursor 工程材料和 Agent Plugins 公开规范。",
-        "rights_scope": "public_allowed",
-        "size_bytes": 195012,
-        "source_label": "WBR 基于 Cursor 与 Agent Plugins 公开材料原创绘制",
-        "source_url": "https://cursor.com/blog/cloud-agent-lessons",
-        "target_section_id": "agent-runtime-architecture",
-        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
-        "width": 3852
-      },
-      {
-        "alt": "当前 Skill 经过任务回放、有限编辑和留出集门禁后发布或拒绝的循环",
-        "asset_ref": "media/skill-optimization-loop.png",
-        "asset_sha256": "720845052a7ad88e635381000f0baa3852e577ca10cb83a474ebb95beda5223d",
-        "caption": "真实任务先形成候选改动，独立验证没有提升就保留旧版，通过后才发布新 Skill。",
-        "evidence_ids": [
-          "ev-skillopt",
-          "ev-prime-general-agent"
-        ],
-        "height": 555,
-        "id": "skill-optimization-loop",
-        "kind": "architecture",
-        "logic_summary": "当前 Skill 在真实任务上产生轨迹，优化器提出有限修改；候选必须通过留出集验证，否则保留旧版，通过后形成版本化发布。",
+        "logic_summary": "需求与约束经过规格、Skill、构建、行为测试和发布逐级批准，运行事故与反馈生成下一轮版本化需求。",
         "logic_type": "flow",
         "mime_type": "image/png",
-        "rights_basis": "WBR 原创图形与文字；事实依据为 Microsoft SkillOpt 和 Prime Intellect 公开研究材料。",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Anthropic AI 原生 SDLC 公开材料。",
         "rights_scope": "public_allowed",
-        "size_bytes": 155053,
-        "source_label": "WBR 基于 Microsoft SkillOpt 公开论文与代码原创绘制",
-        "source_url": "https://github.com/microsoft/SkillOpt",
-        "target_section_id": "skill-loop-architecture",
+        "size_bytes": 96991,
+        "source_label": "WBR 基于 Anthropic AI 原生 SDLC 公开材料原创绘制",
+        "source_url": "https://claude.com/blog/the-ai-native-sdlc-playbook",
+        "target_section_id": "sdlc-playbook",
         "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
-        "width": 2726
+        "width": 2573
       },
       {
-        "alt": "真实推理负载分向横向跨硬件软件与纵向模型专用芯片并由共同指标验收",
-        "asset_ref": "media/inference-stack-paths.png",
-        "asset_sha256": "8982439ad343a52cdb61847721dc471868cf27bed93e8d7da4436d6c2f51ac8e",
-        "caption": "多模型多平台负载优先验证横向软件复用，稳定高量负载可评估模型与芯片联合设计，两条路线使用同一任务口径验收。",
+        "alt": "真实推理工作负载依次约束算法、运行时、算子和异构硬件，再由正确性和性能结果回归调整",
+        "asset_ref": "media/full-stack-inference-optimization.png",
+        "asset_sha256": "7884b297c5c56a9adb3948fc6425d43b1681fabbc60fcadc79030ab680089254",
+        "caption": "模型结构与工作负载决定优化选择，运行时、算子和硬件共同形成端到端结果。",
         "evidence_ids": [
-          "ev-amd-taalas",
-          "ev-qualcomm-modular",
+          "ev-liquid-dspark",
           "ev-cambricon-v4"
         ],
-        "height": 1171,
-        "id": "inference-stack-paths",
+        "height": 368,
+        "id": "full-stack-inference-optimization",
         "kind": "architecture",
-        "logic_summary": "真实负载按模型数量、硬件数量和稳定性分向横向可移植软件或纵向专用化，并以任务质量、延迟、吞吐、能耗和迁移成本共同验收。",
+        "logic_summary": "工作负载选择草稿模型、量化和并行，运行时与编译器生成执行路径，算子和通信匹配硬件，实测结果回到下一轮。",
+        "logic_type": "stack",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Liquid AI DSpark 与寒武纪 DeepSeek-V4 公开材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 92934,
+        "source_label": "WBR 基于 Liquid AI 与寒武纪公开材料原创绘制",
+        "source_url": "https://developer.cambricon.com/index/article/details.html?id=12",
+        "target_section_id": "inference-limits",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 3148
+      },
+      {
+        "alt": "第一视角操作数据经过隐私处理和动作标注进入模型训练，再由仿真与真机任务验证并记录失败",
+        "asset_ref": "media/egocentric-robot-data.png",
+        "asset_sha256": "c75dfd045b424b0b39e0b4f33323d0ced15610b37fb691996070fe20bcfa209d",
+        "caption": "采集与标注提供动作先验，仿真和真机结果决定哪些数据真正改善目标任务。",
+        "evidence_ids": [
+          "ev-lightwheel-egosuite",
+          "ev-lightwheel-egopro"
+        ],
+        "height": 373,
+        "id": "egocentric-robot-data",
+        "kind": "architecture",
+        "logic_summary": "头部与腕部数据完成去标识和动作标注后进入训练，候选策略经仿真与真机筛选，成功和失败记录回到数据版本。",
         "logic_type": "flow",
         "mime_type": "image/png",
-        "rights_basis": "WBR 原创图形与文字；事实依据为 AMD、Qualcomm 与寒武纪公开材料。",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Lightwheel EgoSuite 与 EgoPro 公开材料。",
         "rights_scope": "public_allowed",
-        "size_bytes": 185898,
-        "source_label": "WBR 基于 AMD、Qualcomm 与寒武纪公开材料原创绘制",
-        "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
-        "target_section_id": "inference-architecture",
+        "size_bytes": 129126,
+        "source_label": "WBR 基于 Lightwheel EgoSuite 与 EgoPro 公开材料原创绘制",
+        "source_url": "https://www.lightwheel.ai/egosuite",
+        "target_section_id": "robot-data-signals",
         "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
-        "width": 1224
+        "width": 3428
       }
     ],
     "period": {
-      "as_of": "2026-08-10T08:42:00+08:00",
-      "end": "2026-08-09",
-      "label": "2026 W32",
-      "start": "2026-08-03"
+      "as_of": "2026-08-24T10:05:30+08:00",
+      "end": "2026-08-23",
+      "label": "2026 W34",
+      "start": "2026-08-17"
     },
     "selected_topics": 4,
     "status": "complete",
-    "title": "周度技术战略洞察｜2026 W32",
+    "title": "周度技术战略洞察｜2026 W34",
     "topics": [
       {
         "facts": {
           "sections": [
             {
-              "anchor": "thesis_physical_ai_progress_loop_what_changed",
+              "anchor": "thesis_long_horizon_agent_system_what_changed",
               "evidence_ids": [
-                "ev-google-er2"
+                "ev-nvidia-avo"
               ],
               "items": [],
               "kind": "what_changed",
               "media_ids": [],
               "paragraphs": [
-                "Google 在 7 月 30 日发布 Gemini Robotics ER 2，并于 8 月 3 日进入本周采集。它位于高层任务编排位置：接收自然语言、视频、音频或文本，把 VLA 模型、导航接口和用户自定义函数作为工具，再把动作交给低层控制系统执行。",
-                "开发者可以通过 Gemini API 和 Google AI Studio 调用该模型，Gemini Enterprise Agent Platform 当时为私有预览。官方同时提供 Spot、Apollo 2 和 Franka F3 Duo 等演示，覆盖单机器人任务和多机器人协作。"
+                "NVIDIA 在 8 月 21 日公开 Agentic Variation Operators（AVO）的最新结果。这套系统以一个通用编码 Agent 为核心，能够读取代码和文档、运行命令、调用编译器与性能工具，并依据执行结果继续修改。它的目标是让同一任务持续推进多轮，而非把每次模型调用当作一项独立工作。",
+                "在注意力 Kernel 优化实验中，AVO 连续运行七天，探索了 500 多个优化方向，形成 40 个提交版本。NVIDIA 报告，在其测试配置下，最终 Kernel 在 DGX B200 服务器上相对官方深度学习计算库 cuDNN 最高提高 3.5%，相对开源高性能注意力实现 FlashAttention-4 最高提高 10.5%；随后又用约 30 分钟把演化后的实现适配到分组查询注意力。"
               ],
               "role": "what_changed",
-              "section_id": "physical-release",
+              "section_id": "agent-avo-results",
               "sequence_label": "①",
-              "title": "Gemini Robotics ER 2 接手高层任务编排"
+              "title": "AVO 连续七天优化 GPU Kernel"
             },
             {
-              "anchor": "thesis_physical_ai_progress_loop_how_it_works",
+              "anchor": "thesis_long_horizon_agent_system_how_it_works",
               "evidence_ids": [
-                "ev-google-er2",
-                "ev-er2-safety"
+                "ev-nvidia-avo"
               ],
               "items": [],
               "kind": "how_it_works",
               "media_ids": [
-                "physical-ai-loop"
+                "long-horizon-agent-system"
               ],
               "paragraphs": [
-                "模型在动作进行时持续读取视频，不必等待整段流程结束。每一帧可被归入 0%—20%、20%—40% 等五个进度区间；模型还会寻找倒水结束、灯泡拧紧等关键时刻，用于决定继续、重试、修正或切换下一步。",
-                "这条链路把目标理解、高层规划、低层执行和结果判断放入同一循环。低层控制器仍负责具体运动，确定性的安全停机、人员接近检测和人工接管没有被语言模型取代。"
+                "主 Agent 反复执行查看上下文、提出方案、修改实现、运行测试和评估结果五类动作。持久记忆保存此前实现、性能数据、编译器输出和已经排除的方向，使后续循环可以沿着当前进展继续。工具返回的正确性与性能结果决定候选版本能否保留。",
+                "监督器观察更长时间范围内的搜索轨迹。当主 Agent 长时间停滞或重复无效方向时，监督器可以要求它改换策略。监督器不代替主 Agent 编写实现，而是处理单个上下文窗口难以判断的停滞、重复和方向切换问题。"
               ],
               "role": "how_it_works",
-              "section_id": "physical-loop",
+              "section_id": "agent-avo-loop",
               "sequence_label": "②",
-              "title": "连续视频把执行结果送回任务编排"
+              "title": "持久状态和监督器维持任务连续性"
             },
             {
-              "anchor": "thesis_physical_ai_progress_loop_benchmark",
+              "anchor": "thesis_long_horizon_agent_system_case_study",
               "evidence_ids": [
-                "ev-google-er2",
-                "ev-er2-safety"
+                "ev-nvidia-avo"
               ],
               "items": [],
-              "kind": "benchmark",
+              "kind": "case_study",
               "media_ids": [],
               "paragraphs": [
-                "Google 报告进度分类准确率为 57.4%。关键时刻识别准确率为 91.3%，平均绝对时间误差为 0.96 秒；官方称其在自建工具编排评测中的执行速度约为 ER 1.6 的 4 倍。工具编排还分别使用真实 VLA、仿真 VLA 和人工遥控三种控制方式进行比较。",
-                "这些数字采用 Google 自建任务、模型和对比口径。公开页面没有给出跨厂商机器人、长期工厂运行或全部长尾故障的数据，不能直接换算为客户现场的完整任务成功率。"
+                "NVIDIA 随后把 AVO 接到 ARC-AGI-3 公共集。该评测包含 25 个没有明示规则和目标的互动环境，共 183 个关卡；Agent 需要通过行动观察环境变化，再推断规则。使用 Claude Opus 5 的 AVO 完成全部公开关卡，RHAE 得分为 100.00，共使用 6,624 次环境动作。",
+                "作为参考，VISTA 在同一公共集和模型家族下报告 7,542 次动作，AVO 少约 12%。NVIDIA 明确说明，这不是在其余条件不变时逐项替换模块的对照测试：两套系统的观察表示、记忆、上下文管理和推理设置都不同，公开页面也没有分别测量持久记忆或监督器的单独贡献。"
               ],
-              "role": "benchmark",
-              "section_id": "physical-benchmarks",
+              "role": "case_study",
+              "section_id": "agent-avo-transfer",
               "sequence_label": "③",
-              "title": "官方评测给出进度识别和关键时刻数据"
+              "title": "同一运行结构被用于互动推理任务"
             },
             {
-              "anchor": "thesis_physical_ai_progress_loop_evidence_and_limits",
+              "anchor": "thesis_long_horizon_agent_system_evidence_and_limits",
               "evidence_ids": [
-                "ev-google-er2",
-                "ev-er2-safety"
+                "ev-nvidia-avo"
               ],
               "items": [],
               "kind": "evidence_and_limits",
               "media_ids": [],
               "paragraphs": [
-                "机器人要使用这套能力，必须开放可调用的控制接口，并能把连续视频稳定送入模型。任务还要有可判定的完成条件，否则进度分类无法告诉系统何时停止。",
-                "57.4% 的进度分类准确率也说明该能力尚未解决所有执行判断。遮挡、反光、多人协作、设备差异和网络抖动都会增加误判，工业现场仍需要仿真复测、确定性联锁和人工接管。"
+                "Kernel 优化依赖可以自动执行的编译、正确性测试和性能测量；ARC-AGI-3 也提供明确的动作接口和计分方式。企业材料编制、客户服务或跨系统审批通常缺少同样清楚的反馈，任务状态还可能受人员、权限和外部系统变化影响。",
+                "现有数据来自 NVIDIA 自有实现、DGX B200 服务器和 ARC-AGI-3 公共集，未覆盖私有评测集、长期生产故障或大规模并发，也没有报告企业任务中的中断恢复、重复探索、错误累积、人工接管和最终产物验收数据。"
               ],
               "role": "evidence_and_limits",
-              "section_id": "physical-limits",
+              "section_id": "agent-avo-limits",
               "sequence_label": "④",
-              "title": "落地仍取决于控制接口、低时延和安全边界"
+              "title": "公开结果还不能代表企业长任务稳定性"
             }
           ],
           "term_note_groups": [
             {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_physical_ai_progress_loop_what_changed",
-              "first_section_id": "physical-release",
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_long_horizon_agent_system_what_changed",
+              "first_section_id": "agent-avo-results",
               "reader_texts": [
-                "VLA：视觉—语言—动作模型，把图像和指令转换为机器人动作。"
+                "Kernel：直接在加速芯片上执行某类计算的底层程序，性能会影响模型推理或训练速度。"
+              ]
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_long_horizon_agent_system_case_study",
+              "first_section_id": "agent-avo-transfer",
+              "reader_texts": [
+                "RHAE：同时考虑任务完成和行动效率的评分，用首次接触任务的人类表现作为参照。"
               ]
             }
           ],
           "terms": [
             {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_long_horizon_agent_system_what_changed",
+              "explanation": "直接在加速芯片上执行某类计算的底层程序，性能会影响模型推理或训练速度。",
+              "first_section_id": "agent-avo-results",
+              "reader_text": "Kernel：直接在加速芯片上执行某类计算的底层程序，性能会影响模型推理或训练速度。",
+              "term": "Kernel"
+            },
+            {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_physical_ai_progress_loop_what_changed",
-              "explanation": "视觉—语言—动作模型，把图像和指令转换为机器人动作。",
-              "first_section_id": "physical-release",
-              "reader_text": "VLA：视觉—语言—动作模型，把图像和指令转换为机器人动作。",
-              "term": "VLA"
+              "after_section_anchor": "thesis_long_horizon_agent_system_case_study",
+              "explanation": "同时考虑任务完成和行动效率的评分，用首次接触任务的人类表现作为参照。",
+              "first_section_id": "agent-avo-transfer",
+              "reader_text": "RHAE：同时考虑任务完成和行动效率的评分，用首次接触任务的人类表现作为参照。",
+              "term": "RHAE"
             }
           ],
           "title": "事实与案例"
@@ -353,186 +332,184 @@
         "findings": {
           "items": [
             {
-              "anchor": "thesis_physical_ai_progress_loop_finding_1",
+              "anchor": "thesis_long_horizon_agent_system_finding_1",
               "evidence_ids": [
-                "ev-google-er2"
+                "ev-nvidia-avo"
               ],
-              "finding_id": "finding-physical-1",
+              "finding_id": "finding-agent-system-1",
               "paragraphs": [
-                "具身模型已经能规划动作，但多步骤任务的难点常在执行之后：系统需要知道当前进行到哪里、是否失败、何时停止。连续视频和关键时刻识别使这类判断可以被单独评测和优化。",
-                "现在值得关注，是因为高层模型、低层控制 API 和流式视频接口已经能在同一系统中运行，过去由固定流程或人工承担的结果核验开始进入模型编排层。"
+                "企业里的 Agent 会经历上下文压缩、工具失败、环境变化和多轮试错。模型能力提高只能改善其中一部分；历史状态能否保留、外部结果能否及时反馈、失败后能否恢复，直接决定任务是否继续推进。AVO 受到关注，正值企业把 Agent 接入更多工具并让其承担更长流程。"
               ],
-              "title": "1、任务完成判断成为具身系统的独立能力"
+              "title": "1、长任务首先考验状态和反馈"
             },
             {
-              "anchor": "thesis_physical_ai_progress_loop_finding_2",
+              "anchor": "thesis_long_horizon_agent_system_finding_2",
               "evidence_ids": [
-                "ev-google-er2",
-                "ev-er2-safety"
+                "ev-nvidia-avo"
               ],
-              "finding_id": "finding-physical-2",
+              "finding_id": "finding-agent-system-2",
               "paragraphs": [
-                "不同机器人擅长的动作和地形不同。高层模型提供共同的任务语义后，可以安排移动、抓取和人机协作，但交接是否成功仍取决于每台设备暴露的控制接口、状态定义和安全规则。"
+                "同一模型装入不同运行框架，完成率、行动次数和错误恢复可能明显不同。企业采购和验收应同时固定模型、工具、记忆、监督、预算与环境，记录每次行动和恢复过程，才能知道性能来自哪里，也能在升级后定位退化。"
               ],
-              "title": "2、多机器人协作先考验统一语义和交接规则"
+              "title": "2、评测对象需要覆盖完整运行系统"
             }
           ],
           "title": "发现"
         },
         "industry_impact": {
-          "anchor": "thesis_physical_ai_progress_loop_industry",
+          "anchor": "thesis_long_horizon_agent_system_industry",
           "evidence_ids": [
-            "ev-google-er2",
-            "ev-er2-safety"
+            "ev-nvidia-avo"
           ],
-          "headline": "机器人价值将更多由完整任务成功率决定",
-          "items": [
-            "重点观察第三方完整任务复测，而不是演示数量。",
-            "重点记录故障恢复、人工接管和跨本体适配周期。"
-          ],
+          "headline": "Agent 竞争将扩展到运行时与长任务工程",
+          "items": [],
           "kind": "industry_impact",
           "media_ids": [],
           "paragraphs": [
-            "具身模型把感知、规划和结果核验串入一个循环后，采购比较会逐步超出单项识别准确率，转向完整任务成功率、失败恢复时间、人工接管率和安全停机表现。机器人本体、边缘计算、仿真评测和行业集成因此需要共同交付。",
-            "近期受益者是拥有真实任务数据、控制接口和仿真环境的平台。限制也很清楚：厂商评测尚未覆盖跨本体长期运行，57.4% 的进度分类仍有明显误差；高风险场景不会只凭模型判断放开执行。"
+            "Agent 平台会加强持久状态、工具执行、反馈解析、监督与恢复能力，并针对编码、研究、运营等任务提供可重放环境。模型供应商仍然重要，但客户会更关注一项任务经过多轮运行后能否得到合格产物，以及失败时能否安全恢复。",
+            "价值会向掌握真实任务、运行轨迹和验收规则的平台集中。近期应观察完整任务通过率、中断恢复率、重复探索比例、人工接管次数和单位合格产物成本；只公布单轮评测或最长连续运行时间，难以证明生产价值。"
           ],
           "title": "产业影响"
         },
         "sequence_label": "专题 01/04",
         "strategic_recommendation": {
-          "anchor": "thesis_physical_ai_progress_loop_recommendation",
+          "anchor": "thesis_long_horizon_agent_system_recommendation",
           "evidence_ids": [
-            "ev-google-er2",
+            "ev-nvidia-avo",
             "ev-lenovo-stack"
           ],
-          "headline": "先建设机器人任务验证能力，再决定进入哪些行业场景",
+          "headline": "用可恢复的长任务验证环境评估企业 Agent",
           "items": [],
           "kind": "strategic_recommendation",
           "media_ids": [],
           "paragraphs": [
-            "联想可基于边缘计算、工作站和服务器搭建小规模验证环境，优先选择可复现、可停机、可人工接管的任务，用同一任务测试不同模型和机器人本体，并统一记录任务成功率、故障恢复率、编排时延、人工接管率及失败原因。",
-            "先验证计算、视频链路、模型编排和低层控制能否稳定协同；在机器人本体伙伴、现场数据和安全责任边界尚未明确前，以联合验证能力为主，不提前包装成通用机器人解决方案。"
+            "擎天、AI Foundry 和百应可先选择能够自动检查结果、允许暂停且可人工接管的客户任务，统一保存模型与工具版本、任务状态、每轮行动、失败原因和恢复点；验收同时看完整任务通过率、中断恢复率、重复探索比例、人工接管次数和单位合格产物成本。只有 Agent 在环境变化或工具故障后仍能恢复并交付合格结果，相关运行配置才进入客户方案。"
           ],
           "title": "战略建议"
         },
-        "thesis_id": "thesis-physical-ai-progress-loop",
-        "title": "机器人开始在执行过程中判断任务是否完成",
-        "topic_id": "topic-physical-ai-progress-loop"
+        "thesis_id": "thesis-long-horizon-agent-system",
+        "title": "长时程 Agent 的能力取决于完整运行系统",
+        "topic_id": "topic-long-horizon-agent-system"
       },
       {
         "facts": {
           "sections": [
             {
-              "anchor": "thesis_agent_operating_layer_what_changed",
+              "anchor": "thesis_ai_native_sdlc_what_changed",
               "evidence_ids": [
-                "ev-cursor-cloud-lessons"
+                "ev-anthropic-sdlc"
               ],
               "items": [],
               "kind": "what_changed",
-              "media_ids": [],
+              "media_ids": [
+                "ai-native-sdlc"
+              ],
               "paragraphs": [
-                "Cursor 在 6 月公布云端 Agent 工程经验，并于 8 月 3 日进入本周采集。其云端 Agent 运行在独立虚拟机中，拥有依赖、网络和构建工具，可以并行工作、跨天执行并产出测试、日志、截图和 PR。",
-                "Cursor 称内部超过 40% 的 PR 来自云端 Agent。团队把 Agent 循环迁到持久工作流系统，并将 Agent、机器和会话状态拆开管理，使机器可以休眠、恢复或更换，长任务不必依赖一台持续在线的虚拟机。"
+                "Anthropic 在 8 月 21 日发布 AI 原生软件开发生命周期（SDLC）实践，覆盖规划、设计、构建、测试、部署和维护六个环节。材料判断，Agent 加快代码生成后，需求澄清、安全审查、测试和发布仍按原有人工作业速度运行，会积累新的等待队列。",
+                "这套流程用可提交产物连接各阶段：intent.md 保存原始需求和约束，spec.md 与 plan.md 固化设计和实施路径，代码、测试、审查意见和事故记录继续进入版本控制。一个阶段被接受的产物可以触发下一阶段，产品负责人和高风险代码仍保留人工批准。"
               ],
               "role": "what_changed",
-              "section_id": "agent-environment",
+              "section_id": "sdlc-playbook",
               "sequence_label": "①",
-              "title": "Cursor 把开发环境列为 Agent 输出质量的首要条件"
+              "title": "Anthropic 将软件开发拆成六个连续环节"
             },
             {
-              "anchor": "thesis_agent_operating_layer_case_study",
+              "anchor": "thesis_ai_native_sdlc_case_study",
               "evidence_ids": [
-                "ev-agent-plugins",
-                "ev-agent-plugins-spec",
-                "ev-github-plugin-support"
+                "ev-agent-skills-study"
               ],
               "items": [],
               "kind": "case_study",
               "media_ids": [],
               "paragraphs": [
-                "8 月 6 日发布的 Agent Plugins 1.0.0 规定了一个可检查的文件目录：根目录使用 plugin.json 声明名称和版本，Skills 放在固定位置，MCP 服务器配置使用 mcp.json，客户端专属内容进入命名空间扩展目录。",
-                "规范解决的是发现和装载，不替客户端统一模型、权限或执行结果。规范页面仍标记为 Working Draft，但 GitHub Copilot CLI 已在正式文档中给出相应 schema 和清单字段。"
+                "8 月 14 日提交的 Agent Skills 研究汇总 8,135 次试验，并对 240 条抽样轨迹进行人工编码。研究发现，Skill 的主要作用是把以往经验整理成较稳定的准备步骤、工具顺序、检查点和避错规则；65.7% 的 Skill 机制被归为过程锚定，直接补充缺失事实的比例为 4.5%。",
+                "Skill 也会遇到检索问题。当候选池由 5 个扩大到 100 个，两组实验的实际使用精度平均由 29.6% 降至 3.3%。研究同时观察到任务成功率没有同步大幅下降，说明 Agent 可能查看多个候选后完成任务；因此，命中预设的唯一 Skill 不能单独作为有效性证明。"
               ],
               "role": "case_study",
-              "section_id": "agent-plugin-standard",
+              "section_id": "sdlc-skills",
               "sequence_label": "②",
-              "title": "Agent Plugins 1.0.0 统一能力包的目录和清单"
+              "title": "Skill 更常用于稳定执行步骤"
             },
             {
-              "anchor": "thesis_agent_operating_layer_how_it_works",
+              "anchor": "thesis_ai_native_sdlc_how_it_works",
               "evidence_ids": [
-                "ev-cursor-cloud-lessons",
-                "ev-agent-plugins",
-                "ev-agent-plugins-spec"
+                "ev-behavioral-tests"
               ],
               "items": [],
               "kind": "how_it_works",
-              "media_ids": [
-                "agent-operating-layer"
-              ],
+              "media_ids": [],
               "paragraphs": [
-                "插件把规则、工具和配置带入 Agent；可复现环境负责依赖、凭据、网络和构建工具；持久工作流负责检查点、重试、休眠恢复和分支隔离。最终交付物通过测试、日志、截图或 PR 供人验收。",
-                "Agent Plugins 规范要求插件路径留在插件根目录内，并允许客户端对清单和组件做一致性检查。客户端仍自行决定权限、网络访问、执行记录和停用方式；1.0.0 没有统一这些运行策略。"
+                "5 月 31 日提交的行为测试论文指出，两套 Agent 可能得到相同结果，却采用完全不同的行动策略。论文建议从动作序列恢复决策方式，在受控环境中改变单一条件，并观察多 Agent 互动时出现的策略变化。",
+                "例如，代码修复都通过测试时，还可以比较改动范围、控制结构复杂度和是否只针对样例；客服任务都得到满意评分时，可以改变投诉难度，观察 Agent 是否始终机械退款。行为测试保留结果指标，同时增加对过程、环境敏感性和策略稳定性的检查。"
               ],
               "role": "how_it_works",
-              "section_id": "agent-runtime-architecture",
+              "section_id": "sdlc-behavior",
               "sequence_label": "③",
-              "title": "能力装载与长时执行由两套机制配合"
+              "title": "行为测试检查任务是怎样完成的"
             },
             {
-              "anchor": "thesis_agent_operating_layer_evidence_and_limits",
+              "anchor": "thesis_ai_native_sdlc_evidence_and_limits",
               "evidence_ids": [
-                "ev-cursor-cloud-lessons",
-                "ev-agent-plugins-spec",
-                "ev-github-plugin-support"
+                "ev-anthropic-sdlc",
+                "ev-agent-skills-study",
+                "ev-behavioral-tests"
               ],
               "items": [],
               "kind": "evidence_and_limits",
               "media_ids": [],
               "paragraphs": [
-                "Cursor 的 PR 比例来自自身代码库、工具链和审查流程。传统企业的多仓库依赖、内网制品库、合规审批和旧系统测试会增加环境构建成本。",
-                "Agent Plugins 的跨客户端价值还要看一致性测试：同一插件能否被不同客户端正确发现，权限能否按预期限制，失败后是否可撤销。任何一项不一致，都可能把一次安装变成新的供应链风险。"
+                "Anthropic 的流程来自其内部实践和客户经验，并非不同组织的受控效率对比。Agent Skills 研究跨多个模型与运行框架，但结果仍受任务、Skill 写法和候选池影响；行为测试论文提出研究议程，许多指标还没有统一实现。",
+                "三份材料都没有报告同一企业在改造前后的完整生产对照，也没有覆盖需求错误、权限不足或验收标准含糊时的长期返工、审查等待与回滚成本。"
               ],
               "role": "evidence_and_limits",
-              "section_id": "agent-runtime-limits",
+              "section_id": "sdlc-limits",
               "sequence_label": "④",
-              "title": "公开数据证明工程可行，不代表企业可直接复制"
+              "title": "流程、Skill 和评测都需要真实交付样本"
             }
           ],
           "term_note_groups": [
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_agent_operating_layer_what_changed",
-              "first_section_id": "agent-environment",
+              "after_section_anchor": "thesis_ai_native_sdlc_what_changed",
+              "first_section_id": "sdlc-playbook",
               "reader_texts": [
-                "PR：代码修改提交给团队审查、通过后再合并的请求。"
+                "SDLC：软件从需求、设计和开发到测试、上线与维护的完整生命周期。"
               ]
             },
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_agent_operating_layer_case_study",
-              "first_section_id": "agent-plugin-standard",
+              "after_section_anchor": "thesis_ai_native_sdlc_case_study",
+              "first_section_id": "sdlc-skills",
               "reader_texts": [
-                "MCP：模型上下文协议，用统一接口把 Agent 接到外部工具和数据。"
+                "Skill：供 Agent 读取的版本化操作说明，通常包含步骤、工具顺序、检查点和适用条件。",
+                "过程锚定：把可靠的操作步骤、工具顺序和检查点固定下来，减少 Agent 在执行中偏离。"
               ]
             }
           ],
           "terms": [
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_agent_operating_layer_what_changed",
-              "explanation": "代码修改提交给团队审查、通过后再合并的请求。",
-              "first_section_id": "agent-environment",
-              "reader_text": "PR：代码修改提交给团队审查、通过后再合并的请求。",
-              "term": "PR"
+              "after_section_anchor": "thesis_ai_native_sdlc_what_changed",
+              "explanation": "软件从需求、设计和开发到测试、上线与维护的完整生命周期。",
+              "first_section_id": "sdlc-playbook",
+              "reader_text": "SDLC：软件从需求、设计和开发到测试、上线与维护的完整生命周期。",
+              "term": "SDLC"
             },
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_agent_operating_layer_case_study",
-              "explanation": "模型上下文协议，用统一接口把 Agent 接到外部工具和数据。",
-              "first_section_id": "agent-plugin-standard",
-              "reader_text": "MCP：模型上下文协议，用统一接口把 Agent 接到外部工具和数据。",
-              "term": "MCP"
+              "after_section_anchor": "thesis_ai_native_sdlc_case_study",
+              "explanation": "供 Agent 读取的版本化操作说明，通常包含步骤、工具顺序、检查点和适用条件。",
+              "first_section_id": "sdlc-skills",
+              "reader_text": "Skill：供 Agent 读取的版本化操作说明，通常包含步骤、工具顺序、检查点和适用条件。",
+              "term": "Skill"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_ai_native_sdlc_case_study",
+              "explanation": "把可靠的操作步骤、工具顺序和检查点固定下来，减少 Agent 在执行中偏离。",
+              "first_section_id": "sdlc-skills",
+              "reader_text": "过程锚定：把可靠的操作步骤、工具顺序和检查点固定下来，减少 Agent 在执行中偏离。",
+              "term": "过程锚定"
             }
           ],
           "title": "事实与案例"
@@ -540,188 +517,179 @@
         "findings": {
           "items": [
             {
-              "anchor": "thesis_agent_operating_layer_finding_1",
+              "anchor": "thesis_ai_native_sdlc_finding_1",
               "evidence_ids": [
-                "ev-cursor-cloud-lessons"
+                "ev-anthropic-sdlc"
               ],
-              "finding_id": "finding-agent-runtime-1",
+              "finding_id": "finding-sdlc-1",
               "paragraphs": [
-                "短任务可以容忍缺少一个依赖或一次网络失败，跨小时、跨天任务会把这些小差异累积成错误输出。完整环境、检查点和恢复机制因此直接影响任务成功率。",
-                "这一问题现在变得突出，是因为 Agent 已经能并行执行复杂任务，企业开始把它放入真实代码库和工作流，而不是只在聊天窗口里生成片段。"
+                "代码产出增加后，需求澄清、测试、安全审查和发布队列会更快暴露容量不足。现在重要的原因，是 Coding Agent 已经能够持续生成较大改动，而许多组织仍以人工逐行审查和阶段会议作为主要控制。提高交付速度需要同步改造控制方式和审查分工。"
               ],
-              "title": "1、模型越能长期工作，环境差异越容易决定结果"
+              "title": "1、代码提速放大流程短板"
             },
             {
-              "anchor": "thesis_agent_operating_layer_finding_2",
+              "anchor": "thesis_ai_native_sdlc_finding_2",
               "evidence_ids": [
-                "ev-agent-plugins",
-                "ev-agent-plugins-spec",
-                "ev-github-plugin-support"
+                "ev-agent-skills-study",
+                "ev-behavioral-tests"
               ],
-              "finding_id": "finding-agent-runtime-2",
+              "finding_id": "finding-sdlc-2",
               "paragraphs": [
-                "统一目录降低了重复适配成本，也提高了插件传播速度。企业需要知道插件来自哪里、包含哪些 Skill 和工具、申请什么权限、部署了哪个版本，以及出现问题后如何停用和回滚。"
+                "Skill 可以减少环境准备、工具顺序和格式错误，但候选数量增加会降低精确检索，错误前提和不兼容环境也会造成新失败。最终稿、失败轨迹和人工修改能够说明 Skill 在真实任务中改变了哪些行动，这比插件数量或调用次数更接近交付质量。"
               ],
-              "title": "2、开放能力包需要企业级准入和撤销"
+              "title": "2、Skill 质量要由实际行为验证"
             }
           ],
           "title": "发现"
         },
         "industry_impact": {
-          "anchor": "thesis_agent_operating_layer_industry",
+          "anchor": "thesis_ai_native_sdlc_industry",
           "evidence_ids": [
-            "ev-cursor-cloud-lessons",
-            "ev-agent-plugins",
-            "ev-agent-plugins-spec",
-            "ev-github-plugin-support"
+            "ev-anthropic-sdlc",
+            "ev-agent-skills-study",
+            "ev-behavioral-tests"
           ],
-          "headline": "Agent 平台竞争将延伸到环境、插件和运行治理",
-          "items": [
-            "规范采用量要与跨客户端一致性一起看。",
-            "PR 占比不能替代企业任务成功率和审查成本。"
-          ],
+          "headline": "企业开发平台将管理流程知识和行为证据",
+          "items": [],
           "kind": "industry_impact",
           "media_ids": [],
           "paragraphs": [
-            "云端 Agent 供应商需要同时交付环境构建、持久执行、能力分发和结果验证。模型接口仍重要，但客户会更多比较环境上线时间、任务恢复率、插件兼容率和权限审计。",
-            "插件规范降低了技能与工具重复包装的成本，也会带来新的供应链审查。能够把终端、云资源、Agent 平台和服务治理连在一起的厂商更有机会承接企业级部署。"
+            "开发工具会把需求、规格、计划、Skill、测试、审查和事故记录连接为可追溯链路，并让 Agent 在每个阶段读取上一阶段的获批产物。Skill 市场也需要补充适用环境、版本、依赖、失败条件和回归结果，单纯增加模板数量的价值有限。",
+            "测试会同时检查最终结果和行动轨迹，包括 Agent 是否越权、是否过度针对样例、是否在环境变化下保持稳定。行业竞争指标将扩展到需求返工率、行为测试通过率、审查等待时间、生产回滚率和既有能力退化率。"
           ],
           "title": "产业影响"
         },
         "sequence_label": "专题 02/04",
         "strategic_recommendation": {
-          "anchor": "thesis_agent_operating_layer_recommendation",
+          "anchor": "thesis_ai_native_sdlc_recommendation",
           "evidence_ids": [
-            "ev-cursor-cloud-lessons",
-            "ev-agent-plugins",
+            "ev-anthropic-sdlc",
+            "ev-agent-skills-study",
+            "ev-behavioral-tests",
             "ev-lenovo-stack"
           ],
-          "headline": "把 Agent 能力包、运行环境和产物验收纳入同一交付清单",
+          "headline": "把版本化 Skill 和行为测试纳入软件交付",
           "items": [],
           "kind": "strategic_recommendation",
           "media_ids": [],
           "paragraphs": [
-            "擎天、AI Foundry 和百应先建立少量经过验证的插件与 Skill 能力包，统一管理来源、版本、权限、适用客户端及回滚方式；只有在目标客户端和隔离环境完成重放验证后，才进入客户方案。",
-            "交付验收同时覆盖环境构建、长任务恢复、越权阻断和最终产物通过率，并保留每个能力包的测试与失败记录，以区分模型、环境和插件问题，而不是以插件数量作为能力目标。"
+            "擎天、AI Foundry、百应和 AI 全周期服务可把客户确认的需求、最终产物、任务调整与失败轨迹绑定到具体 Agent 和 Skill 版本，形成受控回放集；每次 Skill 只做有限修改，同时复测目标任务、越权行为、环境变化和既有能力退化。未经独立复测与人工批准的版本不进入正式交付，并保留适用任务、停止条件和可回滚旧版本。"
           ],
           "title": "战略建议"
         },
-        "thesis_id": "thesis-agent-operating-layer",
-        "title": "云端 Agent 需要自己的运行底座和能力包",
-        "topic_id": "topic-agent-operating-layer"
+        "thesis_id": "thesis-ai-native-sdlc",
+        "title": "AI 原生软件交付开始重写开发流程",
+        "topic_id": "topic-ai-native-sdlc"
       },
       {
         "facts": {
           "sections": [
             {
-              "anchor": "thesis_skill_validation_loop_what_changed",
+              "anchor": "thesis_full_stack_inference_optimization_what_changed",
               "evidence_ids": [
-                "ev-skillopt",
-                "ev-skillopt-paper"
+                "ev-liquid-dspark"
               ],
               "items": [],
               "kind": "what_changed",
               "media_ids": [],
               "paragraphs": [
-                "Microsoft 开源的 SkillOpt 固定目标模型、工具链和任务接口，只修改自然语言 Skill。每一轮先让目标模型执行一批任务，保存消息、工具调用、验证结果和得分，再由优化模型提出有限的增加、删除或替换。",
-                "候选 Skill 不会直接替换当前版本。系统在独立留出任务上复测，只有结果优于当前最好版本才接受，并把最终文件保存为 best_skill.md。"
+                "Liquid AI 在 8 月 20 日为 LFM2.5-1.2B-Instruct、LFM2.5-2.6B 和 LFM2.5-8B-A1B 发布三组 DSpark 草稿模型。每个草稿模型约 3 亿参数，通过较轻的网络一次提出多个候选 token（模型生成文本的基本单位），再由原目标模型统一验证，这种方式称为推测解码。",
+                "在贪心解码下，候选 token 只有与目标模型分布一致时才被接受；被拒绝的位置使用目标模型自己的结果，因此输出序列与只运行目标模型相同。新增显存开销较小，收益来自一次读取目标模型权重时验证多个候选。"
               ],
               "role": "what_changed",
-              "section_id": "skillopt-method",
+              "section_id": "inference-dspark-release",
               "sequence_label": "①",
-              "title": "SkillOpt 把自然语言规则作为可优化状态"
+              "title": "DSpark 用小模型批量提出候选 token"
             },
             {
-              "anchor": "thesis_skill_validation_loop_case_study",
+              "anchor": "thesis_full_stack_inference_optimization_benchmark",
               "evidence_ids": [
-                "ev-skillopt",
-                "ev-skillopt-paper"
+                "ev-liquid-dspark"
               ],
               "items": [],
-              "kind": "case_study",
+              "kind": "benchmark",
               "media_ids": [],
               "paragraphs": [
-                "SkillOpt 论文覆盖问答、数学、电子表格、工具调用和具身任务等基准。研究者报告，部分 Skill 可从较大模型迁移到较小模型，也可在 Codex 与 Claude Code 等不同执行工具链之间使用。",
-                "这些数字来自固定基准和研究配置。企业任务中的数据权限、人工审批和长期目标漂移并未被这些实验覆盖，迁移前仍要使用本地任务复测。"
+                "Liquid AI 在单张 H100 80GB 上使用服务端推理框架和半精度计算、批量为 1 测试，在 M4 Max MacBook Pro 上使用端侧推理框架、苹果 GPU 接口和半精度模型文件。三组模型在部分数据集的 GPU 吞吐最高达到 3.18 倍，端侧最高达到 2.87 倍；LFM2.5-2.6B 的多工具场景平均函数调用时延降低 57%。",
+                "平均值并不相同。LFM2.5-2.6B 在 H100 上平均由 323 提高到 864 token/s，约 2.67 倍；8B-A1B 在 M4 Max 上平均仅提高 18%。官方把端侧差异归因于当前混合专家模型（MoE）实现，以及验证多个 token 时会激活更多专家、增加权重读取。"
               ],
-              "role": "case_study",
-              "section_id": "skillopt-transfer",
+              "role": "benchmark",
+              "section_id": "inference-dspark-results",
               "sequence_label": "②",
-              "title": "研究报告给出跨模型和跨工具链迁移结果"
+              "title": "同一方法在不同模型和硬件上的收益差异很大"
             },
             {
-              "anchor": "thesis_skill_validation_loop_how_it_works",
+              "anchor": "thesis_full_stack_inference_optimization_how_it_works",
               "evidence_ids": [
-                "ev-skillopt",
-                "ev-prime-general-agent"
+                "ev-cambricon-v4"
               ],
               "items": [],
               "kind": "how_it_works",
-              "media_ids": [
-                "skill-optimization-loop"
-              ],
+              "media_ids": [],
               "paragraphs": [
-                "优化循环由当前 Skill、任务回放、成功与失败复盘、有限编辑、留出集验证和版本发布组成。候选没有达到门槛时保留旧版；通过后才进入下一轮真实任务。",
-                "这套机制把用户反馈与正式方法更新分开。单次修改可以触发候选，但不能跳过代表性回放、能力退化检查和人工批准。"
+                "寒武纪 4 月公开的 DeepSeek-V4 发布当日适配（Day 0）提供了另一条路径：先在开源推理框架 vLLM 上完成模型稳定运行，使用 PyTorch 开发框架和 Triton 算子开发语言降低迁移门槛，再针对压缩、稀疏注意力和分组矩阵乘法等热点模块编写融合算子与 Kernel。",
+                "公开材料随后列出低精度、张量与专家并行、输入预处理（Prefill）与逐 token 生成（Decode）分离，以及通信计算并行等优化；寒武纪还披露代码生成 Agent CNAgent 用于辅助算子生成和模型迁移，并把功能适配、精度验证、时延与吞吐作为不同工作项。"
               ],
               "role": "how_it_works",
-              "section_id": "skill-loop-architecture",
+              "section_id": "inference-cambricon-stack",
               "sequence_label": "③",
-              "title": "失败反馈先进入候选，再经过验证门"
+              "title": "新模型迁移还要穿过整套软件栈"
             },
             {
-              "anchor": "thesis_skill_validation_loop_evidence_and_limits",
+              "anchor": "thesis_full_stack_inference_optimization_evidence_and_limits",
               "evidence_ids": [
-                "ev-prime-general-agent",
-                "ev-skillopt-paper"
+                "ev-liquid-dspark",
+                "ev-cambricon-v4"
               ],
               "items": [],
               "kind": "evidence_and_limits",
-              "media_ids": [],
+              "media_ids": [
+                "full-stack-inference-optimization"
+              ],
               "paragraphs": [
-                "General Agent 展示了另一块基础设施：合成器生成任务，求解器以多次运行估计通过率，只有难度落入目标区间的任务才被接受。它说明评测任务本身也可以被版本化和扩充。",
-                "风险同样明确。评分器若偏离真实业务，优化器会稳定地提升错误指标；任务集过窄会导致过拟合；客户反馈还涉及隐私、授权和时效，不能自动汇总成长期规则。"
+                "DSpark 的最高倍数来自指定 LFM2.5 模型、数据集、批量、温度和硬件；草稿接受率变化会直接改变收益。寒武纪材料证明适配链路和实现手段已经存在，但没有提供可与其他芯片全面对比的统一第三方报告。",
+                "两份公开测试没有同时覆盖企业常见的并发、长短输入、工具调用、量化精度、显存容量、集群通信、故障恢复和升级回归，也没有给出同一客户任务下的首 token 时延（TTFT）、每秒生成 token 数（TPS）、最慢 1% 时延（P99）、Token 能耗与迁移人天。"
               ],
               "role": "evidence_and_limits",
-              "section_id": "skill-loop-limits",
+              "section_id": "inference-limits",
               "sequence_label": "④",
-              "title": "任务集和评分器决定优化方向"
+              "title": "性能数字必须绑定工作负载和测试条件"
             }
           ],
           "term_note_groups": [
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_skill_validation_loop_what_changed",
-              "first_section_id": "skillopt-method",
+              "after_section_anchor": "thesis_full_stack_inference_optimization_what_changed",
+              "first_section_id": "inference-dspark-release",
               "reader_texts": [
-                "Skill：写给 Agent 的一组可复用任务规则、步骤和工具说明。"
+                "推测解码：先由较小模型提出多个候选 token，再由目标模型一次验证，以减少目标模型逐个生成的等待。"
               ]
             },
             {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_skill_validation_loop_how_it_works",
-              "first_section_id": "skill-loop-architecture",
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_full_stack_inference_optimization_evidence_and_limits",
+              "first_section_id": "inference-limits",
               "reader_texts": [
-                "留出集：不参与候选生成、只用于独立复测的一组任务。"
+                "TTFT：从请求发出到模型返回第一个 token 的时间，用于衡量首响应速度。"
               ]
             }
           ],
           "terms": [
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_skill_validation_loop_what_changed",
-              "explanation": "写给 Agent 的一组可复用任务规则、步骤和工具说明。",
-              "first_section_id": "skillopt-method",
-              "reader_text": "Skill：写给 Agent 的一组可复用任务规则、步骤和工具说明。",
-              "term": "Skill"
+              "after_section_anchor": "thesis_full_stack_inference_optimization_what_changed",
+              "explanation": "先由较小模型提出多个候选 token，再由目标模型一次验证，以减少目标模型逐个生成的等待。",
+              "first_section_id": "inference-dspark-release",
+              "reader_text": "推测解码：先由较小模型提出多个候选 token，再由目标模型一次验证，以减少目标模型逐个生成的等待。",
+              "term": "推测解码"
             },
             {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_skill_validation_loop_how_it_works",
-              "explanation": "不参与候选生成、只用于独立复测的一组任务。",
-              "first_section_id": "skill-loop-architecture",
-              "reader_text": "留出集：不参与候选生成、只用于独立复测的一组任务。",
-              "term": "留出集"
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_full_stack_inference_optimization_evidence_and_limits",
+              "explanation": "从请求发出到模型返回第一个 token 的时间，用于衡量首响应速度。",
+              "first_section_id": "inference-limits",
+              "reader_text": "TTFT：从请求发出到模型返回第一个 token 的时间，用于衡量首响应速度。",
+              "term": "TTFT"
             }
           ],
           "title": "事实与案例"
@@ -729,212 +697,179 @@
         "findings": {
           "items": [
             {
-              "anchor": "thesis_skill_validation_loop_finding_1",
+              "anchor": "thesis_full_stack_inference_optimization_finding_1",
               "evidence_ids": [
-                "ev-skillopt"
+                "ev-liquid-dspark"
               ],
-              "finding_id": "finding-skill-1",
+              "finding_id": "finding-inference-1",
               "paragraphs": [
-                "Skill 本身是文本，但它会改变 Agent 的选题、工具使用和输出。为每次更新记录任务、差异、得分和回滚点，可以避免把一次成功案例直接写成长期方法。"
+                "推测解码的收益取决于草稿模型能否高概率猜中目标模型，以及验证过程是否适合当前硬件。混合专家模型、工具调用、输入长度和端侧内存会改变接受率与权重读取成本。统一方法可以跨平台实现，实际收益仍要逐个模型和工作负载验证。"
               ],
-              "title": "1、方法更新可以像软件版本一样验收和回滚"
+              "title": "1、推理效率依赖具体模型结构"
             },
             {
-              "anchor": "thesis_skill_validation_loop_finding_2",
+              "anchor": "thesis_full_stack_inference_optimization_finding_2",
               "evidence_ids": [
-                "ev-skillopt-paper",
-                "ev-prime-general-agent"
+                "ev-cambricon-v4",
+                "ev-liquid-dspark"
               ],
-              "finding_id": "finding-skill-2",
+              "finding_id": "finding-inference-2",
               "paragraphs": [
-                "优化器可以快速提出候选，是否有用取决于回放任务能否代表真实工作、评分器能否识别质量和边界。企业积累的最终稿、验收记录和失败案例因此比更长的 Prompt 更有价值。",
-                "现在值得重视，是因为 Agent 已经进入重复性的专业工作，任务结果开始可以保存、比较和回放，为方法迭代提供了过去没有的数据基础。"
+                "新模型结构发布频率提高后，芯片能否运行只是第一道门槛。框架兼容、编译、算子、并行、通信和回归工具决定多久能得到稳定性能。代码生成 Agent 可以缩短部分开发，但生成结果仍需正确性、性能和稳定性门禁。"
               ],
-              "title": "2、真正稀缺的是代表性任务和可信评分"
+              "title": "2、快速适配需要软件生态和自动化调优积累"
             }
           ],
           "title": "发现"
         },
         "industry_impact": {
-          "anchor": "thesis_skill_validation_loop_industry",
+          "anchor": "thesis_full_stack_inference_optimization_industry",
           "evidence_ids": [
-            "ev-skillopt",
-            "ev-skillopt-paper",
-            "ev-prime-general-agent"
+            "ev-liquid-dspark",
+            "ev-cambricon-v4"
           ],
-          "headline": "Agent 服务将增加方法版本、评测集和反馈治理",
-          "items": [
-            "观察独立任务提升，不只看训练批次得分。",
-            "记录被拒绝的候选和能力退化，避免重复踩坑。"
-          ],
+          "headline": "算力竞争会更强调模型适配和端到端效率",
+          "items": [],
           "kind": "industry_impact",
           "media_ids": [],
           "paragraphs": [
-            "企业购买 Agent 服务时，除了模型和工具，还会要求方法版本、任务回放、回归结果和回滚记录。拥有真实任务与最终人工结果的服务商可以形成持续改进，但前提是把原始反馈、候选规则和正式发布严格分开。",
-            "短期压力落在评测建设：不同客户的目标、数据权限和审查口径差异很大，通用基准不能替代客户自己的最终稿和验收结果。"
+            "芯片厂商、模型厂商和推理框架会更早共享模型结构与优化接口，以缩短发布到稳定运行的时间。常见开源开发框架、算子语言和推理运行时会降低迁移摩擦，但不同硬件仍会在编译、算子、通信和内存管理上形成差异。",
+            "客户会要求同一任务、同一质量门槛下比较首 token 时延、吞吐、最慢 1% 时延、Token 能耗、模型适配周期和迁移人天。能够持续吸收新模型并交付完整回归证据的平台更有议价能力，单一峰值指标的解释力会下降。"
           ],
           "title": "产业影响"
         },
         "sequence_label": "专题 03/04",
         "strategic_recommendation": {
-          "anchor": "thesis_skill_validation_loop_recommendation",
+          "anchor": "thesis_full_stack_inference_optimization_recommendation",
           "evidence_ids": [
-            "ev-skillopt",
+            "ev-liquid-dspark",
+            "ev-cambricon-v4",
             "ev-lenovo-stack"
           ],
-          "headline": "把客户最终稿和验收结果沉淀为受控回放集",
+          "headline": "万全异构智算方案按工作负载验证联合优化",
           "items": [],
           "kind": "strategic_recommendation",
           "media_ids": [],
           "paragraphs": [
-            "擎天、百应和 AI 全周期服务可将客户确认的最终材料、任务调整和失败记录绑定到具体 Agent 与 Skill 版本，先进入待复核账本，再沉淀为标准回放任务，并区分原始反馈、候选规则和正式 Skill。",
-            "Skill 迭代只做有限修改，并同时验证目标任务提升和既有能力是否退化；未经独立复测和人工批准不进入正式交付，每次发布均保留适用任务、停止条件和可回滚旧版本。"
+            "万全异构智算方案可按模型、上下文、并发和硬件建立工作负载矩阵，联合验证草稿模型、编译器、算子、运行时和通信策略，并用首 token 时延、每秒生成 token 数、最慢 1% 时延、Token 能耗、适配周期和迁移人天比较不同组合；同时尝试用模型辅助生成算子、编译配置和调度策略。所有自动生成结果先通过正确性、性能回归和稳定性门禁，再进入客户环境。"
           ],
           "title": "战略建议"
         },
-        "thesis_id": "thesis-skill-validation-loop",
-        "title": "Skill 的更新开始接受独立任务验证",
-        "topic_id": "topic-skill-validation-loop"
+        "thesis_id": "thesis-full-stack-inference-optimization",
+        "title": "推理加速进入模型、运行时与芯片联合优化",
+        "topic_id": "topic-full-stack-inference-optimization"
       },
       {
         "facts": {
           "sections": [
             {
-              "anchor": "thesis_inference_two_paths_what_changed",
+              "anchor": "thesis_egocentric_robot_data_what_changed",
               "evidence_ids": [
-                "ev-amd-taalas"
+                "ev-lightwheel-open100k"
               ],
               "items": [],
               "kind": "what_changed",
               "media_ids": [],
               "paragraphs": [
-                "AMD 在 8 月 7 日宣布收购 Taalas。公告称，Taalas 的模型与芯片联合设计技术将补充 AMD 的 AI 路线，目标是提高推理性能和效率。",
-                "公告没有提供可独立复现的产品型号、量产时间和同口径基准。因此目前能确认的是 AMD 增加了专用推理技术储备，尚不能确认它对通用 GPU 业务的替代范围。"
+                "Lightwheel 当周更新 EgoSuite-Open100K 开放集合，标注规模为 100,000 小时，覆盖 15,000 多个任务和场景。集合由 EgoDemo、EgoStandard 和 EgoPro 三条数据线组成，以第一视角数据支持具身智能和世界模型训练。",
+                "数据以人执行真实操作时的第一视角记录为基础，目标是补充普通互联网视频缺少的动作过程。集合页面只给出总体规模；具体模态、许可和下载方式需要进入各子数据卡核对，不能把三条数据线的不同格式和视角直接视为同质样本。"
               ],
               "role": "what_changed",
-              "section_id": "inference-taalas",
+              "section_id": "robot-open100k-release",
               "sequence_label": "①",
-              "title": "AMD 收购 Taalas 补充模型与芯片联合设计"
+              "title": "EgoSuite-Open100K 扩大第一视角操作数据规模"
             },
             {
-              "anchor": "thesis_inference_two_paths_case_study",
+              "anchor": "thesis_egocentric_robot_data_case_study",
               "evidence_ids": [
-                "ev-qualcomm-modular"
+                "ev-lightwheel-egopro"
               ],
               "items": [],
               "kind": "case_study",
               "media_ids": [],
               "paragraphs": [
-                "Qualcomm 在 6 月宣布收购 Modular，计划把其统一计算平台用于 CPU、GPU、NPU 和定制 ASIC。官方目标是减少开发者为每类加速器重写模型和运行时的工作，并把优化覆盖到终端、边缘和数据中心。",
-                "这条路线关注可移植性和开发效率。交易公告仍需监管批准，厂商关于性能功耗和总拥有成本的表述也需要客户任务复测。"
+                "EgoPro 是其中 10,000 小时的头部与腕部同步数据：8,000 小时提供手部姿态，另有 2,000 小时增加全身姿态。数据卡说明，两种标准化分发格式只是同一批任务片段的不同表示，不能重复计入时长。",
+                "数据卡还披露，视频经过自动去标识并由人工复核，包括模糊人脸、车牌和其他个人信息；参与者的知情同意覆盖采集、标注、受控发布和许可证允许的用途。访问和再使用仍受数据集许可证与访问条款约束。"
               ],
               "role": "case_study",
-              "section_id": "inference-portable",
+              "section_id": "robot-egopro-detail",
               "sequence_label": "②",
-              "title": "Qualcomm 用 Modular 强化跨硬件软件层"
+              "title": "EgoPro 同步记录头部、腕部与手部姿态"
             },
             {
-              "anchor": "thesis_inference_two_paths_how_it_works",
+              "anchor": "thesis_egocentric_robot_data_how_it_works",
               "evidence_ids": [
-                "ev-amd-taalas",
-                "ev-qualcomm-modular",
-                "ev-cambricon-v4"
+                "ev-lightwheel-egosuite",
+                "ev-lightwheel-egopro"
               ],
               "items": [],
               "kind": "how_it_works",
               "media_ids": [
-                "inference-stack-paths"
+                "egocentric-robot-data"
               ],
               "paragraphs": [
-                "横向软件栈适合模型多、硬件多、更新频繁的负载，重点是统一编译、运行时和算子接口。纵向专用化适合结构稳定、调用量大的模型，目标是用联合设计换取更高效率和更短时延。",
-                "寒武纪对 DeepSeek-V4 的 Day 0 适配说明，通用加速器仍需要 vLLM、Triton、融合算子、混合并行和量化协同。可移植抽象并不会自动消除底层优化。"
+                "Lightwheel 的 EgoSuite 材料把普通网页视频、合成数据和真机遥操作放在同一数据结构中比较。普通视频规模大，却通常缺少第一视角、接触和精确动作；真机遥操作能够记录机器人动作，但受本体、实验室和操作员成本限制。",
+                "其采集方式包括头戴设备、腕部相机、外骨骼和与机器人夹爪运动学对齐的接口，记录 RGB-D、上身与手部姿态、触觉等信号。后处理把连续视频切分成动作段，并关联场景、物体和语言描述，为模型提供观察、动作和任务语义之间的对应关系。"
               ],
               "role": "how_it_works",
-              "section_id": "inference-architecture",
+              "section_id": "robot-data-signals",
               "sequence_label": "③",
-              "title": "两条路线面向不同工作负载"
+              "title": "接触和工具使用信号让视频更接近机器人任务"
             },
             {
-              "anchor": "thesis_inference_two_paths_evidence_and_limits",
+              "anchor": "thesis_egocentric_robot_data_evidence_and_limits",
               "evidence_ids": [
-                "ev-amd-taalas",
-                "ev-qualcomm-modular",
-                "ev-cambricon-v4"
+                "ev-lightwheel-open100k",
+                "ev-lightwheel-egopro",
+                "ev-lightwheel-egosuite"
               ],
               "items": [],
               "kind": "evidence_and_limits",
               "media_ids": [],
               "paragraphs": [
-                "三家公司的公开材料采用不同模型、硬件和目标，不能把厂商数字直接排成一张性能榜。选型至少要固定任务质量，再比较首个 Token 延迟（TTFT）、持续吞吐（TPS）、P99、能耗、新模型适配周期和迁移人天。",
-                "专用芯片面临模型结构变化和供给风险；横向软件可能损失部分峰值性能。两条路线可以在同一平台中并存，由调度层按工作负载路由。"
+                "100,000 小时、15,000 多个任务与场景由 Lightwheel 披露，当前缺少独立机构对重复样本、标注精度和场景分布的全面审计。EgoPro 数据卡提供了更具体的 10,000 小时组成和隐私处理，但并未给出加入该数据前后的统一机器人任务成绩。",
+                "人类手部动作、视角和力反馈与不同机器人本体并不完全一致。现有页面没有提供固定模型下的仿真与真机对照，也没有报告目标任务覆盖、成功率、跨本体迁移、人工接管和失败类型随数据版本的变化。"
               ],
               "role": "evidence_and_limits",
-              "section_id": "inference-limits",
+              "section_id": "robot-data-limits",
               "sequence_label": "④",
-              "title": "同口径客户任务才能比较真实收益"
+              "title": "数据规模不能代替真机任务验证"
             }
           ],
           "term_note_groups": [
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_case_study",
-              "first_section_id": "inference-portable",
+              "after_section_anchor": "thesis_egocentric_robot_data_what_changed",
+              "first_section_id": "robot-open100k-release",
               "reader_texts": [
-                "NPU：面向神经网络运算的专用处理器。",
-                "ASIC：为特定用途设计的专用集成电路。"
+                "第一视角数据：从执行者头部、胸前或手腕附近记录的画面，更接近操作者实际看到和接触物体的过程。"
               ]
             },
             {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
-              "first_section_id": "inference-limits",
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_egocentric_robot_data_how_it_works",
+              "first_section_id": "robot-data-signals",
               "reader_texts": [
-                "TTFT：从发出请求到模型生成第一个 Token 的时间。",
-                "TPS：模型稳定生成时每秒输出的 Token 数。",
-                "P99：99% 请求都不会超过的延迟上界，用来观察少数慢请求。"
+                "RGB-D：同时包含彩色画面和每个像素深度距离的数据，便于恢复物体与手部的空间关系。"
               ]
             }
           ],
           "terms": [
             {
               "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_case_study",
-              "explanation": "面向神经网络运算的专用处理器。",
-              "first_section_id": "inference-portable",
-              "reader_text": "NPU：面向神经网络运算的专用处理器。",
-              "term": "NPU"
+              "after_section_anchor": "thesis_egocentric_robot_data_what_changed",
+              "explanation": "从执行者头部、胸前或手腕附近记录的画面，更接近操作者实际看到和接触物体的过程。",
+              "first_section_id": "robot-open100k-release",
+              "reader_text": "第一视角数据：从执行者头部、胸前或手腕附近记录的画面，更接近操作者实际看到和接触物体的过程。",
+              "term": "第一视角数据"
             },
             {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_case_study",
-              "explanation": "为特定用途设计的专用集成电路。",
-              "first_section_id": "inference-portable",
-              "reader_text": "ASIC：为特定用途设计的专用集成电路。",
-              "term": "ASIC"
-            },
-            {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
-              "explanation": "从发出请求到模型生成第一个 Token 的时间。",
-              "first_section_id": "inference-limits",
-              "reader_text": "TTFT：从发出请求到模型生成第一个 Token 的时间。",
-              "term": "TTFT"
-            },
-            {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
-              "explanation": "模型稳定生成时每秒输出的 Token 数。",
-              "first_section_id": "inference-limits",
-              "reader_text": "TPS：模型稳定生成时每秒输出的 Token 数。",
-              "term": "TPS"
-            },
-            {
-              "after_paragraph_index": 0,
-              "after_section_anchor": "thesis_inference_two_paths_evidence_and_limits",
-              "explanation": "99% 请求都不会超过的延迟上界，用来观察少数慢请求。",
-              "first_section_id": "inference-limits",
-              "reader_text": "P99：99% 请求都不会超过的延迟上界，用来观察少数慢请求。",
-              "term": "P99"
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_egocentric_robot_data_how_it_works",
+              "explanation": "同时包含彩色画面和每个像素深度距离的数据，便于恢复物体与手部的空间关系。",
+              "first_section_id": "robot-data-signals",
+              "reader_text": "RGB-D：同时包含彩色画面和每个像素深度距离的数据，便于恢复物体与手部的空间关系。",
+              "term": "RGB-D"
             }
           ],
           "title": "事实与案例"
@@ -942,87 +877,81 @@
         "findings": {
           "items": [
             {
-              "anchor": "thesis_inference_two_paths_finding_1",
+              "anchor": "thesis_egocentric_robot_data_finding_1",
               "evidence_ids": [
-                "ev-amd-taalas",
-                "ev-qualcomm-modular"
+                "ev-lightwheel-open100k",
+                "ev-lightwheel-egosuite"
               ],
-              "finding_id": "finding-inference-1",
+              "finding_id": "finding-robot-data-1",
               "paragraphs": [
-                "多模型、多平台和频繁更新的业务更看重软件复用；结构稳定、调用量大的业务更可能承受专用化投入。把两类负载混在一个总分中，会掩盖迁移成本和有效期。"
+                "模型规模扩大后，普通视频提供的场景知识仍难以直接说明手怎样接触物体、工具怎样移动以及任务何时完成。现在第一视角和腕部数据受到重视，是因为它们能在不绑定单一机器人本体的情况下，补充动作、接触和任务阶段信号。"
               ],
-              "title": "1、推理架构需要先按负载分路"
+              "title": "1、机器人需要能够表达动作的数据"
             },
             {
-              "anchor": "thesis_inference_two_paths_finding_2",
+              "anchor": "thesis_egocentric_robot_data_finding_2",
               "evidence_ids": [
-                "ev-cambricon-v4",
-                "ev-amd-taalas",
-                "ev-qualcomm-modular"
+                "ev-lightwheel-open100k",
+                "ev-lightwheel-egopro"
               ],
-              "finding_id": "finding-inference-2",
+              "finding_id": "finding-robot-data-2",
               "paragraphs": [
-                "寒武纪的公开路径包含框架、编译、算子、并行和量化。新芯片能运行模型只是起点，稳定延迟、吞吐和故障处理仍要靠软件工程。",
-                "本周两项收购信号表明，头部芯片厂商一边增加推理专用化技术，一边补强跨硬件软件层；路线分化本身比短期胜负更值得跟踪。"
+                "采集小时数和任务名称只能说明供给规模。机器人客户最终关心的是加入这些数据后，目标任务成功率是否提高、跨本体适配是否减少、失败是否更易恢复。数据版本、训练配置、仿真结果和真机结果需要绑定，才能识别哪类数据真正有用。"
               ],
-              "title": "2、软件适配仍是芯片价值兑现的前提"
+              "title": "2、数据价值取决于真实任务迁移"
             }
           ],
           "title": "发现"
         },
         "industry_impact": {
-          "anchor": "thesis_inference_two_paths_industry",
+          "anchor": "thesis_egocentric_robot_data_industry",
           "evidence_ids": [
-            "ev-amd-taalas",
-            "ev-qualcomm-modular",
-            "ev-cambricon-v4"
+            "ev-lightwheel-open100k",
+            "ev-lightwheel-egopro",
+            "ev-lightwheel-egosuite"
           ],
-          "headline": "推理市场会形成按负载路由的多技术组合",
-          "items": [
-            "以任务质量为前提，再比较 TTFT、TPS、P99 和能耗。",
-            "把新模型适配周期和迁移人天纳入总拥有成本。"
-          ],
+          "headline": "机器人数据平台将连接采集、训练与真机验收",
+          "items": [],
           "kind": "industry_impact",
           "media_ids": [],
           "paragraphs": [
-            "通用加速器、跨硬件软件和模型专用芯片会在一段时间内并存。平台价值更多体现在能否用同一任务口径选择硬件、迁移模型并持续优化，而不是拥有最多的芯片型号。",
-            "专用芯片供应商需要证明模型更新后的有效期和供给能力；横向软件供应商需要证明抽象层不会吞噬性能。仅凭收购公告或 Day 0 运行不能判断 CUDA 整体生态已经被削弱。"
+            "机器人数据供应商会扩大全球真实环境采集，并加强动作分段、姿态、触觉、物体和语言标注；硬件无关的人类操作数据可服务多个机器人本体，降低对单一遥操作设备的依赖。隐私处理、许可范围和跨地区合规会成为数据产品的一部分。",
+            "数据平台仍需证明训练收益。产业链会把数据版本与模型、仿真和真机评测连接起来，以目标任务覆盖率、真机成功率提升、跨本体迁移效率、人工接管率和单位有效任务数据成本进行采购和续约。"
           ],
           "title": "产业影响"
         },
         "sequence_label": "专题 04/04",
         "strategic_recommendation": {
-          "anchor": "thesis_inference_two_paths_recommendation",
+          "anchor": "thesis_egocentric_robot_data_recommendation",
           "evidence_ids": [
-            "ev-amd-taalas",
-            "ev-qualcomm-modular",
-            "ev-cambricon-v4",
+            "ev-lightwheel-open100k",
+            "ev-lightwheel-egopro",
+            "ev-lightwheel-egosuite",
             "ev-lenovo-stack"
           ],
-          "headline": "万全异构智算方案按工作负载建立两层推理验证路线",
+          "headline": "先验证人类操作数据能否提升真实机器人任务",
           "items": [],
           "kind": "strategic_recommendation",
           "media_ids": [],
           "paragraphs": [
-            "万全异构智算方案可将客户负载分为两类：对模型和平台变化快的负载，重点验证统一编译、算子和运行时的迁移效率；对稳定高量负载，再评估专用芯片或软硬件深度联合优化的性能与能效收益，避免过早投入专用化。",
-            "两类路线统一以 TTFT、TPS、P99、Token 能耗、模型适配周期和迁移人天进行验证；模型辅助生成的算子、编译配置和调度策略也需经过正确性、性能回归和稳定性门禁后，才能进入客户生产环境。"
+            "联想可与机器人本体和数据伙伴选择少量可复现、可停机、可人工接管的任务，基于边缘计算、工作站和服务器搭建采集处理、训练、仿真与真机验证环境；每个数据版本绑定模型配置、目标任务覆盖、真机成功率、跨本体迁移、人工接管和失败原因。只有新增数据在同一任务和安全边界下稳定改善结果，才扩大采集范围或形成行业方案。"
           ],
           "title": "战略建议"
         },
-        "thesis_id": "thesis-inference-two-paths",
-        "title": "推理平台同时押注跨硬件软件和模型专用芯片",
-        "topic_id": "topic-inference-two-paths"
+        "thesis_id": "thesis-egocentric-robot-data",
+        "title": "机器人训练开始补齐可扩展的人类操作数据",
+        "topic_id": "topic-egocentric-robot-data"
       }
     ]
   },
-  "content_sha256": "790396d2254e0c2720225c6d04b306bd92ba487684b0ac4b4fd63a83343cae5f",
+  "content_sha256": "e867f8f39679816d3d92ca12c0af01a9362b39b2eed3ddbd7c19e399705c475f",
   "publication": {
-    "authorization_id": "wbr-public-release-2026-w32-790396d2254e",
+    "authorization_id": "wbr-public-release-2026-w34-e867f8f39679",
     "public_enabled": true,
     "release_eligible": true,
     "visibility": "public"
   },
   "schema_version": "weekly-insight-publication/v4",
-  "source_run_id": "wbr-codex-manual-2026-W32-first-real",
+  "source_run_id": "wbr-codex-manual-2026-W34",
   "version": "4.1"
 }

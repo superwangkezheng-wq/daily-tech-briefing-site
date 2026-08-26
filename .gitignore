@@ -26,3 +26,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Working artefacts: third-party site screenshots and QA scratch, not part of the public package
+.design-references/
+design-qa.md

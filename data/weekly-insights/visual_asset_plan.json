@@ -3,59 +3,59 @@
     {
       "backend": "graphviz",
       "decision": "draw_original",
-      "editable_export": "media/physical-ai-loop.svg",
-      "editable_source": "media/physical-ai-loop.dot",
-      "media_id": "physical-ai-loop",
+      "editable_export": "media/long-horizon-agent-system.svg",
+      "editable_source": "media/long-horizon-agent-system.dot",
+      "media_id": "long-horizon-agent-system",
       "qa_status": "opened_and_readable",
-      "reader_asset": "media/physical-ai-loop.png",
+      "reader_asset": "media/long-horizon-agent-system.png",
       "rights_scope": "public_allowed",
-      "source_url": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/gemini-robotics-er-2/",
-      "target_section_id": "physical-loop",
-      "tool": "deep-research-visuals:graphviz"
+      "source_url": "https://developer.nvidia.com/blog/nvidia-avo-reaches-100-on-arc-agi-3-demonstrating-a-frontier-level-general-purpose-architecture-for-long-horizon-autonomous-agents/",
+      "target_section_id": "agent-avo-loop",
+      "tool": "fireworks-tech-graph:graphviz"
     },
     {
       "backend": "graphviz",
       "decision": "draw_original",
-      "editable_export": "media/agent-operating-layer.svg",
-      "editable_source": "media/agent-operating-layer.dot",
-      "media_id": "agent-operating-layer",
+      "editable_export": "media/ai-native-sdlc.svg",
+      "editable_source": "media/ai-native-sdlc.dot",
+      "media_id": "ai-native-sdlc",
       "qa_status": "opened_and_readable",
-      "reader_asset": "media/agent-operating-layer.png",
+      "reader_asset": "media/ai-native-sdlc.png",
       "rights_scope": "public_allowed",
-      "source_url": "https://cursor.com/blog/cloud-agent-lessons",
-      "target_section_id": "agent-runtime-architecture",
-      "tool": "deep-research-visuals:graphviz"
+      "source_url": "https://claude.com/blog/the-ai-native-sdlc-playbook",
+      "target_section_id": "sdlc-playbook",
+      "tool": "fireworks-tech-graph:graphviz"
     },
     {
       "backend": "graphviz",
       "decision": "draw_original",
-      "editable_export": "media/skill-optimization-loop.svg",
-      "editable_source": "media/skill-optimization-loop.dot",
-      "media_id": "skill-optimization-loop",
+      "editable_export": "media/full-stack-inference-optimization.svg",
+      "editable_source": "media/full-stack-inference-optimization.dot",
+      "media_id": "full-stack-inference-optimization",
       "qa_status": "opened_and_readable",
-      "reader_asset": "media/skill-optimization-loop.png",
+      "reader_asset": "media/full-stack-inference-optimization.png",
       "rights_scope": "public_allowed",
-      "source_url": "https://github.com/microsoft/SkillOpt",
-      "target_section_id": "skill-loop-architecture",
-      "tool": "deep-research-visuals:graphviz"
+      "source_url": "https://developer.cambricon.com/index/article/details.html?id=12",
+      "target_section_id": "inference-limits",
+      "tool": "fireworks-tech-graph:graphviz"
     },
     {
       "backend": "graphviz",
       "decision": "draw_original",
-      "editable_export": "media/inference-stack-paths.svg",
-      "editable_source": "media/inference-stack-paths.dot",
-      "media_id": "inference-stack-paths",
+      "editable_export": "media/egocentric-robot-data.svg",
+      "editable_source": "media/egocentric-robot-data.dot",
+      "media_id": "egocentric-robot-data",
       "qa_status": "opened_and_readable",
-      "reader_asset": "media/inference-stack-paths.png",
+      "reader_asset": "media/egocentric-robot-data.png",
       "rights_scope": "public_allowed",
-      "source_url": "https://ir.amd.com/news-events/press-releases/detail/1296/amd-acquires-taalas-to-advance-compute-solutions-for-rapidly-growing-ai-inference-market",
-      "target_section_id": "inference-architecture",
-      "tool": "deep-research-visuals:graphviz"
+      "source_url": "https://www.lightwheel.ai/egosuite",
+      "target_section_id": "robot-data-signals",
+      "tool": "fireworks-tech-graph:graphviz"
     }
   ],
   "period": {
-    "end": "2026-08-09",
-    "start": "2026-08-03"
+    "end": "2026-08-23",
+    "start": "2026-08-17"
   },
   "schema_version": "weekly-insight-visual-plan/v1",
   "source_first": true

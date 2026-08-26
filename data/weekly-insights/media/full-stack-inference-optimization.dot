@@ -1,0 +1,17 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="推理工作负载的联合优化路径"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  workload [label="模型与真实工作负载", fillcolor="#ffffff", color="#cbd5e1"];
+  algorithm [label="草稿模型、量化与并行", fillcolor="#ffffff", color="#cbd5e1"];
+  runtime [label="运行时与编译器", fillcolor="#ffffff", color="#cbd5e1"];
+  kernel [label="算子、Kernel 与通信", fillcolor="#ffffff", color="#cbd5e1"];
+  hardware [label="异构芯片与内存互联", fillcolor="#ffffff", color="#cbd5e1"];
+  measure [label="正确性、时延、吞吐与能耗", fillcolor="#ffffff", color="#cbd5e1"];
+  workload -> algorithm [label="选择", color="#2563eb", fontcolor="#475569"];
+  algorithm -> runtime [label="生成执行路径", color="#2563eb", fontcolor="#475569"];
+  runtime -> kernel [label="编译与调度", color="#2563eb", fontcolor="#475569"];
+  kernel -> hardware [label="执行", color="#2563eb", fontcolor="#475569"];
+  hardware -> measure [label="测量", color="#2563eb", fontcolor="#475569"];
+  measure -> workload [label="回归与调整", color="#2563eb", fontcolor="#475569"];
+}
