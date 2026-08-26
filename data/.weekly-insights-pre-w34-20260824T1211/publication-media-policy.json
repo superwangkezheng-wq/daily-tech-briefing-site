@@ -1,0 +1,94 @@
+{
+  "editable_asset_policy": {
+    "delivery_scope": "approved_bundle_only",
+    "public_route_enabled": false
+  },
+  "media": [
+    {
+      "alt": "网络安全任务经过身份与用途核验后进入不同能力层级，并在隔离环境执行和审计",
+      "asset_ref": "media/tiered-cyber-access.png",
+      "caption": "能力层级与身份、授权用途和执行控制一起决定高风险网络安全任务能否运行。",
+      "evidence_ids": [
+        "ev-openai-daybreak"
+      ],
+      "id": "tiered-cyber-access",
+      "kind": "architecture",
+      "logic_summary": "授权任务先核验身份和用途，再进入 Blue 或 Red 能力层；工具动作经过执行前审查，并在隔离环境中记录和审计。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 OpenAI Daybreak 公开材料。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 OpenAI Daybreak 公开材料原创绘制",
+      "source_url": "https://openai.com/index/expanding-daybreak-as-the-cyber-defense-window-narrows/",
+      "src": "",
+      "target_section_id": "cyber-controls",
+      "thesis_id": "thesis-tiered-cyber-access",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    },
+    {
+      "alt": "研究目标进入持久运行框架和批量实验，配置日志经过独立验证后形成结论",
+      "asset_ref": "media/verifiable-ai-research.png",
+      "caption": "目标、运行状态、实验账本和独立验证共同构成可复核的 AI 研究流程。",
+      "evidence_ids": [
+        "ev-prime-auto-nanogpt"
+      ],
+      "id": "verifiable-ai-research",
+      "kind": "architecture",
+      "logic_summary": "目标和规则进入 Harness，批量实验逐次形成配置与日志；结果通过统计、形式化或独立复核后成为可接受结论。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 Prime Intellect 公开实验记录。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 Prime Intellect 公开材料原创绘制",
+      "source_url": "https://www.primeintellect.ai/auto-nanogpt",
+      "src": "",
+      "target_section_id": "research-harness",
+      "thesis_id": "thesis-verifiable-ai-research",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    },
+    {
+      "alt": "真实机器人任务重建为对齐仿真并生成变化，策略经批量评测后回到真机验证",
+      "asset_ref": "media/r2s2r-evaluation-loop.png",
+      "caption": "真实任务校准仿真，仿真批量训练和筛选策略，真机结果再回到下一轮测试。",
+      "evidence_ids": [
+        "ev-worldlabs-r2s2r"
+      ],
+      "id": "r2s2r-evaluation-loop",
+      "kind": "architecture",
+      "logic_summary": "真实任务被重建为对齐仿真，仿真生成受控变化并训练评测策略；真机验证保存失败区域并回灌下一轮。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 World Labs R2S2R 公开材料。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 World Labs R2S2R 公开材料原创绘制",
+      "source_url": "https://www.worldlabs.ai/blog/real-to-sim-to-real",
+      "src": "",
+      "target_section_id": "robot-variation",
+      "thesis_id": "thesis-r2s2r-evaluation-loop",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    },
+    {
+      "alt": "企业应用通过统一网关按策略选择多个模型，失败后按预设链路回退并记录结果",
+      "asset_ref": "media/model-routing-control-plane.png",
+      "caption": "统一模型网关按能力、价格、区域和健康状态路由，并记录实际模型、回退、质量和费用。",
+      "evidence_ids": [
+        "ev-vercel-gateway",
+        "ev-deepseek-api"
+      ],
+      "id": "model-routing-control-plane",
+      "kind": "architecture",
+      "logic_summary": "应用请求进入统一网关，策略层选择多个模型供应商；失败触发预定回退，运行结果进入质量、时延和成本观测。",
+      "logic_type": "flow",
+      "rights_basis": "WBR 原创图形与文字；事实依据为 Vercel AI Gateway 与 DeepSeek API 公开材料。",
+      "rights_scope": "public_allowed",
+      "section_kind": "how_it_works",
+      "source_label": "WBR 基于 Vercel 与 DeepSeek 公开材料原创绘制",
+      "source_url": "https://vercel.com/blog/ai-gateway-is-now-generally-available",
+      "src": "",
+      "target_section_id": "routing-interface",
+      "thesis_id": "thesis-model-routing-control-plane",
+      "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。"
+    }
+  ],
+  "version": "4.1"
+}

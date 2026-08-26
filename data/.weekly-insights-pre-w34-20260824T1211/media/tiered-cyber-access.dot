@@ -1,0 +1,19 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="高风险网络安全能力的分级准入"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  request [label="授权任务", fillcolor="#ffffff", color="#cbd5e1"];
+  identity [label="身份与用途核验", fillcolor="#ffffff", color="#cbd5e1"];
+  blue [label="Blue
+防御任务", fillcolor="#ffffff", color="#cbd5e1"];
+  red [label="Red
+高风险研究", fillcolor="#ffffff", color="#cbd5e1"];
+  review [label="执行前审查", fillcolor="#ffffff", color="#cbd5e1"];
+  sandbox [label="隔离环境与审计", fillcolor="#ffffff", color="#cbd5e1"];
+  request -> identity [label="核对", color="#2563eb", fontcolor="#475569"];
+  identity -> blue [label="普通防御", color="#2563eb", fontcolor="#475569"];
+  identity -> red [label="获批研究", color="#2563eb", fontcolor="#475569"];
+  blue -> review [label="工具动作", color="#2563eb", fontcolor="#475569"];
+  red -> review [label="高权限动作", color="#2563eb", fontcolor="#475569"];
+  review -> sandbox [label="允许或阻断", color="#2563eb", fontcolor="#475569"];
+}

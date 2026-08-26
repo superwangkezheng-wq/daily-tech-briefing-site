@@ -1,0 +1,9 @@
+{
+  "approval_id": "codex-editorial-review-2026-w33-manual",
+  "approval_source_ref": "codex://threads/019fa78f-6f2d-70e3-9020-c4a350f9d987#w33-manual-backfill",
+  "approved_at": "2026-08-20T12:23:17+08:00",
+  "approved_by": "Codex manual Adapter",
+  "approved_candidate_sha256": "6f825aac5905004ff59c35d483a31b5e88d94b232f0f56007ad9d27d2c34a5cd",
+  "approver_id": "codex:wbr-manual-backfill",
+  "status": "approved"
+}

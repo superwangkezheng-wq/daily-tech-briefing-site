@@ -1,0 +1,62 @@
+{
+  "assets": [
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/tiered-cyber-access.svg",
+      "editable_source": "media/tiered-cyber-access.dot",
+      "media_id": "tiered-cyber-access",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/tiered-cyber-access.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://openai.com/index/expanding-daybreak-as-the-cyber-defense-window-narrows/",
+      "target_section_id": "cyber-controls",
+      "tool": "fireworks-tech-graph:graphviz"
+    },
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/verifiable-ai-research.svg",
+      "editable_source": "media/verifiable-ai-research.dot",
+      "media_id": "verifiable-ai-research",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/verifiable-ai-research.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://www.primeintellect.ai/auto-nanogpt",
+      "target_section_id": "research-harness",
+      "tool": "fireworks-tech-graph:graphviz"
+    },
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/r2s2r-evaluation-loop.svg",
+      "editable_source": "media/r2s2r-evaluation-loop.dot",
+      "media_id": "r2s2r-evaluation-loop",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/r2s2r-evaluation-loop.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://www.worldlabs.ai/blog/real-to-sim-to-real",
+      "target_section_id": "robot-variation",
+      "tool": "fireworks-tech-graph:graphviz"
+    },
+    {
+      "backend": "graphviz",
+      "decision": "draw_original",
+      "editable_export": "media/model-routing-control-plane.svg",
+      "editable_source": "media/model-routing-control-plane.dot",
+      "media_id": "model-routing-control-plane",
+      "qa_status": "opened_and_readable",
+      "reader_asset": "media/model-routing-control-plane.png",
+      "rights_scope": "public_allowed",
+      "source_url": "https://vercel.com/blog/ai-gateway-is-now-generally-available",
+      "target_section_id": "routing-interface",
+      "tool": "fireworks-tech-graph:graphviz"
+    }
+  ],
+  "period": {
+    "end": "2026-08-16",
+    "start": "2026-08-10"
+  },
+  "schema_version": "weekly-insight-visual-plan/v1",
+  "source_first": true
+}

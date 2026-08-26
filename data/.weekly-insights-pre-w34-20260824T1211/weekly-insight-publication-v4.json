@@ -1,0 +1,924 @@
+{
+  "approval": {
+    "approval_id": "codex-editorial-review-2026-w33-manual",
+    "approved_at": "2026-08-20T12:23:17+08:00",
+    "status": "approved"
+  },
+  "approved_candidate_sha256": "6f825aac5905004ff59c35d483a31b5e88d94b232f0f56007ad9d27d2c34a5cd",
+  "artifact_id": "wsi-2026-w33-ba229fb6888a-v4-1",
+  "content": {
+    "dek": "本期选择四个可独立核验的专题：高风险网络安全模型的分级准入、可复核的 AI 研究过程、真实任务驱动的机器人仿真，以及多模型生产路由。事实、关键发现、产业影响和战略建议分开呈现。",
+    "evidence": [
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-openai-daybreak",
+        "note": "OpenAI 发布 Daybreak Blue/Red 与 GPT-5.6-Cyber，并披露评测、真实漏洞研究、准入和操作控制。",
+        "published_at": "2026-08-10",
+        "publisher": "openai.com",
+        "role": "source_in",
+        "source_url": "https://openai.com/index/expanding-daybreak-as-the-cyber-defense-window-narrows/",
+        "title": "openai.com"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-lenovo-stack",
+        "note": "联想公开材料列出万全异构智算方案、擎天、AI Foundry、百应和 AI 全周期服务等中国区业务能力。",
+        "published_at": "2026-06-25",
+        "publisher": "brand.lenovo.com.cn",
+        "role": "source_out",
+        "source_url": "https://brand.lenovo.com.cn/brand/ppn03959.html",
+        "title": "brand.lenovo.com.cn"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-anthropic-riemann",
+        "note": "Anthropic 发布 Claude 参与黎曼零点研究的论文，并记录人类引导、独立复核和 Lean 4 形式化。",
+        "published_at": "2026-08-11",
+        "publisher": "www-cdn.anthropic.com",
+        "role": "source_in",
+        "source_url": "https://www-cdn.anthropic.com/95c246936988e43127bc6b2ceb7077c1dad2d68e.pdf",
+        "title": "www-cdn.anthropic.com"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-prime-auto-nanogpt",
+        "note": "Prime Intellect 公布两周、约一万次运行和约 1.4 万 H200 小时的自主优化实验及全部日志。",
+        "published_at": "2026-05-14",
+        "publisher": "primeintellect.ai",
+        "role": "source_out",
+        "source_url": "https://www.primeintellect.ai/auto-nanogpt",
+        "title": "primeintellect.ai"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-worldlabs-r2s2r",
+        "note": "World Labs 公布 R2S2R：把真实任务重建为对齐仿真，用于训练、故障搜索与真机排序验证。",
+        "published_at": "2026-07-28",
+        "publisher": "worldlabs.ai",
+        "role": "source_out",
+        "source_url": "https://www.worldlabs.ai/blog/real-to-sim-to-real",
+        "title": "worldlabs.ai"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-vercel-index",
+        "note": "Vercel 公布 AI Gateway 生产统计：高量团队平均使用 35 个模型，工具调用请求消耗更多 token。",
+        "published_at": "2026-05-12",
+        "publisher": "vercel.com",
+        "role": "source_out",
+        "source_url": "https://vercel.com/blog/ai-gateway-production-index",
+        "title": "vercel.com"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-vercel-gateway",
+        "note": "Vercel AI Gateway 提供统一端点、供应商切换、故障回退、成本和可观测能力。",
+        "published_at": "2025-08-21",
+        "publisher": "vercel.com",
+        "role": "source_out",
+        "source_url": "https://vercel.com/blog/ai-gateway-is-now-generally-available",
+        "title": "vercel.com"
+      },
+      {
+        "accessed_at": "2026-08-20T12:23:17+08:00",
+        "id": "ev-deepseek-api",
+        "note": "DeepSeek 官方文档同时提供 OpenAI 和 Anthropic 兼容接口，并列出 Agent 工具接入。",
+        "published_at": "2026-08-13",
+        "publisher": "api-docs.deepseek.com",
+        "role": "source_in",
+        "source_url": "https://api-docs.deepseek.com/zh-cn/",
+        "title": "api-docs.deepseek.com"
+      }
+    ],
+    "issue_kind": "complete_issue",
+    "media": [
+      {
+        "alt": "网络安全任务经过身份与用途核验后进入不同能力层级，并在隔离环境执行和审计",
+        "asset_ref": "media/tiered-cyber-access.png",
+        "asset_sha256": "c2396494518f0901b99d8a1e48de9d443d7bad06c4cbef1cc36f95520a1d3602",
+        "caption": "能力层级与身份、授权用途和执行控制一起决定高风险网络安全任务能否运行。",
+        "evidence_ids": [
+          "ev-openai-daybreak"
+        ],
+        "height": 505,
+        "id": "tiered-cyber-access",
+        "kind": "architecture",
+        "logic_summary": "授权任务先核验身份和用途，再进入 Blue 或 Red 能力层；工具动作经过执行前审查，并在隔离环境中记录和审计。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 OpenAI Daybreak 公开材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 106676,
+        "source_label": "WBR 基于 OpenAI Daybreak 公开材料原创绘制",
+        "source_url": "https://openai.com/index/expanding-daybreak-as-the-cyber-defense-window-narrows/",
+        "target_section_id": "cyber-controls",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 2061
+      },
+      {
+        "alt": "研究目标进入持久运行框架和批量实验，配置日志经过独立验证后形成结论",
+        "asset_ref": "media/verifiable-ai-research.png",
+        "asset_sha256": "77afc0e71326c712db82f007e71943e2de2c3ac979008770128df2d80a78f475",
+        "caption": "目标、运行状态、实验账本和独立验证共同构成可复核的 AI 研究流程。",
+        "evidence_ids": [
+          "ev-prime-auto-nanogpt"
+        ],
+        "height": 313,
+        "id": "verifiable-ai-research",
+        "kind": "architecture",
+        "logic_summary": "目标和规则进入 Harness，批量实验逐次形成配置与日志；结果通过统计、形式化或独立复核后成为可接受结论。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Prime Intellect 公开实验记录。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 83732,
+        "source_label": "WBR 基于 Prime Intellect 公开材料原创绘制",
+        "source_url": "https://www.primeintellect.ai/auto-nanogpt",
+        "target_section_id": "research-harness",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 2601
+      },
+      {
+        "alt": "真实机器人任务重建为对齐仿真并生成变化，策略经批量评测后回到真机验证",
+        "asset_ref": "media/r2s2r-evaluation-loop.png",
+        "asset_sha256": "99dedf4a9de7c878b072f88aaf2e9c147da46cb0785d63474daf07e723c38558",
+        "caption": "真实任务校准仿真，仿真批量训练和筛选策略，真机结果再回到下一轮测试。",
+        "evidence_ids": [
+          "ev-worldlabs-r2s2r"
+        ],
+        "height": 373,
+        "id": "r2s2r-evaluation-loop",
+        "kind": "architecture",
+        "logic_summary": "真实任务被重建为对齐仿真，仿真生成受控变化并训练评测策略；真机验证保存失败区域并回灌下一轮。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 World Labs R2S2R 公开材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 109014,
+        "source_label": "WBR 基于 World Labs R2S2R 公开材料原创绘制",
+        "source_url": "https://www.worldlabs.ai/blog/real-to-sim-to-real",
+        "target_section_id": "robot-variation",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 2837
+      },
+      {
+        "alt": "企业应用通过统一网关按策略选择多个模型，失败后按预设链路回退并记录结果",
+        "asset_ref": "media/model-routing-control-plane.png",
+        "asset_sha256": "341f01004ecf6a0dcdb8c4a9b4e19183a731d9456608c2f64c9a1f691938c4e0",
+        "caption": "统一模型网关按能力、价格、区域和健康状态路由，并记录实际模型、回退、质量和费用。",
+        "evidence_ids": [
+          "ev-vercel-gateway",
+          "ev-deepseek-api"
+        ],
+        "height": 513,
+        "id": "model-routing-control-plane",
+        "kind": "architecture",
+        "logic_summary": "应用请求进入统一网关，策略层选择多个模型供应商；失败触发预定回退，运行结果进入质量、时延和成本观测。",
+        "logic_type": "flow",
+        "mime_type": "image/png",
+        "rights_basis": "WBR 原创图形与文字；事实依据为 Vercel AI Gateway 与 DeepSeek API 公开材料。",
+        "rights_scope": "public_allowed",
+        "size_bytes": 106035,
+        "source_label": "WBR 基于 Vercel 与 DeepSeek 公开材料原创绘制",
+        "source_url": "https://vercel.com/blog/ai-gateway-is-now-generally-available",
+        "target_section_id": "routing-interface",
+        "usage_rights": "WBR 原创关系图，可随获批内容公开使用并保留来源。",
+        "width": 2557
+      }
+    ],
+    "period": {
+      "as_of": "2026-08-20T12:23:17+08:00",
+      "end": "2026-08-16",
+      "label": "2026 W33",
+      "start": "2026-08-10"
+    },
+    "selected_topics": 4,
+    "status": "complete",
+    "title": "周度技术战略洞察｜2026 W33",
+    "topics": [
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_tiered_cyber_access_what_changed",
+              "evidence_ids": [
+                "ev-openai-daybreak"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "OpenAI 在 8 月 10 日发布扩展后的 Daybreak。Blue 面向获批防御人员，提供 GPT-5.6 Sol 等通用模型，并减少对合法防御任务的系统级拒绝；Red 面向获批的漏洞研究、利用验证和安全测试，提供网络安全专用模型 GPT-5.6-Cyber。",
+                "GPT-5.6-Cyber 基于 GPT-5.6 Sol 训练，目标是提高零日漏洞发现、利用链开发等专门任务的完成率。OpenAI 同时说明，两档服务都只向通过审核的个人和组织开放。"
+              ],
+              "role": "what_changed",
+              "section_id": "cyber-tiers",
+              "sequence_label": "①",
+              "title": "Daybreak 设置两级网络安全入口"
+            },
+            {
+              "anchor": "thesis_tiered_cyber_access_benchmark",
+              "evidence_ids": [
+                "ev-openai-daybreak"
+              ],
+              "items": [],
+              "kind": "benchmark",
+              "media_ids": [],
+              "paragraphs": [
+                "OpenAI 的 Advanced Cybersecurity Completion Rate 覆盖身份绕过、权限提升和利用链开发等请求。GPT-5.6-Cyber 的完成率为 95.0%，GPT-5.6 Sol 为 1.5%，Daybreak Blue 中的 GPT-5.6 Sol 为 2.0%，上一代 GPT-5.5-Cyber 为 57.3%。",
+                "在真实软件研究中，GPT-5.6-Cyber 协助发现两项此前未知的 V8 漏洞，研究人员完成验证并向 Google 协调披露，其中一项被编号为 CVE-2026-15903。官方也披露，GPT-5.6 Sol 在标准 300 轮 ExploitBench 设置中更节省 token，且开放式漏洞报告的细致程度可能更好。"
+              ],
+              "role": "benchmark",
+              "section_id": "cyber-results",
+              "sequence_label": "②",
+              "title": "评测和真实漏洞案例给出能力边界"
+            },
+            {
+              "anchor": "thesis_tiered_cyber_access_how_it_works",
+              "evidence_ids": [
+                "ev-openai-daybreak"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "tiered-cyber-access"
+              ],
+              "paragraphs": [
+                "Daybreak 通过身份验证、账户安全、用途限制、监控和法律声明控制访问。OpenAI 要求个人账号从 9 月 1 日开始使用硬件安全密钥，并建议高风险 Codex 操作采用 auto-review，由独立策略在执行前检查需要提升权限的动作。",
+                "官方实践还包括沙箱隔离、限制目标系统和动作范围、监控工具调用以及为组织定制审批策略。能力选择、用户身份、授权任务和执行环境因此在一个服务流程内核对。"
+              ],
+              "role": "how_it_works",
+              "section_id": "cyber-controls",
+              "sequence_label": "③",
+              "title": "准入和执行控制随能力等级加严"
+            },
+            {
+              "anchor": "thesis_tiered_cyber_access_evidence_and_limits",
+              "evidence_ids": [
+                "ev-openai-daybreak"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "95.0% 来自 OpenAI 内部评测，ExploitGym 和 ExploitBench 也使用其内部实现。公开页面没有提供完整题集、独立复测或高权限模型上线后的长期误用数据。",
+                "OpenAI 将 GPT-5.6 Sol 和 GPT-5.6-Cyber 的网络安全能力评为 High、低于 Critical。现有材料支持分级准入已经落地，不能据此判断这套方式已经成为通用行业标准。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "cyber-limits",
+              "sequence_label": "④",
+              "title": "公开数据仍以供应商内部评测为主"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_tiered_cyber_access_what_changed",
+              "first_section_id": "cyber-tiers",
+              "reader_texts": [
+                "零日漏洞：软件厂商尚未知晓或尚未修复的漏洞。"
+              ]
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_tiered_cyber_access_how_it_works",
+              "first_section_id": "cyber-controls",
+              "reader_texts": [
+                "硬件安全密钥：需要插入设备或近场验证的实体登录凭证，可降低账号被远程盗用的风险。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_tiered_cyber_access_what_changed",
+              "explanation": "软件厂商尚未知晓或尚未修复的漏洞。",
+              "first_section_id": "cyber-tiers",
+              "reader_text": "零日漏洞：软件厂商尚未知晓或尚未修复的漏洞。",
+              "term": "零日漏洞"
+            },
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_tiered_cyber_access_how_it_works",
+              "explanation": "需要插入设备或近场验证的实体登录凭证，可降低账号被远程盗用的风险。",
+              "first_section_id": "cyber-controls",
+              "reader_text": "硬件安全密钥：需要插入设备或近场验证的实体登录凭证，可降低账号被远程盗用的风险。",
+              "term": "硬件安全密钥"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_tiered_cyber_access_finding_1",
+              "evidence_ids": [
+                "ev-openai-daybreak"
+              ],
+              "finding_id": "finding-cyber-1",
+              "paragraphs": [
+                "网络安全模型既能辅助修复，也能完成高风险利用任务。能力差异扩大后，统一护栏很难同时满足普通防御和获批研究。Daybreak 把模型选择、身份核验和授权用途放在一起，说明准入设计已经参与决定模型能够完成哪些任务。"
+              ],
+              "title": "1、模型能力分层需要配套准入层级"
+            },
+            {
+              "anchor": "thesis_tiered_cyber_access_finding_2",
+              "evidence_ids": [
+                "ev-openai-daybreak"
+              ],
+              "finding_id": "finding-cyber-2",
+              "paragraphs": [
+                "模型可能生成可执行的高权限操作，单靠回答前的内容分类无法覆盖后续工具调用。沙箱、范围限制、auto-review 和硬件密钥分别控制环境、动作和账号，目的是在操作落地前减少误用与误操作。"
+              ],
+              "title": "2、高风险操作要在执行前接受独立控制"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_tiered_cyber_access_industry",
+          "evidence_ids": [
+            "ev-openai-daybreak"
+          ],
+          "headline": "网络安全模型将按能力、身份和用途组合交付",
+          "items": [],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "高能力网络安全模型会形成更细的客户审核、账户安全、使用范围和审计要求。模型供应商需要把准入运营、安全工程和事件响应合并为一项持续服务，企业客户也要保存操作者、目标系统、授权文件和执行日志。",
+            "近期受益者是具备身份、权限、隔离运行和操作审计的平台。仅提供内容过滤的工具会承压。判断成效应看越权阻断、误报、审批耗时、授权撤销和事件追溯，模型完成率只是其中一项。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 01/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_tiered_cyber_access_recommendation",
+          "evidence_ids": [
+            "ev-openai-daybreak",
+            "ev-lenovo-stack"
+          ],
+          "headline": "把高风险 AI 能力纳入分级交付和操作审计",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "联想可在擎天、AI Foundry 和 AI 全周期服务中建立高风险能力目录，按普通分析、受控工具调用和高权限安全研究区分准入条件；每次交付同时绑定客户身份、目标系统授权、隔离环境、审批策略和停用方式。",
+            "首批只选择可在沙箱内重放的防御任务，统一记录任务完成率、越权阻断率、误报、人工复核时间和授权撤销时间。模型或工具权限升级必须重新通过同一组任务和操作审计，再进入客户环境。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-tiered-cyber-access",
+        "title": "高风险网络安全模型开始采用分级准入",
+        "topic_id": "topic-tiered-cyber-access"
+      },
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_verifiable_ai_research_what_changed",
+              "evidence_ids": [
+                "ev-anthropic-riemann"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "Anthropic 在 8 月 11 日发布一篇关于黎曼 zeta 函数零点的论文。论文报告，相关方法至少覆盖临界带内三分之二的零点，并改进两个 Montgomery–Taylor 常数；正文同时给出适用条件和证明链路。",
+                "论文没有把结果归为模型单独完成。Jarred Sumner 负责提出问题和引导研究，Ralph Furman 与 Levent Alpöge 进行独立推导并对正确性负责，团队还提供 Lean 4 形式化版本。"
+              ],
+              "role": "what_changed",
+              "section_id": "research-math",
+              "sequence_label": "①",
+              "title": "Claude 参与数学研究并形成可核验论文"
+            },
+            {
+              "anchor": "thesis_verifiable_ai_research_how_it_works",
+              "evidence_ids": [
+                "ev-prime-auto-nanogpt"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "verifiable-ai-research"
+              ],
+              "paragraphs": [
+                "Prime Intellect 让 Codex 5.5 xhigh 和 Claude Opus 4.7 xhigh 连续两周优化 nanoGPT speedrun。系统运行约一万次实验、使用约 1.4 万 H200 小时，并公开脚本、配置、运行日志和 scratchpad。",
+                "Harness 用 AGENTS.md 固定规则，用 goal.md 保存目标，用 plan.md 记录当前计划，用追加式 THREAD.md 保存可恢复的任务状态。实验结果还需要通过统计噪声门槛，避免只靠随机种子得到偶然优势。"
+              ],
+              "role": "how_it_works",
+              "section_id": "research-harness",
+              "sequence_label": "②",
+              "title": "持久 Harness 保存目标、计划和实验记录"
+            },
+            {
+              "anchor": "thesis_verifiable_ai_research_case_study",
+              "evidence_ids": [
+                "ev-prime-auto-nanogpt"
+              ],
+              "items": [],
+              "kind": "case_study",
+              "media_ids": [],
+              "paragraphs": [
+                "两种 Agent 都超过 2990 步的人类基线；Claude 的最好成绩为 2930 步，Codex 为 2950 步。团队报告，Agent 擅长优化器搜索、超参数扫描和已有方法组合。",
+                "约一百次人工干预主要用于检查进展、纠正规则、打断重复搜索或重启任务。加入新颖性门槛后，两种 Agent 都没有改善基线；这说明明确目标上的大规模搜索与提出全新研究方向仍是两类能力。"
+              ],
+              "role": "case_study",
+              "section_id": "research-results",
+              "sequence_label": "③",
+              "title": "大量搜索能提高明确指标，也暴露自治边界"
+            },
+            {
+              "anchor": "thesis_verifiable_ai_research_evidence_and_limits",
+              "evidence_ids": [
+                "ev-anthropic-riemann",
+                "ev-prime-auto-nanogpt"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "数学论文由人类研究者选择问题、引导过程并独立验证；nanoGPT 实验固定模型、数据和架构，只允许修改优化器、初始化、学习率和少量超参数。两项工作都建立了清楚的目标和验收规则。",
+                "现有证据支持 AI 可以承担长时搜索、证明辅助和实验编排，不能证明模型已经具备开放领域的通用自主科研能力。算力投入、既有人类记录和验证人力仍是结果的一部分。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "research-limits",
+              "sequence_label": "④",
+              "title": "研究结论仍依赖任务定义和独立复核"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_verifiable_ai_research_what_changed",
+              "first_section_id": "research-math",
+              "reader_texts": [
+                "Lean 4：一种形式化证明工具，用机器可检查的方式验证数学推导。"
+              ]
+            },
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_verifiable_ai_research_how_it_works",
+              "first_section_id": "research-harness",
+              "reader_texts": [
+                "Harness：约束 Agent 工作方式的运行框架，包含规则、目标、状态记录和验收方法。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_verifiable_ai_research_what_changed",
+              "explanation": "一种形式化证明工具，用机器可检查的方式验证数学推导。",
+              "first_section_id": "research-math",
+              "reader_text": "Lean 4：一种形式化证明工具，用机器可检查的方式验证数学推导。",
+              "term": "Lean 4"
+            },
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_verifiable_ai_research_how_it_works",
+              "explanation": "约束 Agent 工作方式的运行框架，包含规则、目标、状态记录和验收方法。",
+              "first_section_id": "research-harness",
+              "reader_text": "Harness：约束 Agent 工作方式的运行框架，包含规则、目标、状态记录和验收方法。",
+              "term": "Harness"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_verifiable_ai_research_finding_1",
+              "evidence_ids": [
+                "ev-anthropic-riemann",
+                "ev-prime-auto-nanogpt"
+              ],
+              "finding_id": "finding-research-1",
+              "paragraphs": [
+                "长时研究会经历多轮假设、失败、重启和上下文压缩。目标文件、追加式状态、配置和运行日志使后续人员能够重放关键步骤，也让独立验证者知道结论建立在哪些条件上。"
+              ],
+              "title": "1、实验记录决定研究结论能否复查"
+            },
+            {
+              "anchor": "thesis_verifiable_ai_research_finding_2",
+              "evidence_ids": [
+                "ev-prime-auto-nanogpt"
+              ],
+              "finding_id": "finding-research-2",
+              "paragraphs": [
+                "nanoGPT 允许自动运行约一万次实验，因为任务空间、可修改参数和成功标准都被固定。新颖性门槛加入后没有继续提升，说明当前系统擅长在已定义空间内持续搜索和组合，稳定提出新研究方向的能力尚未显示。"
+              ],
+              "title": "2、长时自治适合有明确指标的搜索任务"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_verifiable_ai_research_industry",
+          "evidence_ids": [
+            "ev-anthropic-riemann",
+            "ev-prime-auto-nanogpt"
+          ],
+          "headline": "AI 研究基础设施需要同时管理算力、状态和验证",
+          "items": [],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "研究 Agent 持续运行后，价值链会增加实验 Harness、任务状态、算力调度、结果账本和独立验证。平台方需要证明实验可恢复、配置可重放、结果能通过统计或形式化检查，并准确记录人工干预。",
+            "最先受益的是目标清楚、实验可自动化且验证成本可控的模型优化、材料筛选和工程设计任务。开放式问题仍需要研究者选择方向和承担结论责任。采购指标应包含复现率、有效实验占比、人工干预、单位有效结论成本和独立复核通过率。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 02/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_verifiable_ai_research_recommendation",
+          "evidence_ids": [
+            "ev-anthropic-riemann",
+            "ev-prime-auto-nanogpt",
+            "ev-lenovo-stack"
+          ],
+          "headline": "把 AI 研究能力做成可复核的实验工程服务",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "联想可在万全异构智算方案和 AI Foundry 中选择两类目标明确的客户实验，统一保存任务规则、数据与模型版本、配置、运行日志、失败原因和人工干预，最终交付可重放环境与结果报告。",
+            "试点以复现率、有效实验占比、独立复核通过率、单位有效结论算力成本和人工干预次数验收。没有基线、验收规则或数据授权的开放研究问题暂不承诺自治结果，先由 AI 全周期服务帮助客户定义实验边界。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-verifiable-ai-research",
+        "title": "AI 研究结果开始配套可复核的实验记录",
+        "topic_id": "topic-verifiable-ai-research"
+      },
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_r2s2r_evaluation_loop_what_changed",
+              "evidence_ids": [
+                "ev-worldlabs-r2s2r"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "World Labs 在 7 月 28 日公布 real-to-sim-to-real（R2S2R）早期结果，并于 8 月 16 日进入本周采集。系统采集机器人、传感器、环境、物体和任务演示，重建能够交互的仿真世界。",
+                "重建目标同时包含视觉、几何、物理和动力学。团队用仿真与真机执行相同的开环动作，比较观察结果、物体响应和任务结果，覆盖刚性物体、关节物体和形变线缆。"
+              ],
+              "role": "what_changed",
+              "section_id": "robot-real-to-sim",
+              "sequence_label": "①",
+              "title": "R2S2R 把真实机器人任务重建为仿真"
+            },
+            {
+              "anchor": "thesis_r2s2r_evaluation_loop_how_it_works",
+              "evidence_ids": [
+                "ev-worldlabs-r2s2r"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "r2s2r-evaluation-loop"
+              ],
+              "paragraphs": [
+                "任务完成重建后，系统批量改变物体位置、杂乱程度、光照、物理属性、机器人状态和相机视角。训练阶段让策略反复遇到困难状态，评测阶段主动搜索成功边界和失败区域。",
+                "策略先在仿真中训练和筛选，再交给真机验证。仿真不必复制每个绝对成功率，但需要保持策略之间的相对排序、训练改进趋势和相似的失败区域，才能支持真机测试决策。"
+              ],
+              "role": "how_it_works",
+              "section_id": "robot-variation",
+              "sequence_label": "②",
+              "title": "一个真实任务生成大量可控变化"
+            },
+            {
+              "anchor": "thesis_r2s2r_evaluation_loop_benchmark",
+              "evidence_ids": [
+                "ev-worldlabs-r2s2r"
+              ],
+              "items": [],
+              "kind": "benchmark",
+              "media_ids": [],
+              "paragraphs": [
+                "公开案例包括 ALOHA 双臂装箱、RB-Y1 电源线操作、Flexiv 试管转移和 xArm 物体分拣。World Labs 报告，若干策略只使用仿真训练数据，并在真实机器人上连续运行一小时。",
+                "在 ALOHA 立方体交接评测中，每个 checkpoint 运行 2000 次仿真试验和 100 次真机试验，覆盖训练分布内和分布外位置。官方称仿真能够保持不同策略的相对排序，并显示相似的空间成功与失败区域。"
+              ],
+              "role": "benchmark",
+              "section_id": "robot-results",
+              "sequence_label": "③",
+              "title": "公开结果覆盖多种机器人和两千次仿真评测"
+            },
+            {
+              "anchor": "thesis_r2s2r_evaluation_loop_evidence_and_limits",
+              "evidence_ids": [
+                "ev-worldlabs-r2s2r"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "材料由 World Labs 发布，公开页面没有提供完整训练数据、第三方复现或工业客户长期运行记录。连续一小时运行只覆盖所列任务，不能代表所有机器人和现场条件。",
+                "真实环境中的磨损、材料变化、相机偏移、人员进入和安全联锁会继续制造仿真偏差。项目必须分别报告仿真成绩、真机成绩、故障恢复和人工接管，不能只展示单次成功视频。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "robot-limits",
+              "sequence_label": "④",
+              "title": "跨场景稳定性仍需第三方复测"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_r2s2r_evaluation_loop_what_changed",
+              "first_section_id": "robot-real-to-sim",
+              "reader_texts": [
+                "R2S2R：真实到仿真再回到真实的开发循环，用真实任务校准仿真，再用仿真训练和筛选策略。"
+              ]
+            },
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_r2s2r_evaluation_loop_benchmark",
+              "first_section_id": "robot-results",
+              "reader_texts": [
+                "checkpoint：模型在训练过程某个时间点保存的版本，可单独拿来评测。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_r2s2r_evaluation_loop_what_changed",
+              "explanation": "真实到仿真再回到真实的开发循环，用真实任务校准仿真，再用仿真训练和筛选策略。",
+              "first_section_id": "robot-real-to-sim",
+              "reader_text": "R2S2R：真实到仿真再回到真实的开发循环，用真实任务校准仿真，再用仿真训练和筛选策略。",
+              "term": "R2S2R"
+            },
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_r2s2r_evaluation_loop_benchmark",
+              "explanation": "模型在训练过程某个时间点保存的版本，可单独拿来评测。",
+              "first_section_id": "robot-results",
+              "reader_text": "checkpoint：模型在训练过程某个时间点保存的版本，可单独拿来评测。",
+              "term": "checkpoint"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_r2s2r_evaluation_loop_finding_1",
+              "evidence_ids": [
+                "ev-worldlabs-r2s2r"
+              ],
+              "finding_id": "finding-robot-1",
+              "paragraphs": [
+                "真机故障需要人工复位，难以系统覆盖光照、物体位置和摩擦等组合。对齐仿真可以主动制造困难状态、保留失败条件，并在策略更新后批量重放，因此失败样本成为可积累的测试资产。"
+              ],
+              "title": "1、机器人迭代速度取决于可重复失败样本"
+            },
+            {
+              "anchor": "thesis_r2s2r_evaluation_loop_finding_2",
+              "evidence_ids": [
+                "ev-worldlabs-r2s2r"
+              ],
+              "finding_id": "finding-robot-2",
+              "paragraphs": [
+                "仿真成功率与真机完全一致通常很难做到。若仿真能够稳定判断哪个策略更好、哪些区域容易失败，它仍能减少无效 checkpoint 占用真机的时间。相对排序和失败区域重合度比单一仿真分数更接近项目决策。"
+              ],
+              "title": "2、仿真价值要用真机排序能力验收"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_r2s2r_evaluation_loop_industry",
+          "evidence_ids": [
+            "ev-worldlabs-r2s2r"
+          ],
+          "headline": "机器人开发将增加独立的仿真训练与评测层",
+          "items": [],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "机器人方案会把真实任务采集、世界重建、策略训练、批量评测和真机验证串成一条开发链。客户采购会更关注每次策略更新需要多少真机小时、仿真与真机排序是否一致、失败区域能否复现，以及现场故障是否进入下一轮测试。",
+            "拥有真实任务数据、仿真和真机接口的平台更容易形成持续收入。只提供演示或通用仿真软件的厂商会承压。近期仍要控制适用范围，因为接触、形变、设备磨损和安全规则会产生长尾差异。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 03/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_r2s2r_evaluation_loop_recommendation",
+          "evidence_ids": [
+            "ev-worldlabs-r2s2r",
+            "ev-lenovo-stack"
+          ],
+          "headline": "先验证仿真能否预测真机结果，再扩大机器人方案",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "联想可基于边缘计算、工作站和服务器搭建小规模机器人验证环境，与本体伙伴选择可复现、可停机、可人工接管的任务，使用同一成功条件比较仿真与真机的策略排序、失败区域和故障恢复。",
+            "只有仿真能稳定筛除低质量 checkpoint，并实际减少真机小时和人工重置时，才扩展到更多场景。试点统一记录完整任务成功率、排序相关性、人工接管率、故障恢复率和每次策略更新的真机成本。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-r2s2r-evaluation-loop",
+        "title": "机器人训练把真实任务转换成可重复仿真",
+        "topic_id": "topic-r2s2r-evaluation-loop"
+      },
+      {
+        "facts": {
+          "sections": [
+            {
+              "anchor": "thesis_model_routing_control_plane_what_changed",
+              "evidence_ids": [
+                "ev-vercel-index"
+              ],
+              "items": [],
+              "kind": "what_changed",
+              "media_ids": [],
+              "paragraphs": [
+                "Vercel 在 5 月公布 AI Gateway 生产统计，覆盖超过 20 万个团队和数十万亿 token。月请求超过 1000 万的团队平均使用 35 个模型，月请求超过 100 万的团队平均使用 30 个模型。",
+                "模型数量包含生产、评测和不同任务选择，不能直接等同于每个模型都有稳定大流量。它仍说明，高量应用需要持续比较和切换多个模型，供应商选择会在上线后继续发生。"
+              ],
+              "role": "what_changed",
+              "section_id": "routing-scale",
+              "sequence_label": "①",
+              "title": "高量应用同时使用数十个模型"
+            },
+            {
+              "anchor": "thesis_model_routing_control_plane_how_it_works",
+              "evidence_ids": [
+                "ev-vercel-gateway",
+                "ev-deepseek-api"
+              ],
+              "items": [],
+              "kind": "how_it_works",
+              "media_ids": [
+                "model-routing-control-plane"
+              ],
+              "paragraphs": [
+                "模型网关（AI Gateway）向应用提供统一端点，在后台处理模型与供应商选择、故障回退、密钥使用、费用和可观测数据。应用保留相同调用方式，路由策略可以按能力、价格、区域或健康状态调整。",
+                "DeepSeek 官方文档同时提供 OpenAI 和 Anthropic 兼容接口，并列出 Claude Code、GitHub Copilot 和 OpenCode 等 Agent 工具接入。接口兼容降低接入改动，但工具调用格式、上下文限制、限额和输出差异仍需要逐项验证。"
+              ],
+              "role": "how_it_works",
+              "section_id": "routing-interface",
+              "sequence_label": "②",
+              "title": "统一接口把模型选择和回退放入控制层"
+            },
+            {
+              "anchor": "thesis_model_routing_control_plane_benchmark",
+              "evidence_ids": [
+                "ev-vercel-index"
+              ],
+              "items": [],
+              "kind": "benchmark",
+              "media_ids": [],
+              "paragraphs": [
+                "Vercel 报告，包含工具调用的请求占全部请求 22.2%，却消耗 58.9% 的 token；2025 年 10 月对应比例为 11.4% 和 31.6%。在其样本中，工具调用请求平均消耗的 token 约为全部请求平均水平的 2.6 倍。",
+                "长任务和 Agent 工作流因此更容易集中暴露限额、延迟、供应商故障和费用波动。路由记录需要保留实际使用的模型、是否回退、每一步耗时和最终任务结果，才能解释一次交付的真实成本。"
+              ],
+              "role": "benchmark",
+              "section_id": "routing-load",
+              "sequence_label": "③",
+              "title": "工具调用让少量请求承担更多 token"
+            },
+            {
+              "anchor": "thesis_model_routing_control_plane_evidence_and_limits",
+              "evidence_ids": [
+                "ev-vercel-index",
+                "ev-vercel-gateway",
+                "ev-deepseek-api"
+              ],
+              "items": [],
+              "kind": "evidence_and_limits",
+              "media_ids": [],
+              "paragraphs": [
+                "Vercel 数据只代表其网关流量，模型数量和工具调用占比不能直接外推到全部企业。DeepSeek 的兼容说明也只覆盖接口接入，不保证不同模型在推理、工具调用、内容安全和错误处理上行为一致。",
+                "生产切换仍需要任务级评测、灰度、回退顺序、配额检查和故障演练。没有这些门禁时，统一端点可能把差异隐藏到运行时，增加定位难度。"
+              ],
+              "role": "evidence_and_limits",
+              "section_id": "routing-limits",
+              "sequence_label": "④",
+              "title": "统一 API 不能消除模型行为差异"
+            }
+          ],
+          "term_note_groups": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_model_routing_control_plane_how_it_works",
+              "first_section_id": "routing-interface",
+              "reader_texts": [
+                "模型网关：位于应用和多个模型供应商之间的统一入口，负责选择、回退、记录和计费。"
+              ]
+            },
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_model_routing_control_plane_evidence_and_limits",
+              "first_section_id": "routing-limits",
+              "reader_texts": [
+                "灰度：先让少量真实流量使用新配置，确认稳定后再扩大范围。"
+              ]
+            }
+          ],
+          "terms": [
+            {
+              "after_paragraph_index": 0,
+              "after_section_anchor": "thesis_model_routing_control_plane_how_it_works",
+              "explanation": "位于应用和多个模型供应商之间的统一入口，负责选择、回退、记录和计费。",
+              "first_section_id": "routing-interface",
+              "reader_text": "模型网关：位于应用和多个模型供应商之间的统一入口，负责选择、回退、记录和计费。",
+              "term": "模型网关"
+            },
+            {
+              "after_paragraph_index": 1,
+              "after_section_anchor": "thesis_model_routing_control_plane_evidence_and_limits",
+              "explanation": "先让少量真实流量使用新配置，确认稳定后再扩大范围。",
+              "first_section_id": "routing-limits",
+              "reader_text": "灰度：先让少量真实流量使用新配置，确认稳定后再扩大范围。",
+              "term": "灰度"
+            }
+          ],
+          "title": "事实与案例"
+        },
+        "findings": {
+          "items": [
+            {
+              "anchor": "thesis_model_routing_control_plane_finding_1",
+              "evidence_ids": [
+                "ev-vercel-index",
+                "ev-vercel-gateway",
+                "ev-deepseek-api"
+              ],
+              "finding_id": "finding-routing-1",
+              "paragraphs": [
+                "当同一应用连接数十个模型时，模型名称、供应商、区域、回退顺序和限额都会影响最终结果。配置修改需要和代码发布一样具备版本、审批、灰度、回滚和读回证据，否则一次简单切换也可能改变工具调用或合规边界。"
+              ],
+              "title": "1、路由配置成为生产变更对象"
+            },
+            {
+              "anchor": "thesis_model_routing_control_plane_finding_2",
+              "evidence_ids": [
+                "ev-vercel-index"
+              ],
+              "finding_id": "finding-routing-2",
+              "paragraphs": [
+                "工具调用只占部分请求，却消耗更多 token，并且通常包含多轮状态和外部系统操作。一次模型超时或不兼容可能触发重试、回退和任务重放，成本与故障影响会沿整条工作流累积。"
+              ],
+              "title": "2、工具调用放大链路成本和故障影响"
+            }
+          ],
+          "title": "发现"
+        },
+        "industry_impact": {
+          "anchor": "thesis_model_routing_control_plane_industry",
+          "evidence_ids": [
+            "ev-vercel-index",
+            "ev-vercel-gateway",
+            "ev-deepseek-api"
+          ],
+          "headline": "模型网关将成为 Agent 平台的基础运维层",
+          "items": [],
+          "kind": "industry_impact",
+          "media_ids": [],
+          "paragraphs": [
+            "企业会把模型接入、路由、回退、配额和费用集中管理，并用任务级评测决定新模型能否进入生产。价值会向掌握真实工作负载、质量门槛和运行数据的平台集中，而接口兼容会降低单一供应商的接入摩擦。",
+            "竞争指标会扩展到任务通过率、回退成功率、最慢 1% 时延、每个合格任务成本和切换恢复时间。只比较每百万 token 单价或单模型 benchmark，无法解释多轮 Agent 的真实 SLA 与 TCO。"
+          ],
+          "title": "产业影响"
+        },
+        "sequence_label": "专题 04/04",
+        "strategic_recommendation": {
+          "anchor": "thesis_model_routing_control_plane_recommendation",
+          "evidence_ids": [
+            "ev-vercel-index",
+            "ev-vercel-gateway",
+            "ev-deepseek-api",
+            "ev-lenovo-stack"
+          ],
+          "headline": "把模型路由、回退和成本复盘纳入同一验收口径",
+          "items": [],
+          "kind": "strategic_recommendation",
+          "media_ids": [],
+          "paragraphs": [
+            "擎天和 AI Foundry 可把客户任务验收集作为模型接入门槛，记录每次运行的实际模型、路由原因、回退、工具调用、时延和最终产物；万全异构智算方案同时记录对应算力、吞吐和能耗，形成任务质量与基础设施成本的同一账本。",
+            "新模型或新供应商先在少量任务上灰度，统一检查任务通过率、TTFT、TPS、P99、每个合格任务成本、回退成功率和切换恢复时间。只有质量和合规门槛通过后才扩大流量，异常时恢复到已验证版本。"
+          ],
+          "title": "战略建议"
+        },
+        "thesis_id": "thesis-model-routing-control-plane",
+        "title": "多模型生产系统需要统一路由和回退",
+        "topic_id": "topic-model-routing-control-plane"
+      }
+    ]
+  },
+  "content_sha256": "ba229fb6888a31ad3b0129fa19752f58ae57c923655fef029850c4012a6938cb",
+  "publication": {
+    "authorization_id": "wbr-public-release-2026-w33-ba229fb6888a",
+    "public_enabled": true,
+    "release_eligible": true,
+    "visibility": "public"
+  },
+  "schema_version": "weekly-insight-publication/v4",
+  "source_run_id": "wbr-codex-manual-2026-W33",
+  "version": "4.1"
+}

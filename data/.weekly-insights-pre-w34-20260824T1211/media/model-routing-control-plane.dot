@@ -1,0 +1,17 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="多模型生产路由与回退"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  app [label="企业 Agent / 应用", fillcolor="#ffffff", color="#cbd5e1"];
+  gateway [label="统一模型网关", fillcolor="#ffffff", color="#cbd5e1"];
+  policy [label="能力、价格、区域、健康策略", fillcolor="#ffffff", color="#cbd5e1"];
+  models [label="多个模型与供应商", fillcolor="#ffffff", color="#cbd5e1"];
+  fallback [label="失败回退与版本恢复", fillcolor="#ffffff", color="#cbd5e1"];
+  observe [label="质量、时延、费用与实际模型", fillcolor="#ffffff", color="#cbd5e1"];
+  app -> gateway [label="任务请求", color="#2563eb", fontcolor="#475569"];
+  gateway -> policy [label="选择", color="#2563eb", fontcolor="#475569"];
+  policy -> models [label="路由", color="#2563eb", fontcolor="#475569"];
+  models -> fallback [label="失败或限额", color="#2563eb", fontcolor="#475569"];
+  fallback -> gateway [label="重试", color="#2563eb", fontcolor="#475569"];
+  gateway -> observe [label="逐次记录", color="#2563eb", fontcolor="#475569"];
+}

@@ -1,0 +1,17 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="可复核的 AI 研究流程"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  goal [label="目标与规则", fillcolor="#ffffff", color="#cbd5e1"];
+  harness [label="Harness
+计划与状态", fillcolor="#ffffff", color="#cbd5e1"];
+  runs [label="批量实验", fillcolor="#ffffff", color="#cbd5e1"];
+  ledger [label="配置、日志与失败", fillcolor="#ffffff", color="#cbd5e1"];
+  verify [label="统计 / 形式化 / 独立复核", fillcolor="#ffffff", color="#cbd5e1"];
+  result [label="可接受结论", fillcolor="#ffffff", color="#cbd5e1"];
+  goal -> harness [label="限定任务", color="#2563eb", fontcolor="#475569"];
+  harness -> runs [label="连续执行", color="#2563eb", fontcolor="#475569"];
+  runs -> ledger [label="逐次记录", color="#2563eb", fontcolor="#475569"];
+  ledger -> verify [label="复现", color="#2563eb", fontcolor="#475569"];
+  verify -> result [label="通过门槛", color="#2563eb", fontcolor="#475569"];
+}

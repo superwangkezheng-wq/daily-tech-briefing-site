@@ -1,0 +1,17 @@
+digraph G {
+  graph [bgcolor="white", rankdir=LR, pad="0.25", nodesep="0.35", ranksep="0.55", labelloc="t", labeljust="l", fontsize=20, fontname="PingFang SC", label="真实任务驱动的机器人仿真闭环"];
+  node [shape=box, style="rounded,filled", fontname="PingFang SC", fontsize=13, margin="0.16,0.10", penwidth=1.4];
+  edge [fontname="PingFang SC", fontsize=10, penwidth=1.6, arrowsize=0.8];
+  real [label="真实任务与演示", fillcolor="#ffffff", color="#cbd5e1"];
+  sim [label="对齐仿真", fillcolor="#ffffff", color="#cbd5e1"];
+  variation [label="外观、物体与物理变化", fillcolor="#ffffff", color="#cbd5e1"];
+  train [label="策略训练与批量评测", fillcolor="#ffffff", color="#cbd5e1"];
+  hardware [label="真机候选验证", fillcolor="#ffffff", color="#cbd5e1"];
+  failure [label="失败区域与现场结果", fillcolor="#ffffff", color="#cbd5e1"];
+  real -> sim [label="重建", color="#2563eb", fontcolor="#475569"];
+  sim -> variation [label="批量生成", color="#2563eb", fontcolor="#475569"];
+  variation -> train [label="训练 / 搜索", color="#2563eb", fontcolor="#475569"];
+  train -> hardware [label="筛选模型版本", color="#2563eb", fontcolor="#475569"];
+  hardware -> failure [label="记录", color="#2563eb", fontcolor="#475569"];
+  failure -> sim [label="回灌", color="#2563eb", fontcolor="#475569"];
+}

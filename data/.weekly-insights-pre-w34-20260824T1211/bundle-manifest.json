@@ -1,0 +1,142 @@
+{
+  "approved_candidate_sha256": "6f825aac5905004ff59c35d483a31b5e88d94b232f0f56007ad9d27d2c34a5cd",
+  "artifact_id": "wsi-2026-w33-ba229fb6888a-v4-1",
+  "bundle_entries_sha256": "a1e39fefceae62e9541e317a392d2e917fd084d5b94fd06fef18adf00975dc3f",
+  "content_sha256": "ba229fb6888a31ad3b0129fa19752f58ae57c923655fef029850c4012a6938cb",
+  "entries": [
+    {
+      "path": "weekly-analysis-candidate.json",
+      "role": "analysis_candidate",
+      "sha256": "5dd60c19c9b65fb99b10a5b08d141536d5f97d879f3d5e80c238dc20d1864b07",
+      "size_bytes": 56904
+    },
+    {
+      "path": "projection-approval.json",
+      "role": "candidate_approval",
+      "sha256": "38da8a4114e9d5ffd2c1b8dabbe6625ba0f75c1ec8387e1d5cc433c068e7548f",
+      "size_bytes": 419
+    },
+    {
+      "path": "publication-media-policy.json",
+      "role": "media_policy",
+      "sha256": "577ab132062518e414ee4d9fa499c9ae56e81717879dddaee25fc90e262a0008",
+      "size_bytes": 4993
+    },
+    {
+      "path": "weekly-insight-publication-v4.json",
+      "role": "reader_snapshot",
+      "sha256": "e03599603eda1faec67fa21f7634cc04fa1b497bec2b60734f115b1005ff7171",
+      "size_bytes": 49855
+    },
+    {
+      "height": 505,
+      "mime_type": "image/png",
+      "path": "media/tiered-cyber-access.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "c2396494518f0901b99d8a1e48de9d443d7bad06c4cbef1cc36f95520a1d3602",
+      "size_bytes": 106676,
+      "width": 2061
+    },
+    {
+      "height": 313,
+      "mime_type": "image/png",
+      "path": "media/verifiable-ai-research.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "77afc0e71326c712db82f007e71943e2de2c3ac979008770128df2d80a78f475",
+      "size_bytes": 83732,
+      "width": 2601
+    },
+    {
+      "height": 373,
+      "mime_type": "image/png",
+      "path": "media/r2s2r-evaluation-loop.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "99dedf4a9de7c878b072f88aaf2e9c147da46cb0785d63474daf07e723c38558",
+      "size_bytes": 109014,
+      "width": 2837
+    },
+    {
+      "height": 513,
+      "mime_type": "image/png",
+      "path": "media/model-routing-control-plane.png",
+      "rights_scope": "public_allowed",
+      "role": "reader_media",
+      "sha256": "341f01004ecf6a0dcdb8c4a9b4e19183a731d9456608c2f64c9a1f691938c4e0",
+      "size_bytes": 106035,
+      "width": 2557
+    },
+    {
+      "path": "media/tiered-cyber-access.svg",
+      "role": "editable_export",
+      "sha256": "34aacae839129ac8d0af149eab5b68cb1ded12637bf1fad0d33e084fb8974e25",
+      "size_bytes": 7545
+    },
+    {
+      "path": "media/tiered-cyber-access.dot",
+      "role": "editable_source",
+      "sha256": "e8c03e4851def24e97429ecd6f6d4dd90469dc766f4816bdf203c1d8ae54c927",
+      "size_bytes": 1347
+    },
+    {
+      "path": "media/verifiable-ai-research.svg",
+      "role": "editable_export",
+      "sha256": "a220e0e83ca964de18cb6110dced5f539cfcace5cbebc85b2f83b190d5b75e01",
+      "size_bytes": 6921
+    },
+    {
+      "path": "media/verifiable-ai-research.dot",
+      "role": "editable_source",
+      "sha256": "e48da669b353216f57383e85f2bd0f4b680500f1a93b9a1d198f418a6dbd1663",
+      "size_bytes": 1259
+    },
+    {
+      "path": "media/r2s2r-evaluation-loop.svg",
+      "role": "editable_export",
+      "sha256": "be56351ccdd14092dd56a2740c4b70e61f8e2c9f893c668abb49017aa0ee3a8a",
+      "size_bytes": 7003
+    },
+    {
+      "path": "media/r2s2r-evaluation-loop.dot",
+      "role": "editable_source",
+      "sha256": "f1ad8f07a1e45ee1aabb6f07bf649750e82ff3de81e6de6196bb0177847c80dc",
+      "size_bytes": 1370
+    },
+    {
+      "path": "media/model-routing-control-plane.svg",
+      "role": "editable_export",
+      "sha256": "6011366476801ee2c2933c6bad507f90415f5e9879c0da4f51ceebc8ce9dd9cf",
+      "size_bytes": 7072
+    },
+    {
+      "path": "media/model-routing-control-plane.dot",
+      "role": "editable_source",
+      "sha256": "df5af59918896797e8068a761566bb9e70c85e2d5a7a97a5ca83cf1d5e0a625a",
+      "size_bytes": 1393
+    },
+    {
+      "path": "visual_asset_plan.json",
+      "role": "visual_plan",
+      "sha256": "0598590573ca574e6b4fba2ad28ac6dbda989bd98e34f97ebac2a91382f23ac8",
+      "size_bytes": 2402
+    },
+    {
+      "path": "visual_asset_log.md",
+      "role": "visual_qa_record",
+      "sha256": "69dd4fb09c0ada0f096e61552cf2cb9612a4cdfe427976587280c7317cfa3467",
+      "size_bytes": 319
+    },
+    {
+      "path": "editorial-review.md",
+      "role": "editorial_qa_record",
+      "sha256": "98ac5c6c469adfff647eb1080013e62b3013b62174966d06a2a99afad8043ea5",
+      "size_bytes": 573
+    }
+  ],
+  "public_enabled": true,
+  "release_eligible": true,
+  "schema_version": "weekly-insight-private-bundle/v1",
+  "snapshot_path": "weekly-insight-publication-v4.json"
+}
