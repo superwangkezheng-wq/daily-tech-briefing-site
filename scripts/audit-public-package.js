@@ -19,11 +19,61 @@ const TEXT_EXTENSIONS = new Set([
   ".txt",
 ]);
 
+const SECRET_RULES_PATH = path.join(ROOT_DIR, "scripts/privacy-audit-secrets.json");
+
+// Loads the literal, identifying strings (real usernames, hostnames, domains,
+// tokens, internal codenames) this audit looks for. These must never live in
+// source, because this script itself ships in the public package -- hardcoding
+// them here would be the exact disclosure this audit exists to prevent. Fails
+// closed: a missing, corrupt, or empty config throws before any file is
+// scanned, instead of silently running with zero rules and reporting a false
+// "all clear".
+function loadSecretRules() {
+  const relConfigPath = path.relative(ROOT_DIR, SECRET_RULES_PATH);
+  let raw;
+  try {
+    raw = fs.readFileSync(SECRET_RULES_PATH, "utf8");
+  } catch (error) {
+    throw new Error(
+      `privacy audit cannot run: ${relConfigPath} is missing (${error.code || error.message}). ` +
+        `Copy ${relConfigPath}.example to ${relConfigPath} and fill in the real values before running this audit.`,
+    );
+  }
+  let config;
+  try {
+    config = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(`privacy audit cannot run: ${relConfigPath} is not valid JSON (${error.message})`);
+  }
+  if (!config || !Array.isArray(config.rules) || config.rules.length === 0) {
+    throw new Error(`privacy audit cannot run: ${relConfigPath} must define a non-empty "rules" array`);
+  }
+  return config.rules.map((rule, index) => {
+    if (!rule || typeof rule.name !== "string" || !rule.name) {
+      throw new Error(`privacy audit cannot run: ${relConfigPath} rule ${index} is missing "name"`);
+    }
+    if (
+      !Array.isArray(rule.literals) ||
+      !rule.literals.length ||
+      rule.literals.some((value) => typeof value !== "string" || !value)
+    ) {
+      throw new Error(
+        `privacy audit cannot run: ${relConfigPath} rule "${rule.name}" needs a non-empty "literals" array of strings`,
+      );
+    }
+    const escaped = rule.literals.map((value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    return {
+      name: rule.name,
+      pattern: new RegExp(escaped.join("|"), rule.caseInsensitive ? "gi" : "g"),
+      publicOnly: !!rule.publicOnly,
+    };
+  });
+}
+
+const SECRET_RULES = loadSecretRules();
+
 const RULES = [
-  { name: "private macOS user path", pattern: /\/Users\/REDACTED/g },
-  { name: "old local hostname", pattern: /REDACTED-HOSTNAME/g },
-  { name: "private public domain", pattern: /example/g },
-  { name: "real maintenance token", pattern: /REDACTED-TOKEN/g },
+  ...SECRET_RULES,
   { name: "real Feishu open_id", pattern: /ou_[0-9a-fA-F]{12,}/g },
   {
     name: "filled Cloudflare tunnel token",
@@ -32,11 +82,6 @@ const RULES = [
   {
     name: "filled app secret",
     pattern: /(APP_SECRET|API_KEY|SECRET_KEY)=(?!\s*$|replace-|your-|change-)\S+/gi,
-  },
-  {
-    name: "internal strategy marker in public static assets",
-    pattern: /联想中国区|万全智算|Lenovo China/gi,
-    publicOnly: true,
   },
 ];
 
@@ -329,7 +374,11 @@ function runAudit() {
   const findings = [];
   for (const filePath of trackedFiles()) {
     const relativePath = path.relative(ROOT_DIR, filePath);
-    if (relativePath === ".git" || relativePath === "scripts/audit-public-package.js") {
+    if (
+      relativePath === ".git" ||
+      relativePath === "scripts/audit-public-package.js" ||
+      relativePath === "scripts/privacy-audit-secrets.json"
+    ) {
       continue;
     }
     const text = fs.readFileSync(filePath, "utf8");
